@@ -570,6 +570,169 @@ async function render(){
 // ═══════════════════════════════════════
 //  PLANILLA
 // ═══════════════════════════════════════
+
+// ═══════════════════════════════════════
+//  COMPROBANTE DE PLANILLA
+// ═══════════════════════════════════════
+async function verComprobante(userId){
+  const cfg   = await loadEmpCfg();
+  const sol   = await getGlobal();
+  const u     = USERS.find(x=>x.id===Number(userId));
+  if(!u) return;
+
+  const per = periodoActual;
+  const c   = cfg[u.id]||{sueldo:0,bono:0,horaPago:0,horasAcordadas:0};
+
+  // Horas
+  const horasKey = HORAS_KEY(u.id, per);
+  let horasData = {horas:c.horasAcordadas||0};
+  try{horasData=JSON.parse(localStorage.getItem(horasKey)||JSON.stringify(horasData))}catch{}
+  const horas      = parseFloat(horasData.horas)||0;
+  const pagoHoras  = (parseFloat(c.horaPago)||0)*horas;
+  const bono       = parseFloat(c.bono)||0;
+  const sueldo     = parseFloat(c.sueldo)||0;
+  const bruto      = sueldo+pagoHoras+bono;
+
+  // Descuentos aprobados
+  const descuentos = sol.filter(s=>Number(s.userId)===Number(u.id)&&s.estado==='approved');
+  const totalDesc  = descuentos.reduce((a,d)=>a+(d.monto||0),0);
+  const neto       = Math.max(0,bruto-totalDesc);
+
+  // Formatear período
+  const [y,m,q]= per.split('-');
+  const MESES = ['','Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const perLabel = q
+    ? (q==='Q1'?'1ª quincena ':'2ª quincena ')+MESES[parseInt(m)]+' '+y
+    : MESES[parseInt(m)]+' '+y;
+
+  // Descuentos HTML
+  const descRows = descuentos.length
+    ? descuentos.map(d=>`
+        <tr>
+          <td>${TIPO_LABEL[d.tipo]||d.tipo}</td>
+          <td style="color:#64748B;font-size:11px">${d.desc||''}</td>
+          <td style="text-align:right;color:#EF4444;font-weight:600">- ${Lf(d.monto)}</td>
+        </tr>`).join('')
+    : `<tr><td colspan="3" style="color:#64748B;font-style:italic">Sin descuentos este período</td></tr>`;
+
+  const now = new Date();
+  const fechaEmision = now.toLocaleDateString('es-HN',{day:'2-digit',month:'long',year:'numeric'});
+
+  const html = `<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Comprobante ${u.name} · ${perLabel}</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Arial',sans-serif;font-size:13px;color:#0F172A;background:#fff;padding:32px}
+  .header{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;padding-bottom:18px;border-bottom:2px solid #1E3A8A}
+  .logo{font-size:24px;font-weight:900;color:#1E3A8A;letter-spacing:-0.5px}
+  .logo-sub{font-size:11px;color:#64748B;margin-top:2px}
+  .titulo{text-align:right}
+  .titulo h2{font-size:16px;font-weight:700;color:#1E3A8A}
+  .titulo p{font-size:11px;color:#64748B;margin-top:3px}
+  .emp-block{background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:16px 20px;margin-bottom:20px;display:flex;align-items:center;gap:14px}
+  .emp-av{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:#fff;flex-shrink:0;background:${u.bg}}
+  .emp-name{font-size:17px;font-weight:700;color:#0F172A}
+  .emp-cargo{font-size:12px;color:#64748B;margin-top:2px}
+  .emp-per{font-size:11px;font-weight:600;color:#2563EB;background:#EFF6FF;padding:2px 10px;border-radius:999px;margin-top:4px;display:inline-block}
+  table{width:100%;border-collapse:collapse;margin-bottom:16px}
+  th{background:#F1F5F9;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#64748B;padding:8px 12px;text-align:left;border-bottom:2px solid #E2E8F0}
+  td{padding:9px 12px;border-bottom:1px solid #F1F5F9;font-size:13px}
+  tr:last-child td{border-bottom:none}
+  .amount{text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
+  .section-title{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#64748B;margin:18px 0 8px;display:flex;align-items:center;gap:8px}
+  .section-title::after{content:'';flex:1;height:1px;background:#E2E8F0}
+  .total-box{background:linear-gradient(135deg,#1E3A8A,#2563EB);border-radius:10px;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;margin-top:20px}
+  .total-lbl{font-size:13px;font-weight:600;color:rgba(255,255,255,.8)}
+  .total-val{font-size:26px;font-weight:900;color:#fff;font-variant-numeric:tabular-nums}
+  .footer{margin-top:28px;padding-top:16px;border-top:1px solid #E2E8F0;display:flex;justify-content:space-between;font-size:11px;color:#94A3B8}
+  .firma-box{margin-top:40px;display:grid;grid-template-columns:1fr 1fr;gap:40px}
+  .firma{border-top:1px solid #CBD5E1;padding-top:8px;font-size:11px;color:#64748B;text-align:center}
+  .firma strong{display:block;font-size:12px;color:#0F172A;margin-bottom:4px}
+  .ok-badge{display:inline-flex;align-items:center;gap:6px;background:#F0FDF4;border:1px solid #BBF7D0;color:#16A34A;font-size:12px;font-weight:600;padding:6px 14px;border-radius:999px;margin-top:12px}
+  @media print{body{padding:20px}.no-print{display:none!important}}
+</style>
+</head>
+<body>
+<div class="no-print" style="background:#1E3A8A;color:#fff;padding:10px 20px;border-radius:8px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center">
+  <span style="font-weight:700">📋 Comprobante de Planilla — ${u.name}</span>
+  <div style="display:flex;gap:10px">
+    <button onclick="window.print()" style="background:#fff;color:#1E3A8A;border:none;padding:7px 16px;border-radius:6px;font-weight:700;cursor:pointer;font-size:13px">🖨️ Imprimir / Guardar PDF</button>
+    <button onclick="window.close()" style="background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.3);padding:7px 14px;border-radius:6px;font-weight:600;cursor:pointer;font-size:13px">✕ Cerrar</button>
+  </div>
+</div>
+
+<div class="header">
+  <div>
+    <div class="logo">● Cayena</div>
+    <div class="logo-sub">RTN: 0318-2001-022079 · Siguatepeque, Honduras</div>
+  </div>
+  <div class="titulo">
+    <h2>Comprobante de Planilla</h2>
+    <p>Período: ${perLabel}</p>
+    <p>Emitido: ${fechaEmision}</p>
+  </div>
+</div>
+
+<div class="emp-block">
+  <div class="emp-av">${u.initials}</div>
+  <div>
+    <div class="emp-name">${u.name}</div>
+    <div class="emp-cargo">${u.cargo}</div>
+    <span class="emp-per">${perLabel}</span>
+  </div>
+</div>
+
+<div class="section-title">Ingresos del período</div>
+<table>
+  <thead><tr><th>Concepto</th><th>Detalle</th><th style="text-align:right">Monto</th></tr></thead>
+  <tbody>
+    ${sueldo>0?`<tr><td>Sueldo base</td><td style="color:#64748B">—</td><td class="amount" style="color:#16A34A">${Lf(sueldo)}</td></tr>`:''}
+    ${horas>0?`<tr><td>Horas trabajadas</td><td style="color:#64748B">${horas}h × ${Lf(parseFloat(c.horaPago)||0)}/h</td><td class="amount" style="color:#16A34A">${Lf(pagoHoras)}</td></tr>`:''}
+    ${bono>0?`<tr><td>Bonificación</td><td style="color:#64748B">—</td><td class="amount" style="color:#16A34A">${Lf(bono)}</td></tr>`:''}
+    <tr style="background:#F8FAFC"><td colspan="2"><strong>Total bruto</strong></td><td class="amount"><strong>${Lf(bruto)}</strong></td></tr>
+  </tbody>
+</table>
+
+<div class="section-title">Descuentos aprobados</div>
+<table>
+  <thead><tr><th>Tipo</th><th>Descripción</th><th style="text-align:right">Monto</th></tr></thead>
+  <tbody>${descRows}</tbody>
+  ${totalDesc>0?`<tfoot><tr style="background:#FEF2F2"><td colspan="2"><strong>Total descuentos</strong></td><td class="amount" style="color:#EF4444"><strong>- ${Lf(totalDesc)}</strong></td></tr></tfoot>`:''}
+</table>
+
+<div class="total-box">
+  <div class="total-lbl">💵 NETO A RECIBIR</div>
+  <div class="total-val">${Lf(neto)}</div>
+</div>
+
+<div class="firma-box">
+  <div class="firma">
+    <strong>Firma del empleado</strong>
+    ${u.name}<br>
+    <span style="font-size:10px">Confirmo haber recibido y revisado este comprobante</span>
+  </div>
+  <div class="firma">
+    <strong>Autorizado por</strong>
+    Gerencia · Cayena<br>
+    <span style="font-size:10px">${fechaEmision}</span>
+  </div>
+</div>
+
+<div class="footer">
+  <span>Cayena · Sistema de Gestión Empresarial</span>
+  <span>Período: ${perLabel} · Generado: ${fechaEmision}</span>
+</div>
+</body></html>`;
+
+  // Abrir en nueva ventana para imprimir o guardar como PDF
+  const w = window.open('', '_blank', 'width=860,height=760');
+  w.document.write(html);
+  w.document.close();
+}
+
 async function renderPlanilla(){
   const cfg=await loadEmpCfg();
   const per=periodoActual;
@@ -621,6 +784,7 @@ async function renderPlanilla(){
           </div>
         </div>
         <div style="display:flex;align-items:center;gap:8px">
+          <button class="btn btn-sm" onclick="verComprobante(${u.id})">📋 Comprobante</button>
           <button class="btn btn-sm" onclick="openAddEmpFor(${u.id})">⚙️ Configurar</button>
           <div class="ec-total">
             <div class="ec-total-lbl">Neto a pagar</div>
