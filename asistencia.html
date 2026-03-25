@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<script>(function(){var href=window.location.href;var p=href.split("/").pop().split("?")[0].split("#")[0]||"dashboard.html";if(!p||p==="")p="dashboard.html";if(p==="index.html")return;var s=sessionStorage.getItem("cayena_session");if(!s){window.location.replace("index.html");return;}try{var d=JSON.parse(s);if(!d||!d.role){window.location.replace("index.html");return;}if(Date.now()-d.ts>14400000){sessionStorage.removeItem("cayena_session");window.location.replace("index.html");return;}}catch(e){window.location.replace("index.html");}})();</script>
+<script src="supabase-config.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Cayena — Asistencia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --blue:#2563EB;--blue-deep:#1E3A8A;--blue-soft:#60A5FA;
+  --green:#84CC16;--green-ui:#16A34A;--green-soft:#F0FDF4;
+  --text:#0F172A;--body:#334155;--muted:#64748B;
+  --border:#E2E8F0;--bg:#F8FAFC;--white:#FFFFFF;
+  --red:#EF4444;--red-soft:#FEF2F2;
+  --orange:#F97316;--amber:#D97706;--amber-soft:#FFFBEB;
+  --shadow:0 4px 20px rgba(0,0,0,0.05);
+  --shadow-md:0 10px 28px rgba(0,0,0,0.09);
+  --r:12px;--r-lg:16px;--r-xl:20px;
+  --font:'Inter',sans-serif;
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font);font-size:14px;-webkit-font-smoothing:antialiased}
+body{overflow-x:hidden}
+
+/* LAYOUT */
+.app{display:flex;height:100vh;overflow:hidden}
+.sidebar{width:240px;min-width:240px;background:var(--white);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;z-index:90;box-shadow:var(--shadow);transition:transform .28s cubic-bezier(.4,0,.2,1)}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.logo-wrap{padding:24px 20px 20px;border-bottom:1px solid var(--border)}
+.logo{font-size:22px;font-weight:800;letter-spacing:-0.5px;color:var(--text);display:flex;align-items:center;gap:8px}
+.logo-dot{width:8px;height:8px;border-radius:50%;background:linear-gradient(135deg,#2563EB,#84CC16)}
+.logo-rtn{font-size:10px;color:var(--muted);margin-top:4px}
+.nav{flex:1;padding:12px}
+.ng{font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);padding:12px 10px 6px}
+.ni{display:flex;align-items:center;gap:10px;padding:10px 12px;font-size:13px;font-weight:500;color:var(--body);cursor:pointer;border-radius:var(--r);transition:all .15s;text-decoration:none;margin-bottom:2px}
+.ni svg{width:16px;height:16px;flex-shrink:0;opacity:.6}
+.ni:hover{color:var(--blue);background:#EFF6FF}
+.ni:hover svg{opacity:1}
+.ni.active{color:var(--blue);background:#EFF6FF;font-weight:600}
+.ni.active svg{opacity:1}
+.su{padding:14px 16px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px;margin-top:auto}
+.av{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--blue-soft));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0}
+.un{font-size:13px;font-weight:600;color:var(--text)}
+.ur{font-size:11px;color:var(--muted)}
+.logout-btn{display:block;width:calc(100% - 32px);margin:0 16px 14px;font-family:var(--font);font-size:11px;font-weight:600;color:var(--red);background:none;border:1px solid #FECACA;border-radius:8px;padding:6px;cursor:pointer;transition:all .14s;text-align:center}
+.logout-btn:hover{background:var(--red-soft)}
+
+/* TOPBAR */
+.topbar{height:58px;background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;flex-shrink:0;gap:10px;box-shadow:var(--shadow)}
+.mb{display:none;background:none;border:none;color:var(--muted);cursor:pointer;padding:6px;border-radius:8px;line-height:1}
+.mb:hover{background:var(--bg)}
+.tl{display:flex;align-items:center;gap:10px;min-width:0}
+.tey{font-size:11px;font-weight:500;color:var(--muted);white-space:nowrap}
+.tsep{width:1px;height:14px;background:var(--border);flex-shrink:0}
+.ttl{font-size:16px;font-weight:700;color:var(--text)}
+.tr2{display:flex;align-items:center;gap:7px;flex-shrink:0}
+.btn{font-family:var(--font);font-size:13px;font-weight:600;padding:9px 16px;border-radius:var(--r);cursor:pointer;transition:all .14s;white-space:nowrap;border:1px solid var(--border);background:var(--white);color:var(--body)}
+.btn:hover{border-color:var(--blue-soft);color:var(--blue)}
+.btn-sm{padding:6px 11px;font-size:12px}
+
+/* CONTENT */
+.content{flex:1;overflow-y:auto;padding:20px 20px 80px}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+
+/* WIFI BLOCKER */
+#wifiBlock{display:none;position:fixed;inset:0;z-index:500;background:linear-gradient(135deg,#0F172A,#1E3A8A);align-items:center;justify-content:center;flex-direction:column;gap:16px;text-align:center;padding:24px}
+#wifiBlock.show{display:flex}
+.wb-icon{font-size:64px;margin-bottom:8px;animation:pulse 2s ease infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.wb-title{font-size:24px;font-weight:800;color:#fff;letter-spacing:-.4px}
+.wb-sub{font-size:14px;color:rgba(255,255,255,.7);max-width:320px;line-height:1.6}
+.wb-ssid{display:inline-block;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;font-size:14px;font-weight:700;padding:6px 16px;border-radius:999px;margin:8px 0}
+.wb-retry{font-family:var(--font);font-size:13px;font-weight:600;padding:10px 20px;border-radius:var(--r);border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.1);color:#fff;cursor:pointer;margin-top:8px;transition:all .14s}
+.wb-retry:hover{background:rgba(255,255,255,.2)}
+.wb-status{font-size:11px;color:rgba(255,255,255,.5);margin-top:8px}
+
+/* CHECKING OVERLAY */
+#checkOverlay{display:none;position:fixed;inset:0;z-index:499;background:rgba(15,23,42,.8);backdrop-filter:blur(6px);align-items:center;justify-content:center;flex-direction:column;gap:12px}
+#checkOverlay.show{display:flex}
+.check-spin{width:40px;height:40px;border:3px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.check-text{font-size:13px;color:#fff;font-weight:500}
+
+/* HERO */
+.page-hero{background:linear-gradient(135deg,#1E3A8A 0%,#2563EB 60%,#60A5FA 100%);border-radius:var(--r-xl);padding:20px 24px;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.ph-left{}
+.ph-title{font-size:22px;font-weight:800;color:#fff;letter-spacing:-.3px}
+.ph-sub{font-size:12px;color:rgba(255,255,255,.65);margin-top:3px}
+.ph-right{text-align:right}
+.ph-clock{font-size:32px;font-weight:800;color:#fff;font-variant-numeric:tabular-nums;letter-spacing:-.5px;line-height:1}
+.ph-date{font-size:12px;color:rgba(255,255,255,.65);margin-top:3px}
+
+/* WIFI STATUS PILL */
+.wifi-pill{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;padding:4px 12px;border-radius:999px;margin-bottom:16px}
+.wifi-pill.ok{background:#F0FDF4;color:var(--green-ui);border:1px solid #BBF7D0}
+.wifi-pill.err{background:var(--red-soft);color:var(--red);border:1px solid #FECACA}
+.wifi-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.wifi-pill.ok .wifi-dot{background:var(--green-ui)}
+.wifi-pill.err .wifi-dot{background:var(--red)}
+
+/* SL */
+.sl{font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin:18px 0 10px;display:flex;align-items:center;gap:10px}
+.sl::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* CLOCK CARD */
+.clock-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r-xl);overflow:hidden;margin-bottom:16px;box-shadow:var(--shadow-md)}
+.cc-head{padding:18px 22px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px}
+.cc-av{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;flex-shrink:0}
+.cc-name{font-size:15px;font-weight:700;color:var(--text)}
+.cc-cargo{font-size:11px;color:var(--muted);margin-top:2px}
+.cc-body{padding:20px 22px}
+
+/* CLOCK IN/OUT BUTTONS */
+.clock-btns{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.clock-btn{font-family:var(--font);font-size:15px;font-weight:700;padding:18px 12px;border-radius:var(--r-lg);border:2px solid transparent;cursor:pointer;transition:all .15s;display:flex;flex-direction:column;align-items:center;gap:6px;line-height:1.2}
+.clock-btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important}
+.clock-btn-in{background:var(--green-soft);border-color:#BBF7D0;color:var(--green-ui)}
+.clock-btn-in:hover:not(:disabled){background:var(--green-ui);color:#fff;border-color:var(--green-ui);transform:translateY(-2px);box-shadow:0 8px 20px rgba(22,163,74,.25)}
+.clock-btn-out{background:var(--red-soft);border-color:#FECACA;color:var(--red)}
+.clock-btn-out:hover:not(:disabled){background:var(--red);color:#fff;border-color:var(--red);transform:translateY(-2px);box-shadow:0 8px 20px rgba(239,68,68,.25)}
+.clock-btn-icon{font-size:28px}
+.clock-btn-label{font-size:13px;font-weight:600}
+.clock-btn-time{font-size:11px;font-weight:500;opacity:.8;font-variant-numeric:tabular-nums}
+
+/* STATUS BAR */
+.status-bar{display:flex;align-items:center;gap:10px;background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;font-size:12px;color:var(--body)}
+.status-bar.clocked-in{background:#F0FDF4;border-color:#BBF7D0;color:var(--green-ui)}
+.status-bar.clocked-out{background:var(--bg);border-color:var(--border);color:var(--muted)}
+.status-bar.complete{background:#EFF6FF;border-color:#BFDBFE;color:var(--blue)}
+.sb-icon{font-size:18px;flex-shrink:0}
+.sb-text{font-weight:600}
+.sb-detail{font-weight:400;opacity:.8;margin-top:2px}
+.sb-elapsed{margin-left:auto;font-variant-numeric:tabular-nums;font-weight:700;font-size:14px;flex-shrink:0}
+
+/* TODAY SUMMARY */
+.summary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:4px}
+.sum-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r-lg);padding:12px 14px;text-align:center}
+.sum-lbl{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.sum-val{font-size:18px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--text)}
+.sum-val.green{color:var(--green-ui)}
+.sum-val.blue{color:var(--blue)}
+.sum-val.orange{color:var(--orange)}
+
+/* HISTORY TABLE */
+.hist-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden}
+.hist-head{padding:12px 16px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.hist-title{font-size:13px;font-weight:700;color:var(--text)}
+.hist-sub{font-size:11px;color:var(--muted)}
+table{width:100%;border-collapse:collapse}
+thead th{padding:9px 14px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);border-bottom:1px solid var(--border);background:var(--bg);white-space:nowrap}
+tbody td{padding:11px 14px;border-bottom:1px solid var(--border);vertical-align:middle;font-size:13px}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:var(--bg)}
+.badge{display:inline-flex;font-size:10px;font-weight:600;padding:3px 8px;border-radius:999px}
+.badge-complete{background:#EFF6FF;color:var(--blue)}
+.badge-partial{background:var(--green-soft);color:var(--green-ui)}
+.badge-absent{background:var(--red-soft);color:var(--red)}
+.empty{padding:36px;text-align:center;color:var(--muted);font-size:13px}
+
+/* TABS */
+.tabs{display:flex;gap:4px;background:var(--white);border:1px solid var(--border);border-radius:var(--r-lg);padding:4px;margin-bottom:14px;overflow-x:auto}
+.tab{font-family:var(--font);font-size:12px;font-weight:600;padding:8px 14px;border-radius:10px;border:none;background:none;cursor:pointer;color:var(--muted);transition:all .14s;white-space:nowrap;flex-shrink:0}
+.tab:hover{color:var(--text);background:var(--bg)}
+.tab.active{background:var(--blue);color:#fff}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);z-index:999;background:var(--text);color:#fff;font-size:13px;font-weight:500;padding:10px 20px;border-radius:999px;box-shadow:var(--shadow-md);opacity:0;transition:all .25s;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.ok{background:var(--green-ui)}
+.toast.err{background:var(--red)}
+
+/* OVBG */
+.ovbg{display:none;position:fixed;inset:0;z-index:89;background:rgba(0,0,0,.3)}
+.ovbg.open{display:block}
+
+@media(max-width:900px){
+  .sidebar{position:fixed;left:0;top:0;bottom:0;transform:translateX(-100%)}
+  .sidebar.open{transform:translateX(0)}
+  .mb{display:flex}
+  .summary-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:600px){
+  .clock-btns{grid-template-columns:1fr}
+  .page-hero{gap:8px}
+  .ph-clock{font-size:26px}
+}
+</style>
+</head>
+<body>
+
+<!-- WIFI BLOCK -->
+<div id="wifiBlock">
+  <div class="wb-icon">📶</div>
+  <div class="wb-title">Red no autorizada</div>
+  <div class="wb-sub">Para registrar asistencia debes estar conectado a la red WiFi de Cayena</div>
+  <div class="wb-ssid">📡 Cayena</div>
+  <div class="wb-sub" style="font-size:12px;margin-top:4px">Conéctate a la red WiFi y vuelve a intentarlo</div>
+  <button class="wb-retry" onclick="checkWifi()">🔄 Verificar conexión</button>
+  <div class="wb-status" id="wbStatus"></div>
+</div>
+
+<!-- CHECKING -->
+<div id="checkOverlay">
+  <div class="check-spin"></div>
+  <div class="check-text">Verificando red WiFi...</div>
+</div>
+
+<div class="ovbg" id="ovbg" onclick="closeSB()"></div>
+<div class="app">
+  <aside class="sidebar" id="sb">
+    <div class="logo-wrap">
+      <div class="logo"><div class="logo-dot"></div>Cayena</div>
+      <div class="logo-rtn">RTN: 0318-2001-022079</div>
+    </div>
+    <nav class="nav">
+      <div class="ng">Principal</div>
+      <a class="ni" href="dashboard.html"><svg viewBox="0 0 16 16" fill="none"><rect x="1.5" y="1.5" width="5.5" height="5.5" rx="1.5" stroke="currentColor" stroke-width="1.4"/><rect x="9" y="1.5" width="5.5" height="5.5" rx="1.5" stroke="currentColor" stroke-width="1.4" opacity=".5"/><rect x="1.5" y="9" width="5.5" height="5.5" rx="1.5" stroke="currentColor" stroke-width="1.4" opacity=".5"/><rect x="9" y="9" width="5.5" height="5.5" rx="1.5" stroke="currentColor" stroke-width="1.4" opacity=".5"/></svg>Dashboard</a>
+      <div class="ng">Operaciones</div>
+      <a class="ni" href="ingresos.html"><svg viewBox="0 0 16 16" fill="none"><path d="M2 12L5.5 7.5L8.5 10L11 5.5L14 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Ingresos</a>
+      <a class="ni" href="isv.html"><svg viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="M5 8h6M8 5v6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Resumen ISV</a>
+      <a class="ni" href="compras.html"><svg viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="11" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M5 3V2M11 3V2M2 7h12" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Compras</a>
+      <a class="ni" href="proveedores.html"><svg viewBox="0 0 16 16" fill="none"><circle cx="6" cy="5" r="2.5" stroke="currentColor" stroke-width="1.4"/><path d="M2 13c0-2.21 1.79-4 4-4s4 1.79 4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M11 7l1.5 1.5L15 6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Proveedores</a>
+      <a class="ni" href="inventario.html"><svg viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="5.5" height="5.5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="8.5" y="2" width="5.5" height="5.5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="2" y="8.5" width="5.5" height="5.5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="8.5" y="8.5" width="5.5" height="5.5" rx="1" stroke="currentColor" stroke-width="1.4"/></svg>Inventario</a>
+      <a class="ni" href="gastos.html"><svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.4"/><path d="M8 5v3.5l2.5 1.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Gastos</a>
+      <div class="ng">Personas</div>
+      <a class="ni" href="planilla.html"><svg viewBox="0 0 16 16" fill="none"><circle cx="6" cy="5" r="2.5" stroke="currentColor" stroke-width="1.4"/><path d="M1 13c0-2.76 2.24-5 5-5s5 2.24 5 5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M11 8h4M13 6v4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Planilla</a>
+      <a class="ni" href="cuenta-corriente.html"><svg viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M2 7h12M5 10h3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Cuenta Corriente</a>
+      <a class="ni active" href="asistencia.html"><svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.4"/><path d="M8 5v3l2 2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Asistencia</a>
+      <div class="ng">Análisis</div>
+      <a class="ni" href="#"><svg viewBox="0 0 16 16" fill="none"><path d="M2 13L5 9l3 2.5L11 5l3 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Costo de Ventas</a>
+    </nav>
+    <div class="su">
+      <div class="av" id="sideAv">—</div>
+      <div><div class="un" id="sideNombre">—</div><div class="ur" id="sideCargo">—</div></div>
+    </div>
+    <button class="logout-btn" onclick="logout()">Cerrar sesión</button>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="tl">
+        <button class="mb" onclick="toggleSB()"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M2 5h16M2 10h16M2 15h16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
+        <span class="tey">Cayena</span><div class="tsep"></div>
+        <span class="ttl">Asistencia</span>
+      </div>
+      <div class="tr2" id="wifiPillWrap"></div>
+    </div>
+
+    <div class="content">
+      <!-- HERO -->
+      <div class="page-hero">
+        <div class="ph-left">
+          <div class="ph-title" id="heroName">Bienvenido</div>
+          <div class="ph-sub" id="heroCargo">Registro de asistencia</div>
+        </div>
+        <div class="ph-right">
+          <div class="ph-clock" id="liveClock">--:--:--</div>
+          <div class="ph-date" id="liveDate">—</div>
+        </div>
+      </div>
+
+      <!-- TABS -->
+      <div class="tabs">
+        <button class="tab active" id="tab-hoy" onclick="switchTab('hoy')">🕐 Hoy</button>
+        <button class="tab" id="tab-historial" onclick="switchTab('historial')">📅 Historial</button>
+      </div>
+
+      <!-- HOY -->
+      <div id="pane-hoy">
+        <!-- CLOCK CARD -->
+        <div class="clock-card">
+          <div class="cc-head">
+            <div class="cc-av" id="ccAv">—</div>
+            <div>
+              <div class="cc-name" id="ccName">—</div>
+              <div class="cc-cargo" id="ccCargo">—</div>
+            </div>
+          </div>
+          <div class="cc-body">
+            <!-- BOTONES CLOCK IN / OUT -->
+            <div class="clock-btns">
+              <button class="clock-btn clock-btn-in" id="btnIn" onclick="clockIn()">
+                <span class="clock-btn-icon">🟢</span>
+                <span class="clock-btn-label">Registrar entrada</span>
+                <span class="clock-btn-time" id="btnInTime">—</span>
+              </button>
+              <button class="clock-btn clock-btn-out" id="btnOut" onclick="clockOut()">
+                <span class="clock-btn-icon">🔴</span>
+                <span class="clock-btn-label">Registrar salida</span>
+                <span class="clock-btn-time" id="btnOutTime">—</span>
+              </button>
+            </div>
+            <!-- STATUS -->
+            <div class="status-bar clocked-out" id="statusBar">
+              <span class="sb-icon">⏸️</span>
+              <div>
+                <div class="sb-text" id="sbText">Sin registros hoy</div>
+                <div class="sb-detail" id="sbDetail">Presiona "Registrar entrada" para comenzar</div>
+              </div>
+              <span class="sb-elapsed" id="sbElapsed"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- RESUMEN DE HOY -->
+        <div class="sl">Resumen del día</div>
+        <div class="summary-grid">
+          <div class="sum-card">
+            <div class="sum-lbl">Entrada</div>
+            <div class="sum-val green" id="sumEntrada">—</div>
+          </div>
+          <div class="sum-card">
+            <div class="sum-lbl">Salida</div>
+            <div class="sum-val orange" id="sumSalida">—</div>
+          </div>
+          <div class="sum-card">
+            <div class="sum-lbl">Horas trabajadas</div>
+            <div class="sum-val blue" id="sumHoras">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- HISTORIAL -->
+      <div id="pane-historial" style="display:none">
+        <div class="hist-card">
+          <div class="hist-head">
+            <div>
+              <div class="hist-title">Historial de asistencia</div>
+              <div class="hist-sub" id="histSub">Últimos 30 días</div>
+            </div>
+          </div>
+          <div id="histBody"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ════════════════════════════════
+//  CONFIGURACIÓN
+// ════════════════════════════════
+const WIFI_SSID = 'Cayena'; // Nombre exacto de la red WiFi requerida
+const SESSION_KEY = 'cayena_session';
+const ASIST_KEY = uid => 'cayena_asistencia_' + uid;
+const PLANILLA_ASIST_KEY = 'cayena_asistencia_global';
+
+// ════════════════════════════════
+//  SESIÓN
+// ════════════════════════════════
+let session = null;
+try{ session = JSON.parse(sessionStorage.getItem(SESSION_KEY)); }catch{}
+if(!session){ window.location.replace('index.html'); }
+
+const el = id => document.getElementById(id);
+const fmt2 = n => String(n).padStart(2,'0');
+
+function logout(){
+  sessionStorage.removeItem(SESSION_KEY);
+  window.location.replace('index.html');
+}
+
+// ════════════════════════════════
+//  VERIFICACIÓN WIFI
+// ════════════════════════════════
+let wifiOk = false;
+
+async function checkWifi(){
+  el('checkOverlay').classList.add('show');
+  el('wbStatus').textContent = 'Buscando red Cayena...';
+
+  // Paso 1: Verificar que hay conexión activa
+  if(!navigator.onLine){
+    el('checkOverlay').classList.remove('show');
+    showWifiBlock('Sin conexión · Activa el WiFi e intenta de nuevo');
+    return;
+  }
+
+  // Paso 2: Verificar tipo de conexión — rechazar datos móviles
+  const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+  if(conn && conn.type && conn.type === 'cellular'){
+    el('checkOverlay').classList.remove('show');
+    showWifiBlock('Estás usando datos móviles · Conéctate al WiFi "Cayena"');
+    return;
+  }
+
+  // Paso 3: VERIFICACIÓN REAL — intentar acceder a cayena-ping.txt
+  // Este archivo solo existe si estás en la misma red donde está alojada la app.
+  // Si la app está en GitHub Pages, el ping también es accesible desde esa red.
+  // Si la app está en un servidor local, el ping solo responde dentro de la red Cayena.
+  el('wbStatus').textContent = 'Verificando archivo de red...';
+
+  const pingOk = await tryPing();
+
+  if(pingOk){
+    wifiOk = true;
+    el('wifiBlock').classList.remove('show');
+    el('checkOverlay').classList.remove('show');
+    updateWifiPill(true);
+    initApp();
+  } else {
+    el('checkOverlay').classList.remove('show');
+    showWifiBlock('No se detectó la red "Cayena" · Verifica tu conexión WiFi');
+  }
+}
+
+async function tryPing(){
+  // Intentar cargar cayena-ping.txt desde la misma ubicación que la app
+  // Probamos 3 métodos en cascada
+
+  // Método 1: fetch del archivo ping en la misma carpeta
+  try{
+    const ctrl = new AbortController();
+    const tid = setTimeout(()=>ctrl.abort(), 3000);
+    const res = await fetch('cayena-ping.txt?_=' + Date.now(), {
+      signal: ctrl.signal,
+      cache: 'no-store',
+      method: 'GET'
+    });
+    clearTimeout(tid);
+    if(res.ok){
+      const txt = await res.text();
+      if(txt.trim() === 'CAYENA_NETWORK_OK'){
+        return true;
+      }
+    }
+  } catch(e){}
+
+  // Método 2: fetch con ruta relativa explícita
+  try{
+    const base = window.location.href.split('/').slice(0,-1).join('/') + '/';
+    const ctrl2 = new AbortController();
+    const tid2 = setTimeout(()=>ctrl2.abort(), 3000);
+    const res2 = await fetch(base + 'cayena-ping.txt?_=' + Date.now(), {
+      signal: ctrl2.signal,
+      cache: 'no-store'
+    });
+    clearTimeout(tid2);
+    if(res2.ok){
+      const txt2 = await res2.text();
+      if(txt2.trim() === 'CAYENA_NETWORK_OK') return true;
+    }
+  } catch(e){}
+
+  // Método 3: XMLHttpRequest sincrónico como último recurso
+  try{
+    return await new Promise(resolve=>{
+      const xhr = new XMLHttpRequest();
+      xhr.open('GET', 'cayena-ping.txt?_=' + Date.now(), true);
+      xhr.timeout = 3000;
+      xhr.onload = ()=>{
+        resolve(xhr.status === 200 && xhr.responseText.trim() === 'CAYENA_NETWORK_OK');
+      };
+      xhr.onerror = ()=>resolve(false);
+      xhr.ontimeout = ()=>resolve(false);
+      xhr.send();
+    });
+  } catch(e){ return false; }
+}
+
+function showWifiBlock(msg){
+  el('wifiBlock').classList.add('show');
+  el('wbStatus').textContent = msg || '';
+  updateWifiPill(false);
+}
+
+function updateWifiPill(ok, isGerencia){
+  if(isGerencia){
+    el('wifiPillWrap').innerHTML = `<div class="wifi-pill ok"><div class="wifi-dot"></div>Acceso gerencial</div>`;
+    return;
+  }
+  el('wifiPillWrap').innerHTML = ok
+    ? `<div class="wifi-pill ok"><div class="wifi-dot"></div>WiFi Cayena ✓</div>`
+    : `<div class="wifi-pill err"><div class="wifi-dot"></div>WiFi no verificado</div>`;
+}
+
+// ════════════════════════════════
+//  INIT APP
+// ════════════════════════════════
+function initApp(){
+  if(!session) return;
+
+  // Sidebar
+  const av = el('sideAv'), un = el('sideNombre'), ur = el('sideCargo');
+  const ini = session.initials || session.name.slice(0,2).toUpperCase();
+  if(av){ av.textContent = ini; if(session.bg) av.style.background = session.bg; }
+  if(un) un.textContent = session.name;
+  if(ur) ur.textContent = session.cargo || '';
+
+  // Hero
+  el('heroName').textContent = 'Hola, ' + session.name.split(' ')[0];
+  el('heroCargo').textContent = session.cargo || 'Asistencia';
+
+  // Clock card
+  el('ccAv').textContent = ini;
+  if(session.bg) el('ccAv').style.background = session.bg;
+  el('ccName').textContent = session.name;
+  el('ccCargo').textContent = session.cargo || '';
+
+  // Reloj en vivo
+  updateClock();
+  setInterval(updateClock, 1000);
+
+  // Render estado actual
+  await renderHoy();
+}
+
+// ════════════════════════════════
+//  RELOJ EN VIVO
+// ════════════════════════════════
+const DIAS = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+const MESES_CORTOS = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+
+function updateClock(){
+  const now = new Date();
+  el('liveClock').textContent =
+    fmt2(now.getHours()) + ':' + fmt2(now.getMinutes()) + ':' + fmt2(now.getSeconds());
+  el('liveDate').textContent =
+    DIAS[now.getDay()] + ' ' + now.getDate() + ' de ' +
+    MESES_CORTOS[now.getMonth()] + ' ' + now.getFullYear();
+
+  // Actualizar tiempo transcurrido si está marcado
+  updateElapsed();
+}
+
+// ════════════════════════════════
+//  STORAGE
+// ════════════════════════════════
+function todayKey(){
+  const n = new Date();
+  return `${n.getFullYear()}-${fmt2(n.getMonth()+1)}-${fmt2(n.getDate())}`;
+}
+
+async function loadRegistros(uid){
+  try{
+    const rows = await DB_Asist.getByUser(Number(uid));
+    // cache local para offline
+    localStorage.setItem(ASIST_KEY(uid), JSON.stringify(rows));
+    return rows;
+  }catch(e){
+    try{ return JSON.parse(localStorage.getItem(ASIST_KEY(uid))||'[]'); }catch{ return []; }
+  }
+}
+async function saveRegistros(uid, data){
+  // solo usado por setHoyRecord
+}
+
+async function getHoyRecord(uid){
+  const key = todayKey();
+  const registros = await loadRegistros(uid);
+  return registros.find(r => r.fecha === key) || null;
+}
+
+async function setHoyRecord(uid, record){
+  const key = todayKey();
+  // Guardar localmente como backup
+  const registros = await loadRegistros(uid);
+  const idx = registros.findIndex(r => r.fecha === key);
+  if(idx >= 0) registros[idx] = record;
+  else registros.push(record);
+  saveRegistros(uid, registros);
+  // Guardar en Supabase
+  try{
+    await DB_Asist.upsert(record);
+  }catch(e){ console.warn('Asistencia offline:',e); }
+}
+
+// Sincronizar al objeto global de planilla
+
+
+// ════════════════════════════════
+//  CLOCK IN / OUT
+// ════════════════════════════════
+async async function clockIn(){
+  if(!session) return;
+  const hoy = await getHoyRecord(session.id);
+
+  if(hoy && hoy.entrada){
+    toast('Ya registraste tu entrada hoy a las ' + hoy.entrada, 'err');
+    return;
+  }
+
+  const now = new Date();
+  const hora = fmt2(now.getHours()) + ':' + fmt2(now.getMinutes());
+  const ts = now.getTime();
+
+  const record = {
+    fecha: todayKey(),
+    entrada: hora,
+    entradaTs: ts,
+    salida: null,
+    salidaTs: null,
+    horasTrabajadas: null,
+    userId: session.id,
+    userName: session.name,
+    wifiVerificado: true,
+    ssid: WIFI_SSID
+  };
+
+  await setHoyRecord(session.id, record);
+  toast('✓ Entrada registrada · ' + hora, 'ok');
+  await renderHoy();
+}
+
+async async function clockOut(){
+  if(!session) return;
+  const hoy = await getHoyRecord(session.id);
+
+  if(!hoy || !hoy.entrada){
+    toast('Primero debes registrar tu entrada', 'err');
+    return;
+  }
+  if(hoy.salida){
+    toast('Ya registraste tu salida hoy a las ' + hoy.salida, 'err');
+    return;
+  }
+
+  const now = new Date();
+  const hora = fmt2(now.getHours()) + ':' + fmt2(now.getMinutes());
+  const ts = now.getTime();
+
+  // Calcular horas trabajadas
+  const diffMs = ts - hoy.entradaTs;
+  const diffH = diffMs / (1000 * 60 * 60);
+  const horasTrabajadas = parseFloat(diffH.toFixed(2));
+
+  const updated = {
+    ...hoy,
+    salida: hora,
+    salidaTs: ts,
+    horasTrabajadas
+  };
+
+  await setHoyRecord(session.id, updated);
+  toast('✓ Salida registrada · ' + hora + ' · ' + formatHoras(horasTrabajadas) + ' trabajadas', 'ok');
+  await renderHoy();
+}
+
+function formatHoras(h){
+  if(h === null || h === undefined) return '—';
+  const hrs = Math.floor(h);
+  const mins = Math.round((h - hrs) * 60);
+  return hrs + 'h ' + fmt2(mins) + 'm';
+}
+
+// ════════════════════════════════
+//  RENDER HOY
+// ════════════════════════════════
+async function renderHoy(){
+  if(!session) return;
+  const hoy = await getHoyRecord(session.id);
+
+  const btnIn  = el('btnIn');
+  const btnOut = el('btnOut');
+
+  if(!hoy || !hoy.entrada){
+    // Sin registro
+    btnIn.disabled = false;
+    btnOut.disabled = true;
+    el('btnInTime').textContent = 'Toca para registrar';
+    el('btnOutTime').textContent = '—';
+    el('statusBar').className = 'status-bar clocked-out';
+    el('sbIcon') && (el('sbIcon').textContent = '⏸️');
+    el('sbText').textContent = 'Sin registros hoy';
+    el('sbDetail').textContent = 'Presiona "Registrar entrada" para comenzar';
+    el('sbElapsed').textContent = '';
+    el('sumEntrada').textContent = '—';
+    el('sumSalida').textContent = '—';
+    el('sumHoras').textContent = '—';
+  } else if(hoy.entrada && !hoy.salida){
+    // Marcado, sin salida
+    btnIn.disabled = true;
+    btnOut.disabled = false;
+    el('btnInTime').textContent = '✓ ' + hoy.entrada;
+    el('btnOutTime').textContent = 'Toca para registrar';
+    el('statusBar').className = 'status-bar clocked-in';
+    el('sbText').textContent = 'Trabajando desde las ' + hoy.entrada;
+    el('sbDetail').textContent = 'Presiona "Registrar salida" cuando termines';
+    el('sumEntrada').textContent = hoy.entrada;
+    el('sumSalida').textContent = '—';
+    el('sumHoras').textContent = '—';
+  } else {
+    // Completo
+    btnIn.disabled = true;
+    btnOut.disabled = true;
+    el('btnInTime').textContent = '✓ ' + hoy.entrada;
+    el('btnOutTime').textContent = '✓ ' + hoy.salida;
+    el('statusBar').className = 'status-bar complete';
+    el('sbText').textContent = '¡Jornada completa! · ' + formatHoras(hoy.horasTrabajadas);
+    el('sbDetail').textContent = 'Entrada: ' + hoy.entrada + ' · Salida: ' + hoy.salida;
+    el('sbElapsed').textContent = formatHoras(hoy.horasTrabajadas);
+    el('sumEntrada').textContent = hoy.entrada;
+    el('sumSalida').textContent = hoy.salida;
+    el('sumHoras').textContent = formatHoras(hoy.horasTrabajadas);
+  }
+}
+
+async function updateElapsed(){
+  if(!session) return;
+  const hoy = await getHoyRecord(session.id);
+  if(!hoy || !hoy.entrada || hoy.salida) return;
+
+  const now = Date.now();
+  const diffMs = now - hoy.entradaTs;
+  const diffH = diffMs / (1000 * 60 * 60);
+  el('sbElapsed').textContent = formatHoras(diffH);
+}
+
+// ════════════════════════════════
+//  HISTORIAL
+// ════════════════════════════════
+async function renderHistorial(){
+  if(!session) return;
+  let registros = loadRegistros(session.id);
+  try{
+    const sbRows = await DB_Asist.getByUser(Number(session.id));
+    if(sbRows.length>0){
+      registros=sbRows;
+      // Sync local
+      localStorage.setItem('cayena_asistencia_'+session.id,JSON.stringify(sbRows));
+    }
+  }catch(e){}
+  const registros_sorted = registros
+    .sort((a,b) => b.fecha.localeCompare(a.fecha))
+    .slice(0, 30);
+
+  el('histSub').textContent = session.name + ' · ' + registros.length + ' día(s) registrados';
+
+  if(!registros.length){
+    el('histBody').innerHTML = '<div class="empty">Sin registros de asistencia aún.</div>';
+    return;
+  }
+
+  const rows = registros.map(r => {
+    const fecha = new Date(r.fecha + 'T12:00:00').toLocaleDateString('es-HN',{weekday:'short',day:'2-digit',month:'short',year:'numeric'});
+    const status = r.salida ? 'complete' : (r.entrada ? 'partial' : 'absent');
+    const statusLabel = r.salida ? 'Completo' : (r.entrada ? 'Sin salida' : 'Ausente');
+    const statusCls = r.salida ? 'badge-complete' : (r.entrada ? 'badge-partial' : 'badge-absent');
+    return `<tr>
+      <td style="font-weight:600">${fecha}</td>
+      <td style="color:var(--green-ui);font-weight:600">${r.entrada || '—'}</td>
+      <td style="color:var(--orange);font-weight:600">${r.salida || '—'}</td>
+      <td style="font-weight:700;color:var(--blue)">${r.horasTrabajadas ? formatHoras(r.horasTrabajadas) : '—'}</td>
+      <td><span class="badge ${statusCls}">${statusLabel}</span></td>
+    </tr>`;
+  }).join('');
+
+  el('histBody').innerHTML = `<table>
+    <thead><tr>
+      <th>Fecha</th><th>Entrada</th><th>Salida</th><th>Horas</th><th>Estado</th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+}
+
+// ════════════════════════════════
+//  TABS
+// ════════════════════════════════
+async function switchTab(t){
+  ['hoy','historial'].forEach(id=>{
+    el('tab-'+id).classList.toggle('active', id===t);
+    el('pane-'+id).style.display = id===t ? 'block' : 'none';
+  });
+  if(t==='historial') await renderHistorial();
+}
+
+// ════════════════════════════════
+//  UTILS
+// ════════════════════════════════
+function toggleSB(){ el('sb').classList.toggle('open'); el('ovbg').classList.toggle('open'); }
+function closeSB()  { el('sb').classList.remove('open'); el('ovbg').classList.remove('open'); }
+
+function toast(msg, type=''){
+  const t = el('toast'); t.textContent = msg;
+  t.className = 'toast ' + (type||'');
+  void t.offsetWidth; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 3000);
+}
+
+// ════════════════════════════════
+//  SIDEBAR SCRIPT
+// ════════════════════════════════
+(function(){
+  var s = null;
+  try{ s = JSON.parse(sessionStorage.getItem('cayena_session')); }catch{}
+  if(!s) return;
+  var av = document.querySelector('.av,.sav');
+  var un = document.querySelector('.un,.sun');
+  var ur = document.querySelector('.ur,.sur');
+  if(av){ av.textContent = s.initials||(s.name||'').slice(0,2).toUpperCase(); if(s.bg) av.style.background=s.bg; }
+  if(un) un.textContent = s.name||'';
+  if(ur) ur.textContent = s.cargo||'';
+})();
+
+// ════════════════════════════════
+//  INICIO — VERIFICAR WIFI
+// ════════════════════════════════
+window.addEventListener('load', ()=>{
+  // IDs de empleados que requieren verificación WiFi
+  // Gerencia (id 0 y 1) tiene acceso libre
+  const REQUIRE_WIFI = [2, 3, 4, 5];
+
+  if(!session){
+    window.location.replace('index.html');
+    return;
+  }
+
+  if(REQUIRE_WIFI.includes(Number(session.id))){
+    // Empleado — requiere estar en red Cayena
+    checkWifi();
+  } else {
+    // Gerencia — acceso directo sin verificación de red
+    wifiOk = true;
+    updateWifiPill(true, true); // true = gerencia (pill diferente)
+    initApp();
+  }
+});
+</script>
+</body>
+</html>

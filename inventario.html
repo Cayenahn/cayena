@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<script>(function(){var href=window.location.href;var p=href.split("/").pop().split("?")[0].split("#")[0]||"index.html";if(!p||p==="")p="index.html";if(p==="index.html")return;var s=sessionStorage.getItem("cayena_session");if(!s){window.location.replace("index.html");return;}try{var d=JSON.parse(s);if(!d||!d.role){window.location.replace("index.html");return;}if(Date.now()-d.ts>14400000){sessionStorage.removeItem("cayena_session");window.location.replace("index.html");return;}var pages=d.pages;if(pages!=="all"&&pages.indexOf(p)<0){var dest={gerencia:"dashboard.html",emp_inv:"inventario.html",emp_cc:"cuenta-corriente.html"}[d.role]||"index.html";if(p!==dest)window.location.replace(dest);return;}}catch(e){window.location.replace("index.html");}})();</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Cayena — Inventario</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --blue:#2563EB;--blue-deep:#1E3A8A;--blue-soft:#60A5FA;
+  --green:#84CC16;--green-ui:#16A34A;
+  --text:#0F172A;--body:#334155;--muted:#64748B;
+  --border:#E2E8F0;--bg:#F8FAFC;--white:#FFFFFF;
+  --red:#EF4444;--red-soft:#FEE2E2;--orange:#F97316;
+  --purple:#7C3AED;--amber:#D97706;
+  --shadow:0 4px 20px rgba(0,0,0,0.05);
+  --shadow-md:0 10px 25px rgba(0,0,0,0.08);
+  --shadow-lg:0 20px 40px rgba(0,0,0,0.12);
+  --r:12px;--r-lg:16px;--r-xl:20px;
+  --font:'Inter',sans-serif;
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font);font-size:14px}
+body{overflow-x:hidden}
+*{-webkit-font-smoothing:antialiased}
+
+/* ── LAYOUT ── */
+.app{display:flex;height:100vh;overflow:hidden}
+.sidebar{width:240px;min-width:240px;background:var(--white);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;transition:transform .28s cubic-bezier(.4,0,.2,1);z-index:90;box-shadow:var(--shadow)}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.logo-wrap{padding:24px 20px 20px;border-bottom:1px solid var(--border)}
+.logo{font-size:22px;font-weight:800;letter-spacing:-0.5px;color:var(--text);line-height:1;display:flex;align-items:center;gap:8px}
+.logo-dot{width:8px;height:8px;border-radius:50%;background:linear-gradient(135deg,#2563EB,#84CC16)}
+.logo-rtn{font-size:10px;color:var(--muted);margin-top:4px}
+.nav{flex:1;padding:12px 12px}
+.ng{font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);padding:12px 10px 6px}
+.ni{display:flex;align-items:center;gap:10px;padding:10px 12px;font-size:13px;font-weight:500;color:var(--body);cursor:pointer;border-radius:var(--r);transition:all .15s;text-decoration:none;margin-bottom:2px}
+.ni svg{width:16px;height:16px;flex-shrink:0;opacity:.6}
+.ni:hover{color:var(--blue);background:#EFF6FF}
+.ni.active{color:var(--blue);background:#EFF6FF;font-weight:600}
+.ni.active svg{opacity:1}
+.su{padding:14px 16px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px;margin-top:auto}
+.av{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--blue-soft));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0}
+.un{font-size:13px;font-weight:600;color:var(--text)}
+.ur{font-size:11px;color:var(--muted)}
+
+/* ── TOPBAR ── */
+.topbar{height:58px;background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;flex-shrink:0;gap:10px;box-shadow:var(--shadow)}
+.mb{display:none;background:none;border:none;color:var(--muted);cursor:pointer;padding:6px;line-height:1;border-radius:8px}
+.mb:hover{background:var(--bg)}
+.tl{display:flex;align-items:center;gap:10px;min-width:0;flex-wrap:wrap}
+.tey{font-size:11px;font-weight:500;color:var(--muted);white-space:nowrap}
+.tsep{width:1px;height:14px;background:var(--border);flex-shrink:0}
+.ttl{font-size:16px;font-weight:700;color:var(--text);white-space:nowrap}
+.tr2{display:flex;align-items:center;gap:7px;flex-shrink:0}
+.btn{font-family:var(--font);font-size:13px;font-weight:600;padding:9px 16px;border-radius:var(--r);cursor:pointer;transition:all .15s;white-space:nowrap;border:1px solid var(--border);background:var(--white);color:var(--body)}
+.btn:hover{border-color:var(--blue-soft);color:var(--blue)}
+.btn-primary{background:var(--blue);color:#fff;border-color:var(--blue)}
+.btn-primary:hover{background:var(--blue-deep)}
+.btn-green{background:var(--green-ui);color:#fff;border-color:var(--green-ui)}
+.btn-green:hover{opacity:.9}
+
+/* ── CONTENT ── */
+.content{flex:1;overflow-y:auto;padding:24px 24px 80px;-webkit-overflow-scrolling:touch}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+
+/* ── HERO ── */
+.page-hero{background:linear-gradient(135deg,#1E3A8A 0%,#2563EB 60%,#60A5FA 100%);border-radius:var(--r-xl);padding:22px 24px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.hero-left .pey{font-size:11px;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,.6);margin-bottom:4px}
+.hero-left .ptitle{font-size:26px;font-weight:800;color:#fff;line-height:1.1;letter-spacing:-0.3px}
+.hero-right{text-align:right;flex-shrink:0}
+.period-chip{display:inline-block;background:rgba(255,255,255,.2);color:#fff;font-size:12px;font-weight:600;padding:6px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.3);cursor:pointer;transition:all .15s}
+.period-chip:hover{background:rgba(255,255,255,.3)}
+.period-sub{font-size:11px;color:rgba(255,255,255,.5);margin-top:5px}
+
+/* ── PRINCIPLE BANNER ── */
+.principle{display:flex;align-items:center;gap:12px;padding:12px 16px;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:var(--r);margin-bottom:16px}
+.principle-icon{font-size:18px;flex-shrink:0}
+.principle-text{font-size:12px;color:var(--green-ui);font-weight:500;line-height:1.5}
+.principle-text strong{font-weight:700}
+
+/* ── SECTION LABEL ── */
+.sl{font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin:22px 0 10px;display:flex;align-items:center;gap:10px}
+.sl::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* ── KPI GRID ── */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
+.kpi{background:var(--white);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px 18px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--c,var(--blue));border-radius:var(--r-lg) var(--r-lg) 0 0}
+.kpi-lbl{font-size:11px;font-weight:500;color:var(--muted);margin-bottom:8px}
+.kpi-val{font-size:20px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1}
+.kpi-sub{font-size:11px;color:var(--muted);margin-top:5px}
+
+/* ── TABS ── */
+.tabs{display:flex;gap:4px;background:var(--bg);border:1px solid var(--border);border-radius:var(--r-lg);padding:4px;margin-bottom:20px}
+.tab{flex:1;padding:10px 16px;font-family:var(--font);font-size:13px;font-weight:600;border:none;background:none;cursor:pointer;border-radius:10px;color:var(--muted);transition:all .15s;display:flex;align-items:center;justify-content:center;gap:7px}
+.tab:hover{color:var(--text)}
+.tab.active{background:var(--white);color:var(--blue);box-shadow:var(--shadow)}
+.tab svg{width:15px;height:15px}
+
+/* ── MONTH SELECTOR ── */
+.month-bar{display:flex;align-items:center;gap:10px;margin-bottom:16px;background:var(--white);border:1px solid var(--border);border-radius:var(--r-lg);padding:12px 16px;box-shadow:var(--shadow)}
+.month-nav{background:var(--bg);border:1px solid var(--border);color:var(--body);cursor:pointer;font-size:16px;width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
+.month-nav:hover{border-color:var(--blue);color:var(--blue)}
+.month-label{font-size:15px;font-weight:700;color:var(--text);flex:1;text-align:center}
+.month-badge{font-size:11px;font-weight:600;padding:3px 10px;border-radius:999px;background:#EFF6FF;color:var(--blue)}
+
+/* ── CATEGORY ACCORDION ── */
+.cat-block{background:var(--white);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;margin-bottom:8px;box-shadow:var(--shadow)}
+.cat-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;cursor:pointer;transition:background .1s;background:var(--bg);border-bottom:1px solid var(--border)}
+.cat-head:hover{background:#F1F5F9}
+.cat-head-left{display:flex;align-items:center;gap:10px}
+.cat-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.cat-name{font-size:14px;font-weight:700;color:var(--text)}
+.cat-count{font-size:11px;color:var(--muted);margin-left:6px}
+.cat-total{font-size:15px;font-weight:700;color:var(--blue);font-variant-numeric:tabular-nums}
+.cat-chevron{color:var(--muted);transition:transform .2s;flex-shrink:0}
+.cat-chevron.open{transform:rotate(180deg)}
+.cat-body{display:none}
+.cat-body.open{display:block}
+
+/* ── PRODUCT ROW ── */
+.prod-row{display:grid;grid-template-columns:1fr 130px 120px 120px;align-items:center;gap:8px;padding:11px 18px;border-bottom:1px solid var(--border);transition:background .1s}
+.prod-row:last-child{border-bottom:none}
+.prod-row:hover{background:#FAFAFA}
+.prod-name{font-size:13px;font-weight:500;color:var(--text)}
+.prod-price{font-size:11px;color:var(--muted);margin-top:2px;font-variant-numeric:tabular-nums}
+.qty-wrap{position:relative;display:flex;align-items:center}
+.qty-input{width:100%;font-family:var(--font);font-size:15px;font-weight:700;color:var(--text);background:var(--bg);border:1.5px solid var(--border);border-radius:var(--r);padding:8px 12px;outline:none;transition:all .15s;text-align:center;-webkit-appearance:none;font-variant-numeric:tabular-nums}
+.qty-input:focus{border-color:var(--blue);background:var(--white);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+.qty-input::placeholder{color:var(--border);font-weight:400;font-size:13px}
+.qty-input::-webkit-outer-spin-button,.qty-input::-webkit-inner-spin-button{-webkit-appearance:none}
+.qty-hint{font-size:10px;color:var(--muted);text-align:center;margin-top:3px}
+.prod-value{font-size:14px;font-weight:700;color:var(--blue);text-align:right;font-variant-numeric:tabular-nums}
+.prod-value.zero{color:var(--muted);font-weight:400}
+/* ── PRICE EDIT ── */
+.prod-price-edit{display:flex;align-items:center;gap:6px;position:relative}
+.price-inp{width:100%;font-family:var(--font);font-size:13px;font-weight:700;color:var(--text);background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;outline:none;transition:all .15s;font-variant-numeric:tabular-nums;-webkit-appearance:none;text-align:center}
+.price-inp:focus{border-color:var(--blue);background:var(--white);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+.price-inp::-webkit-outer-spin-button,.price-inp::-webkit-inner-spin-button{-webkit-appearance:none}
+.price-sync-badge{font-size:9px;font-weight:600;color:var(--green-ui);text-align:center;margin-top:3px;display:flex;align-items:center;justify-content:center;gap:3px;opacity:.7}
+
+/* ── COMPARISON VIEW ── */
+.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.compare-panel{background:var(--white);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow)}
+.compare-head{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--bg)}
+.compare-title{font-size:13px;font-weight:700;color:var(--text)}
+.compare-total{font-size:16px;font-weight:800;font-variant-numeric:tabular-nums}
+.compare-body{padding:0;max-height:400px;overflow-y:auto}
+.cmp-row{display:flex;align-items:center;justify-content:space-between;padding:10px 18px;border-bottom:1px solid var(--border);font-size:12px}
+.cmp-row:last-child{border-bottom:none}
+.cmp-name{color:var(--body);flex:1}
+.cmp-val{font-weight:600;font-variant-numeric:tabular-nums;color:var(--text)}
+
+/* ── HISTORY TABLE ── */
+.history-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow)}
+.ht{width:100%;border-collapse:collapse;min-width:500px}
+.ht th{font-size:11px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);padding:12px 16px;text-align:right;border-bottom:1px solid var(--border);background:var(--bg)}
+.ht th:first-child{text-align:left}
+.ht td{font-size:13px;padding:12px 16px;text-align:right;color:var(--body);border-bottom:1px solid var(--border);font-variant-numeric:tabular-nums}
+.ht td:first-child{text-align:left;font-weight:600;color:var(--text)}
+.ht tr:last-child td{border-bottom:none}
+.ht tr:hover td{background:var(--bg)}
+.carried-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:600;padding:2px 8px;border-radius:999px;background:#F0FDF4;color:var(--green-ui);border:1px solid #BBF7D0}
+
+/* ── SAVE BAR ── */
+.save-bar{position:sticky;bottom:0;left:0;right:0;background:var(--white);border-top:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;box-shadow:0 -4px 20px rgba(0,0,0,.06);z-index:50}
+.save-bar-info{font-size:13px;color:var(--muted)}
+.save-bar-total{font-size:18px;font-weight:800;color:var(--blue);font-variant-numeric:tabular-nums}
+.save-btn{font-family:var(--font);font-size:14px;font-weight:700;padding:13px 28px;border:none;cursor:pointer;background:var(--blue);color:#fff;transition:all .15s;display:flex;align-items:center;gap:8px;border-radius:var(--r)}
+.save-btn:hover{background:var(--blue-deep)}
+
+/* ── MODAL ── */
+.overlay{display:none;position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:200;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)}
+.overlay.open{display:flex}
+.modal{background:var(--white);border-radius:var(--r-xl);border:1px solid var(--border);width:100%;max-width:420px;overflow:hidden;box-shadow:var(--shadow-lg);animation:popIn .2s cubic-bezier(.34,1.56,.64,1)}
+@keyframes popIn{from{opacity:0;transform:scale(.93)}to{opacity:1;transform:scale(1)}}
+.modal-head{padding:20px 24px 16px;border-bottom:1px solid var(--border)}
+.modal-title{font-size:18px;font-weight:800;color:var(--text)}
+.modal-sub{font-size:12px;color:var(--muted);margin-top:4px}
+.modal-body{padding:20px 24px}
+.modal-field{margin-bottom:14px}
+.modal-field label{display:block;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:7px}
+.modal-field select,.modal-field input{width:100%;font-family:var(--font);font-size:14px;font-weight:600;color:var(--text);background:var(--bg);border:1.5px solid var(--border);border-radius:var(--r);padding:11px 14px;outline:none;transition:all .15s}
+.modal-field select:focus,.modal-field input:focus{border-color:var(--blue);background:var(--white);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+.modal-footer{display:flex;gap:8px;padding:0 24px 24px}
+.modal-footer .btn{flex:1}
+.modal-footer .btn-primary{flex:2}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--text);color:#fff;font-size:12px;font-weight:600;padding:10px 20px;border-radius:999px;z-index:999;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;box-shadow:var(--shadow-md)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.ok{background:var(--green-ui)}
+.toast.err{background:var(--red)}
+
+/* OVBG */
+.ovbg{display:none;position:fixed;inset:0;background:rgba(15,23,42,.4);z-index:89}
+.ovbg.open{display:block}
+
+/* EMPTY */
+.empty-st{padding:40px;text-align:center;color:var(--muted);font-size:12px;line-height:1.8}
+
+/* MOBILE */
+@media(max-width:720px){
+  .sidebar{position:fixed;left:0;top:0;bottom:0;transform:translateX(-100%)}
+  .sidebar.open{transform:translateX(0)}
+  .mb{display:flex}
+  .kpi-grid{grid-template-columns:1fr 1fr}
+  .prod-row{grid-template-columns:1fr 100px 110px 80px}
+  .compare-grid{grid-template-columns:1fr}
+  .page-hero{flex-direction:column;gap:12px}
+  .hero-right{text-align:left}
+  .content{padding:16px 16px 100px}
+  .tabs{flex-direction:column}
+}
+</style>
+</head>
+<body>
+<div class="ovbg" id="ovbg" onclick="closeSB()"></div>
+<div class="app">
+
+  <aside class="sidebar" id="sb">
+    <div class="logo-wrap">
+      <div class="logo"><div class="logo-dot"></div>Cayena</div>
+      <div class="logo-rtn">RTN: 0318-2001-022079</div>
+    </div>
+    <nav class="nav">
+      <div class="ng">Principal</div>
+      <a class="ni" href="dashboard.html"><svg viewBox="0 0 16 16" fill="none"><rect x="1.5" y="1.5" width="5.5" height="5.5" rx="1.5" stroke="currentColor" stroke-width="1.4"/><rect x="9" y="1.5" width="5.5" height="5.5" rx="1.5" stroke="currentColor" stroke-width="1.4" opacity=".5"/><rect x="1.5" y="9" width="5.5" height="5.5" rx="1.5" stroke="currentColor" stroke-width="1.4" opacity=".5"/><rect x="9" y="9" width="5.5" height="5.5" rx="1.5" stroke="currentColor" stroke-width="1.4" opacity=".5"/></svg>Dashboard</a>
+      <div class="ng">Operaciones</div>
+      <a class="ni" href="ingresos.html"><svg viewBox="0 0 16 16" fill="none"><path d="M2 12L5.5 7.5L8.5 10L11 5.5L14 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Ingresos</a>
+      <a class="ni" href="isv.html"><svg viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="M5 8h6M8 5v6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Resumen ISV</a>
+      <a class="ni" href="compras.html"><svg viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="11" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M5 3V2M11 3V2M2 7h12" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Compras</a>
+      <a class="ni" href="proveedores.html"><svg viewBox="0 0 16 16" fill="none"><circle cx="6" cy="5" r="2.5" stroke="currentColor" stroke-width="1.4"/><path d="M2 13c0-2.21 1.79-4 4-4s4 1.79 4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M11 7l1.5 1.5L15 6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Proveedores</a>
+      <a class="ni active" href="inventario.html"><svg viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="5.5" height="5.5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="8.5" y="2" width="5.5" height="5.5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="2" y="8.5" width="5.5" height="5.5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="8.5" y="8.5" width="5.5" height="5.5" rx="1" stroke="currentColor" stroke-width="1.4"/></svg>Inventario</a>
+      <a class="ni" href="gastos.html"><svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.4"/><path d="M8 5v3.5l2.5 1.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Gastos</a>
+      <div class="ng">Personas</div>
+      <a class="ni" href="planilla.html"><svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5.5" r="2.5" stroke="currentColor" stroke-width="1.4"/><path d="M3 13c0-2.76 2.24-5 5-5s5 2.24 5 5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Planilla</a>
+      <a class="ni" href="cuenta-corriente.html"><svg viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M2 7h12M5 10h3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Cuenta Corriente</a>
+      <a class="ni" href="asistencia.html"><svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.4"/><path d="M8 5v3l2 2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Asistencia</a>
+      <div class="ng">Análisis</div>
+      <a class="ni" href="#"><svg viewBox="0 0 16 16" fill="none"><path d="M2 13L5 9l3 2.5L11 5l3 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Costo de Ventas</a>
+    </nav>
+    <div class="su">
+      <div class="av">AD</div>
+      <div><div class="un">Administrador</div><div class="ur">Admin general</div></div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="tl">
+        <button class="mb" onclick="toggleSB()"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M2 5h16M2 10h16M2 15h16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
+        <span class="tey">Cayena</span><div class="tsep"></div>
+        <span class="ttl">Inventario</span><div class="tsep"></div>
+        <span id="topbar-period" style="font-size:12px;font-weight:600;color:var(--blue);background:#EFF6FF;padding:3px 10px;border-radius:999px">—</span>
+      </div>
+      <div class="tr2">
+        <button class="btn" onclick="exportPDF()">Exportar PDF</button>
+        <button class="btn btn-primary" onclick="openPeriodModal()">📅 Cambiar período</button>
+      </div>
+    </div>
+
+    <div class="content" id="main-content">
+
+      <div class="page-hero">
+        <div class="hero-left">
+          <div class="pey">Operaciones · Control de stock</div>
+          <div class="ptitle">Inventario</div>
+        </div>
+        <div class="hero-right">
+          <div class="period-chip" onclick="openPeriodModal()" id="period-chip">— Período</div>
+          <div class="period-sub" id="period-sub">Toca para cambiar</div>
+        </div>
+      </div>
+
+      <div class="principle">
+        <span class="principle-icon">⚖️</span>
+        <div class="principle-text"><strong>Principio contable:</strong> Inventario Final del mes anterior = Inventario Inicial del mes siguiente. Al cerrar un período, el inventario final se traslada automáticamente como inicial del próximo mes.</div>
+      </div>
+
+      <!-- KPIs -->
+      <div class="kpi-grid">
+        <div class="kpi" style="--c:var(--blue)">
+          <div class="kpi-lbl">Inventario Inicial</div>
+          <div class="kpi-val" style="color:var(--blue)" id="k-ini">L 0.00</div>
+          <div class="kpi-sub" id="k-ini-items">0 productos</div>
+        </div>
+        <div class="kpi" style="--c:var(--green-ui)">
+          <div class="kpi-lbl">Inventario Final</div>
+          <div class="kpi-val" style="color:var(--green-ui)" id="k-fin">L 0.00</div>
+          <div class="kpi-sub" id="k-fin-items">0 productos</div>
+        </div>
+        <div class="kpi" style="--c:var(--orange)">
+          <div class="kpi-lbl">Variación del período</div>
+          <div class="kpi-val" id="k-var">L 0.00</div>
+          <div class="kpi-sub" id="k-var-pct">vs inventario inicial</div>
+        </div>
+        <div class="kpi" style="--c:var(--purple)">
+          <div class="kpi-lbl">Productos registrados</div>
+          <div class="kpi-val" style="color:var(--purple)" id="k-prods">0</div>
+          <div class="kpi-sub">Con cantidad > 0</div>
+        </div>
+      </div>
+
+      <!-- TABS -->
+      <div class="tabs">
+        <button class="tab active" id="tab-inicial" onclick="switchTab('inicial')">
+          <svg viewBox="0 0 16 16" fill="none"><path d="M3 8h10M3 4h7M3 12h5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+          Inventario Inicial
+        </button>
+        <button class="tab" id="tab-final" onclick="switchTab('final')">
+          <svg viewBox="0 0 16 16" fill="none"><path d="M3 8h10M3 4h10M3 12h10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+          Inventario Final
+        </button>
+        <button class="tab" id="tab-comparar" onclick="switchTab('comparar')">
+          <svg viewBox="0 0 16 16" fill="none"><path d="M2 8h5M9 8h5M8 3v10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+          Comparar
+        </button>
+        <button class="tab" id="tab-historial" onclick="switchTab('historial')">
+          <svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.4"/><path d="M8 5v3.5l2.5 1.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+          Historial
+        </button>
+      </div>
+
+      <!-- ═══ TAB: INICIAL / FINAL ═══ -->
+      <div id="pane-form">
+        <div id="catalog-container"></div>
+        <div style="height:80px"></div>
+      </div>
+
+      <!-- ═══ TAB: COMPARAR ═══ -->
+      <div id="pane-comparar" style="display:none">
+        <div class="compare-grid">
+          <div class="compare-panel">
+            <div class="compare-head">
+              <div class="compare-title">📦 Inventario Inicial</div>
+              <div class="compare-total" style="color:var(--blue)" id="cmp-ini-total">L 0.00</div>
+            </div>
+            <div class="compare-body" id="cmp-ini-body">
+              <div class="empty-st">Sin datos de inventario inicial.</div>
+            </div>
+          </div>
+          <div class="compare-panel">
+            <div class="compare-head">
+              <div class="compare-title">✅ Inventario Final</div>
+              <div class="compare-total" style="color:var(--green-ui)" id="cmp-fin-total">L 0.00</div>
+            </div>
+            <div class="compare-body" id="cmp-fin-body">
+              <div class="empty-st">Sin datos de inventario final.</div>
+            </div>
+          </div>
+        </div>
+        <div id="diff-table-wrap"></div>
+      </div>
+
+      <!-- ═══ TAB: HISTORIAL ═══ -->
+      <div id="pane-historial" style="display:none">
+        <div class="sl">Períodos cerrados</div>
+        <div class="history-card">
+          <div style="overflow-x:auto">
+            <table class="ht">
+              <thead><tr>
+                <th style="text-align:left">Período</th>
+                <th>Inv. Inicial</th>
+                <th>Inv. Final</th>
+                <th>Variación</th>
+                <th>Productos</th>
+                <th></th>
+              </tr></thead>
+              <tbody id="history-tbody">
+                <tr><td colspan="6" class="empty-st">No hay períodos cerrados aún.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+
+    <!-- SAVE BAR -->
+    <div class="save-bar" id="save-bar">
+      <div>
+        <div class="save-bar-info" id="save-bar-label">Total inventario</div>
+        <div class="save-bar-total" id="save-bar-total">L 0.00</div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn" onclick="clearCurrentTab()">Limpiar</button>
+        <button class="save-btn btn-green" id="save-main-btn" onclick="saveCurrentTab()">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span id="save-btn-label">Guardar Inventario Inicial</span>
+        </button>
+        <button class="btn btn-primary" id="close-period-btn" onclick="closePeriod()" style="display:none">
+          🔒 Cerrar período
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PERIOD MODAL -->
+<div class="overlay" id="period-overlay" onclick="if(event.target===this)closePeriodModal()">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title">Seleccionar período</div>
+      <div class="modal-sub">Elige el mes y año del inventario</div>
+    </div>
+    <div class="modal-body">
+      <div class="modal-field">
+        <label>Mes</label>
+        <select id="pm-mes">
+          <option value="0">Enero</option><option value="1">Febrero</option>
+          <option value="2">Marzo</option><option value="3">Abril</option>
+          <option value="4">Mayo</option><option value="5">Junio</option>
+          <option value="6">Julio</option><option value="7">Agosto</option>
+          <option value="8">Septiembre</option><option value="9">Octubre</option>
+          <option value="10">Noviembre</option><option value="11">Diciembre</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <label>Año</label>
+        <input type="number" id="pm-year" min="2020" max="2099" step="1">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closePeriodModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="applyPeriod()">Aplicar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════
+//  CATALOG — 151 productos del Excel
+// ══════════════════════════════════════════════
+const INVENTORY_CATALOG = [
+  {name:'Alas de pollo (Libra)', cat:'Proteínas', price:66.0},
+  {name:'Pechuga Congelada (Libra)', cat:'Proteínas', price:61.65},
+  {name:'Tortas Angus (Unidades)', cat:'Proteínas', price:37.95},
+  {name:'Carne Molida Regular Del Corral', cat:'Proteínas', price:62.5},
+  {name:'Chorizo Molido Baleada Del Corral', cat:'Proteínas', price:66.5},
+  {name:'Carne Molida de Pollo', cat:'Proteínas', price:42.5},
+  {name:'Carton de Huevos (30 unidades)', cat:'Proteínas', price:109.95},
+  {name:'Bacon Zaragoza', cat:'Proteínas', price:199.95},
+  {name:'Chorizo Zamorano', cat:'Proteínas', price:204.95},
+  {name:'Lomo preparado (2 Porciones) (Cayena)', cat:'Proteínas', price:66.7},
+  {name:'Panceta de Cerdo Prep (2 Porciones) (Cayena)', cat:'Proteínas', price:83.63},
+  {name:'Jalapeno poppers (Cayena)', cat:'Proteínas', price:51.75},
+  {name:'Pollo Desmenusado (3 Porciones) (Cayena)', cat:'Proteínas', price:86.04},
+  {name:'Chorizo Molido Prep (8 Tortas) (Cayena)', cat:'Proteínas', price:68.32},
+  {name:'Nuggets de Pollo (2 Porciones) (Cayena)', cat:'Proteínas', price:48.31},
+  {name:'Muslo Deshuesado (3 Porciones) (Cayena)', cat:'Proteínas', price:35.06},
+  {name:'Empanizador Premium (4840g) (Cayena)', cat:'Ingredientes Preparados', price:475.0},
+  {name:'Mozzarella Porcionado (120g) (Cayena)', cat:'Ingredientes Preparados', price:22.87},
+  {name:'Cebolla Caramelizada (3 Porciones) (Cayena)', cat:'Ingredientes Preparados', price:17.0},
+  {name:'Aderezo de Capitata (3 porciones) (Cayena)', cat:'Ingredientes Preparados', price:11.0},
+  {name:'Tortillas Para Tacos (6 Unidades)', cat:'Ingredientes Preparados', price:12.0},
+  {name:'Papas Waffle Porcionadas (200g)', cat:'Ingredientes Preparados', price:50.0},
+  {name:'Leche Semidescremada MS (Fardo de 12)', cat:'Lácteos', price:379.95},
+  {name:'Mozzarella MS (Unidad)', cat:'Lácteos', price:419.95},
+  {name:'Pepperjack MS', cat:'Lácteos', price:244.95},
+  {name:'Quesillo Boqueron Libra', cat:'Lácteos', price:51.5},
+  {name:'Queso Americano MS', cat:'Lácteos', price:199.95},
+  {name:'Parmesano 680g', cat:'Lácteos', price:374.95},
+  {name:'Queso Para Nachos (Libra)', cat:'Lácteos', price:60.0},
+  {name:'Mantequilla Escurrida (Libra)', cat:'Lácteos', price:50.0},
+  {name:'Barbacoa 1000ml (Cayena)', cat:'Salsas Cayena', price:81.7},
+  {name:'Buffalo 1000ml (Cayena)', cat:'Salsas Cayena', price:104.42},
+  {name:'Mango Habanero 1000ml (Cayena)', cat:'Salsas Cayena', price:179.88},
+  {name:'Cayena Home 1000ml (Cayena)', cat:'Salsas Cayena', price:162.4},
+  {name:'Sweet Chilli 1000ml (Cayena)', cat:'Salsas Cayena', price:662.0},
+  {name:'Lemon Pepper (Cayena)', cat:'Salsas Cayena', price:460.0},
+  {name:'Ajo Parmesano 372g (Cayena)', cat:'Salsas Cayena', price:46.07},
+  {name:'Miel Mostaza (Cayena)', cat:'Salsas Cayena', price:128.7},
+  {name:'Ranch (Cayena)', cat:'Salsas Cayena', price:101.17},
+  {name:'Aderezo Rosa (Cayena)', cat:'Salsas Cayena', price:66.7},
+  {name:'Aderezo de Encurtido (Cayena)', cat:'Salsas Cayena', price:77.05},
+  {name:'Aderezo Chipotle (Cayena)', cat:'Salsas Cayena', price:115.93},
+  {name:'Aderezo Miel Mostaza (Cayena)', cat:'Salsas Cayena', price:128.7},
+  {name:'Papas Corte Recto Caja', cat:'Carbohidratos', price:530.0},
+  {name:'Pan de Hamburguesa', cat:'Carbohidratos', price:17.77},
+  {name:'Tortillas la Selecta', cat:'Carbohidratos', price:10.0},
+  {name:'Papas Waffle 737g', cat:'Carbohidratos', price:138.0},
+  {name:'Tortillas Milpa Real', cat:'Carbohidratos', price:14.5},
+  {name:'Cebolla Amarilla (Libra)', cat:'Frutas y Verduras', price:20.0},
+  {name:'Cebolla Roja (Libra)', cat:'Frutas y Verduras', price:30.0},
+  {name:'Zanahoria', cat:'Frutas y Verduras', price:15.0},
+  {name:'Tomate Manzano (Libra)', cat:'Frutas y Verduras', price:16.0},
+  {name:'Lechuga escarola (unidades)', cat:'Frutas y Verduras', price:17.5},
+  {name:'Menta (Unidad)', cat:'Frutas y Verduras', price:22.9},
+  {name:'Hierba Buena (Unidad)', cat:'Frutas y Verduras', price:22.9},
+  {name:'Jengibre (Libra)', cat:'Frutas y Verduras', price:42.5},
+  {name:'Piña (Unidad)', cat:'Frutas y Verduras', price:45.0},
+  {name:'Limon (Unidad)', cat:'Frutas y Verduras', price:2.5},
+  {name:'Maracuya (Unidad)', cat:'Frutas y Verduras', price:5.0},
+  {name:'Fresas Congeladas (5 Libras)', cat:'Frutas y Verduras', price:200.0},
+  {name:'Arandanos Congelados', cat:'Frutas y Verduras', price:294.95},
+  {name:'Aguacates Unidad', cat:'Frutas y Verduras', price:13.0},
+  {name:'Repollo (Libra)', cat:'Frutas y Verduras', price:10.0},
+  {name:'Jalapeños (Libra)', cat:'Frutas y Verduras', price:15.0},
+  {name:'Barbacoa Best Choice', cat:'Salsas y Aderezos', price:157.0},
+  {name:'Cayenne Franks Redhot', cat:'Salsas y Aderezos', price:545.0},
+  {name:'Ajo y Buffalo', cat:'Salsas y Aderezos', price:411.5},
+  {name:'Korean BBQ', cat:'Salsas y Aderezos', price:460.0},
+  {name:'Sweet Chilli', cat:'Salsas y Aderezos', price:525.0},
+  {name:'Salsa Soya', cat:'Salsas y Aderezos', price:141.45},
+  {name:'Miel', cat:'Salsas y Aderezos', price:800.0},
+  {name:'Mostaza Galon', cat:'Salsas y Aderezos', price:189.75},
+  {name:'Vinagre Blanco', cat:'Salsas y Aderezos', price:134.95},
+  {name:'Ranch', cat:'Salsas y Aderezos', price:354.95},
+  {name:'Ranch Marina', cat:'Salsas y Aderezos', price:360.0},
+  {name:'Mayonesa Best Choice', cat:'Salsas y Aderezos', price:290.95},
+  {name:'Ketchup Pouch Heinz', cat:'Salsas y Aderezos', price:182.0},
+  {name:'Blue Cheese', cat:'Salsas y Aderezos', price:784.99},
+  {name:'Margarina', cat:'Salsas y Aderezos', price:29.9},
+  {name:'Lemon Pepper', cat:'Salsas y Aderezos', price:460.0},
+  {name:'Copa Plastica 2 Oz Tapa (Fardo 2500)', cat:'Plásticos y Empaques', price:1173.0},
+  {name:'Contenedor Negro 9*9 (Fardo 50)', cat:'Plásticos y Empaques', price:138.86},
+  {name:'Contenedor Negro 8*8 (Fardo 50)', cat:'Plásticos y Empaques', price:120.75},
+  {name:'Contenedor Negro 6*6 (Fardo 50)', cat:'Plásticos y Empaques', price:86.83},
+  {name:'Bolsa Café No 10 (Fardo)', cat:'Plásticos y Empaques', price:392.0},
+  {name:'Caja Papas Fritas (Fardo 100)', cat:'Plásticos y Empaques', price:172.5},
+  {name:'Bolsa Transparente 7*14 (9000u)', cat:'Plásticos y Empaques', price:2740.45},
+  {name:"Pajilla Forrada Negra 7.75' (Fardo 250)", cat:'Plásticos y Empaques', price:58.85},
+  {name:'Papel Hamburguesa Cuadriculado', cat:'Plásticos y Empaques', price:879.75},
+  {name:'Papel plateado (Fardo 500)', cat:'Plásticos y Empaques', price:1078.0},
+  {name:'Ketchup en Sobre (Fardo 1000)', cat:'Plásticos y Empaques', price:782.0},
+  {name:'Servilleta White C 16.5*33cm', cat:'Plásticos y Empaques', price:253.92},
+  {name:'Tenedor Cuchillo Servilleta 3g (500)', cat:'Plásticos y Empaques', price:770.5},
+  {name:'Papel Cayena (1000 Unidades)', cat:'Plásticos y Empaques', price:2000.0},
+  {name:'Vasos 14 oz (Fardo 50)', cat:'Plásticos y Empaques', price:108.33},
+  {name:'Tapaderas Vaso 14 oz (Fardo 50)', cat:'Plásticos y Empaques', price:49.8},
+  {name:'Bolsa Camiseta 12" (Thank you)', cat:'Plásticos y Empaques', price:37.95},
+  {name:'Bolsa Camiseta No2 Blanca', cat:'Plásticos y Empaques', price:34.38},
+  {name:'Jumbo Roll Papel Higiénico', cat:'Artículos de Limpieza', price:80.0},
+  {name:'Papel interfoleado Scott', cat:'Artículos de Limpieza', price:74.68},
+  {name:'Azistin Lysol', cat:'Artículos de Limpieza', price:399.95},
+  {name:'Ace Bolsa 10kg', cat:'Artículos de Limpieza', price:434.95},
+  {name:'Jabón Ajax', cat:'Artículos de Limpieza', price:15.22},
+  {name:'Windex', cat:'Artículos de Limpieza', price:75.5},
+  {name:'Bolsas negras 50 Litros', cat:'Artículos de Limpieza', price:479.95},
+  {name:'Bolsa Blanca Liston Naranja', cat:'Artículos de Limpieza', price:599.95},
+  {name:'Magia Blanca Cloro 20 galones', cat:'Artículos de Limpieza', price:275.95},
+  {name:'Jabón Limpia Platos', cat:'Artículos de Limpieza', price:179.95},
+  {name:'Pimienta Cayena', cat:'Condimentos', price:166.75},
+  {name:'Pimienta Negra', cat:'Condimentos', price:264.95},
+  {name:'Adobo sin Pimienta', cat:'Condimentos', price:183.77},
+  {name:'Paprika', cat:'Condimentos', price:174.95},
+  {name:'Sal de Ajo la Buena Cocina', cat:'Condimentos', price:77.95},
+  {name:'Sazonador Completo', cat:'Condimentos', price:224.83},
+  {name:'Azúcar', cat:'Condimentos', price:464.95},
+  {name:'Sal yodada', cat:'Condimentos', price:32.99},
+  {name:'Consomé de Pollo', cat:'Condimentos', price:128.8},
+  {name:'Bacon Bites', cat:'Condimentos', price:188.26},
+  {name:'Sal y pimienta DJ', cat:'Condimentos', price:30.0},
+  {name:'Harina Fardo', cat:'Condimentos', price:99.95},
+  {name:'Maizena', cat:'Condimentos', price:315.0},
+  {name:'Canela', cat:'Condimentos', price:194.95},
+  {name:'Zuko de Mango', cat:'Condimentos', price:5.64},
+  {name:'Jalapeno la Costena (Fardo 24)', cat:'Producto Enlatado', price:623.04},
+  {name:'Pepino en Rodajas Car Int', cat:'Producto Enlatado', price:247.0},
+  {name:'Banana Pepper', cat:'Producto Enlatado', price:332.81},
+  {name:'Margarina Liquida Oasis', cat:'Producto Enlatado', price:355.01},
+  {name:'Leche Condensada Nestle (Fardo 24)', cat:'Producto Enlatado', price:1010.85},
+  {name:'Chipotle la Costena', cat:'Producto Enlatado', price:50.14},
+  {name:'Leche de Coco Roland (Fardo 24)', cat:'Producto Enlatado', price:1010.85},
+  {name:'Crema de Coco JAJA', cat:'Producto Enlatado', price:61.7},
+  {name:'Cerezas Rojas Diamante', cat:'Producto Enlatado', price:759.0},
+  {name:'Lyches Roland', cat:'Producto Enlatado', price:125.01},
+  {name:'Cocacola Lata (Fardo de 12)', cat:'Bebidas', price:200.0},
+  {name:'Canada-Dry Soda (Fardo de 24)', cat:'Bebidas', price:400.0},
+  {name:'Canada-Dry Quina (Fardo de 24)', cat:'Bebidas', price:400.0},
+  {name:'Canada-Dry Ginger Ale (Fardo de 24)', cat:'Bebidas', price:400.0},
+  {name:'Fresca Toronja (Fardo de 12)', cat:'Bebidas', price:220.0},
+  {name:'Agua Dasani (Fardo de 12)', cat:'Bebidas', price:130.0},
+  {name:'Jugo de Naranja (Unidad)', cat:'Bebidas', price:27.5},
+  {name:'Hielo (Unidades)', cat:'Bebidas', price:12.0},
+  {name:'Cocacola Zero (Fardo de 12)', cat:'Bebidas', price:180.0},
+  {name:'Té frío 2200g', cat:'Bebidas', price:189.95},
+  {name:'Tajin Salsa en Polvo', cat:'Cocteles', price:56.95},
+  {name:'Chamoi Tajin (475ml)', cat:'Cocteles', price:76.82},
+  {name:'Dailys Margarita 750ml', cat:'Cocteles', price:142.13},
+  {name:'Vodka Barton 750ml', cat:'Cocteles', price:56.95},
+  {name:'Ron Bacardi 750ml', cat:'Cocteles', price:634.66},
+  {name:'Gin Bombay 1000ml', cat:'Cocteles', price:634.66},
+  {name:'Tequila Jarana 1750ml', cat:'Cocteles', price:583.66},
+  {name:'Barton Triple Sec 750ml', cat:'Cocteles', price:66.5},
+  {name:'Café', cat:'Otros', price:38.9},
+  {name:'Botellón con agua', cat:'Otros', price:25.0},
+  {name:'Aceite 20 Libras', cat:'Otros', price:680.0},
+];
+
+// ══════════════════════════════════════════════
+//  CATEGORY COLORS
+// ══════════════════════════════════════════════
+const CAT_COLORS = {
+  'Proteínas':'#EF4444','Ingredientes Preparados':'#F97316',
+  'Lácteos':'#60A5FA','Salsas Cayena':'#7C3AED',
+  'Carbohidratos':'#D97706','Frutas y Verduras':'#16A34A',
+  'Salsas y Aderezos':'#F97316','Plásticos y Empaques':'#64748B',
+  'Artículos de Limpieza':'#0891B2','Condimentos':'#CA8A04',
+  'Producto Enlatado':'#0284C7','Bebidas':'#2563EB',
+  'Cocteles':'#7C3AED','Otros':'#94A3B8',
+};
+
+// ══════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════
+const el = id => document.getElementById(id);
+const Lf = n => 'L ' + parseFloat(n||0).toLocaleString('es-HN', {minimumFractionDigits:2, maximumFractionDigits:2});
+const MO = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+let curTab = 'inicial';
+let curY, curM;
+let prices = {}; // live price map, synced with cayena_precios
+
+// ── PRICE SYNC ──
+// Prices: INVENTORY_CATALOG is base, cayena_precios overrides
+function loadPrices() {
+  const stored = JSON.parse(localStorage.getItem('cayena_precios') || '{}');
+  prices = {};
+  INVENTORY_CATALOG.forEach(p => { prices[p.name] = p.price; });
+  // Override with any updated prices from compras
+  Object.entries(stored).forEach(([k,v]) => { if(v > 0) prices[k] = v; });
+}
+function savePrice(name, val) {
+  if(!name || val <= 0) return;
+  prices[name] = val;
+  const stored = JSON.parse(localStorage.getItem('cayena_precios') || '{}');
+  stored[name] = val;
+  localStorage.setItem('cayena_precios', JSON.stringify(stored));
+  if(typeof DB_Inv !== 'undefined'){
+    Object.entries(stored||{}).forEach(([p,pr])=>{ DB_Inv.upsertPrecio(p,pr).catch(()=>{}); });
+  }
+  // Also update INVENTORY_CATALOG in memory
+  const item = INVENTORY_CATALOG.find(p => p.name === name);
+  if(item) item.price = val;
+}
+function getPrice(name) {
+  return prices[name] || INVENTORY_CATALOG.find(p => p.name === name)?.price || 0;
+}
+
+// ── PERIOD KEY ── "2025-03"
+function periodKey(y, m) { return `${y}-${String(m+1).padStart(2,'0')}`; }
+function periodLabel(y, m) { return MO[m] + ' ' + y; }
+function storageKey(type, y, m) { return `cayena_inv_${type}_${periodKey(y,m)}`; }
+
+// ── LOAD PERIOD DATA ──
+function loadPeriod(type) {
+  return JSON.parse(localStorage.getItem(storageKey(type, curY, curM)) || '{}');
+}
+function savePeriod(type, data) {
+  localStorage.setItem(storageKey(type, curY, curM), JSON.stringify(data));
+  if(typeof DB_Inv !== 'undefined'){
+    const per = curY+'-'+String(curM+1).padStart(2,'0');
+    Object.entries(data||{}).forEach(([prod,qty])=>{ DB_Inv.upsertInventario(per,type,prod,qty).catch(()=>{}); });
+  }
+}
+
+// ══════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════
+(function(){
+  const now = new Date();
+  curY = now.getFullYear(); curM = now.getMonth();
+  loadPrices();
+  updatePeriodUI();
+  renderCatalog();
+  updateKPIs();
+  el('pm-mes').value = curM;
+  el('pm-year').value = curY;
+})();
+
+// ── SIDEBAR ──
+function toggleSB(){el('sb').classList.toggle('open');el('ovbg').classList.toggle('open');}
+function closeSB(){el('sb').classList.remove('open');el('ovbg').classList.remove('open');}
+
+// ── TABS ──
+function switchTab(t) {
+  curTab = t;
+  ['inicial','final','comparar','historial'].forEach(id => {
+    el('tab-'+id).classList.toggle('active', id===t);
+  });
+  el('pane-form').style.display = (t==='inicial'||t==='final') ? 'block' : 'none';
+  el('pane-comparar').style.display = t==='comparar' ? 'block' : 'none';
+  el('pane-historial').style.display = t==='historial' ? 'block' : 'none';
+  el('save-bar').style.display = (t==='comparar'||t==='historial') ? 'none' : 'flex';
+  el('close-period-btn').style.display = t==='final' ? 'block' : 'none';
+
+  if(t==='inicial'||t==='final') {
+    renderCatalog();
+    el('save-btn-label').textContent = t==='inicial' ? 'Guardar Inventario Inicial' : 'Guardar Inventario Final';
+    el('save-bar-label').textContent = t==='inicial' ? 'Total Inventario Inicial' : 'Total Inventario Final';
+  }
+  if(t==='comparar') renderComparison();
+  if(t==='historial') renderHistory();
+}
+
+// ── PERIOD ──
+function updatePeriodUI() {
+  const label = periodLabel(curY, curM);
+  el('period-chip').textContent = label;
+  el('topbar-period').textContent = label;
+  el('period-sub').textContent = 'Período activo';
+  el('pm-mes').value = curM;
+  el('pm-year').value = curY;
+}
+function openPeriodModal() {
+  el('period-overlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closePeriodModal() {
+  el('period-overlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+function applyPeriod() {
+  const m = parseInt(el('pm-mes').value);
+  const y = parseInt(el('pm-year').value);
+  if(isNaN(y)||y<2020||y>2099){showToast('Año inválido','err');return;}
+  curM=m; curY=y;
+  updatePeriodUI();
+  closePeriodModal();
+  renderCatalog();
+  updateKPIs();
+  showToast('Período: '+periodLabel(curY,curM));
+}
+
+// ── RENDER CATALOG ──
+function renderCatalog() {
+  const data = loadPeriod(curTab);
+  const container = el('catalog-container');
+  container.innerHTML = '';
+
+  // Group by category
+  const cats = {};
+  INVENTORY_CATALOG.forEach(p => {
+    if(!cats[p.cat]) cats[p.cat] = [];
+    cats[p.cat].push(p);
+  });
+
+  let grandTotal = 0;
+
+  Object.entries(cats).forEach(([catName, items]) => {
+    const color = CAT_COLORS[catName] || '#64748B';
+    const catKey = catName.toLowerCase().replace(/\s+/g,'-');
+    
+    // Calc cat total
+    let catTotal = 0;
+    items.forEach(p => {
+      const qty = parseFloat(data[p.name] || 0);
+      catTotal += qty * getPrice(p.name);
+    });
+    grandTotal += catTotal;
+
+    const block = document.createElement('div');
+    block.className = 'cat-block';
+    block.id = 'cat-'+catKey;
+
+    block.innerHTML = `
+      <div class="cat-head" onclick="toggleCat('${catKey}')">
+        <div class="cat-head-left">
+          <div class="cat-dot" style="background:${color}"></div>
+          <span class="cat-name">${catName}</span>
+          <span class="cat-count">${items.length} productos</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <span class="cat-total" id="cat-total-${catKey}">${catTotal>0?Lf(catTotal):'—'}</span>
+          <svg class="cat-chevron" id="chev-${catKey}" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      </div>
+      <div class="cat-body" id="body-${catKey}">
+        <div style="display:grid;grid-template-columns:1fr 130px 120px 120px;padding:9px 18px;background:var(--bg);border-bottom:1px solid var(--border)">
+          <span style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)">Producto</span>
+          <span style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);text-align:center">Cantidad / %</span>
+          <span style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--blue);text-align:center">✦ Precio unitario</span>
+          <span style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);text-align:right">Valor</span>
+        </div>
+        ${items.map(p => {
+          const qty = parseFloat(data[p.name] || 0);
+          const unitPrice = getPrice(p.name);
+          const val = qty * unitPrice;
+          const safeId = p.name.replace(/[^a-z0-9]/gi,'_');
+          return `<div class="prod-row" id="row-${safeId}">
+            <div>
+              <div class="prod-name">${p.name}</div>
+              <div class="prod-price">L ${unitPrice.toLocaleString('es-HN',{minimumFractionDigits:2,maximumFractionDigits:2})} / unidad</div>
+            </div>
+            <div class="qty-wrap" style="flex-direction:column;gap:2px">
+              <input class="qty-input" type="number" id="qty-${safeId}"
+                value="${qty||''}" placeholder="0" min="0" step="0.01"
+                inputmode="decimal"
+                data-name="${p.name}" data-cat="${catKey}"
+                oninput="onQtyChange('${p.name}','${catKey}',this)"
+                onblur="onQtyChange('${p.name}','${catKey}',this)">
+              <div class="qty-hint">ej: 0.5 = mitad</div>
+            </div>
+            <div class="prod-price-edit">
+              <div style="width:100%">
+                <input class="price-inp" type="number" id="price-${safeId}"
+                  value="${unitPrice}" min="0" step="0.01"
+                  inputmode="decimal"
+                  data-name="${p.name}" data-cat="${catKey}"
+                  onblur="onPriceChange('${p.name}','${catKey}',this)"
+                  title="Editar precio — se sincroniza con Compras">
+                <div class="price-sync-badge">
+                  <svg width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2 5a3 3 0 005.5 1.5M8 5a3 3 0 00-5.5-1.5M1 7l1-2 2 1M9 3L8 5l-2-1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  sync global
+                </div>
+              </div>
+            </div>
+            <div class="prod-value ${val===0?'zero':''}" id="val-${safeId}">
+              ${val>0?Lf(val):'—'}
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+    `;
+    container.appendChild(block);
+    // Auto-open cats that have data
+    if(catTotal > 0) {
+      setTimeout(() => {
+        const body = el('body-'+catKey);
+        const chev = el('chev-'+catKey);
+        if(body) body.classList.add('open');
+        if(chev) chev.classList.add('open');
+      }, 0);
+    }
+  });
+
+  el('save-bar-total').textContent = Lf(grandTotal);
+  updateKPIs();
+}
+
+function toggleCat(catKey) {
+  const body = el('body-'+catKey);
+  const chev = el('chev-'+catKey);
+  if(!body) return;
+  const open = body.classList.toggle('open');
+  if(chev) chev.classList.toggle('open', open);
+}
+
+// ── QTY CHANGE ──
+function onQtyChange(name, catKey, input) {
+  const qty = parseFloat(input.value) || 0;
+  const unitPrice = getPrice(name);
+  const val = qty * unitPrice;
+  const safeId = name.replace(/[^a-z0-9]/gi,'_');
+  const valEl = el('val-'+safeId);
+  if(valEl) {
+    valEl.textContent = val > 0 ? Lf(val) : '—';
+    valEl.className = 'prod-value' + (val===0?' zero':'');
+  }
+  updateCatTotal(catKey);
+  updateGrandTotal();
+}
+
+// ── PRICE CHANGE ──
+function onPriceChange(name, catKey, input) {
+  const val = parseFloat(input.value);
+  if(!val || val <= 0) { input.value = getPrice(name); return; }
+  const oldPrice = getPrice(name);
+  if(val === oldPrice) return; // no change
+  savePrice(name, val);
+  // Recalc value display for this product
+  const safeId = name.replace(/[^a-z0-9]/gi,'_');
+  const qtyEl = el('qty-'+safeId);
+  const qty = parseFloat(qtyEl?.value) || 0;
+  const valueEl = el('val-'+safeId);
+  if(valueEl) {
+    const total = qty * val;
+    valueEl.textContent = total > 0 ? Lf(total) : '—';
+    valueEl.className = 'prod-value' + (total===0?' zero':'');
+  }
+  // Update price label under product name
+  const row = document.getElementById('row-'+safeId);
+  if(row) {
+    const priceLabel = row.querySelector('.prod-price');
+    if(priceLabel) priceLabel.textContent = `L ${val.toLocaleString('es-HN',{minimumFractionDigits:2,maximumFractionDigits:2})} / unidad`;
+  }
+  updateCatTotal(catKey);
+  updateGrandTotal();
+  showToast(`"${name.length>25?name.slice(0,25)+'…':name}" → ${Lf(val)} · Sincronizado con Compras ✓`, 'ok');
+}
+
+function updateCatTotal(catKey) {
+  let total = 0;
+  document.querySelectorAll(`[data-cat="${catKey}"]`).forEach(inp => {
+    if(inp.classList.contains('qty-input')) {
+      const qty = parseFloat(inp.value) || 0;
+      const name = inp.dataset.name;
+      total += qty * getPrice(name);
+    }
+  });
+  const el2 = el('cat-total-'+catKey);
+  if(el2) el2.textContent = total > 0 ? Lf(total) : '—';
+}
+
+function updateGrandTotal() {
+  let total = 0;
+  document.querySelectorAll('.qty-input').forEach(inp => {
+    const qty = parseFloat(inp.value) || 0;
+    const name = inp.dataset.name;
+    if(name) total += qty * getPrice(name);
+  });
+  el('save-bar-total').textContent = Lf(total);
+}
+
+// ── UPDATE KPIs ──
+function updateKPIs() {
+  const ini = loadPeriod('inicial');
+  const fin = loadPeriod('final');
+  let iniTotal=0, finTotal=0, iniCount=0, finCount=0;
+  INVENTORY_CATALOG.forEach(p => {
+    const qi = parseFloat(ini[p.name]||0);
+    const qf = parseFloat(fin[p.name]||0);
+    const price = getPrice(p.name);
+    if(qi>0){iniTotal+=qi*price;iniCount++;}
+    if(qf>0){finTotal+=qf*price;finCount++;}
+  });
+  el('k-ini').textContent = Lf(iniTotal);
+  el('k-ini-items').textContent = iniCount+' productos';
+  el('k-fin').textContent = Lf(finTotal);
+  el('k-fin-items').textContent = finCount+' productos';
+  const varAmt = finTotal - iniTotal;
+  el('k-var').textContent = Lf(Math.abs(varAmt));
+  el('k-var').style.color = varAmt >= 0 ? 'var(--green-ui)' : 'var(--red)';
+  el('k-var-pct').textContent = iniTotal > 0 ? (varAmt>=0?'+':'')+((varAmt/iniTotal)*100).toFixed(1)+'% vs inicial' : 'vs inventario inicial';
+  const totalProds = Math.max(iniCount, finCount);
+  el('k-prods').textContent = totalProds;
+}
+
+// ── SAVE ──
+function saveCurrentTab() {
+  const data = {};
+  document.querySelectorAll('.qty-input').forEach(inp => {
+    const qty = parseFloat(inp.value) || 0;
+    const name = inp.dataset.name;
+    if(name && qty > 0) data[name] = qty;
+  });
+  savePeriod(curTab, data);
+  updateKPIs();
+  const count = Object.keys(data).length;
+  showToast(`${curTab==='inicial'?'Inventario Inicial':'Inventario Final'} guardado — ${count} productos`,'ok');
+}
+
+function clearCurrentTab() {
+  if(!confirm('¿Limpiar todos los valores del '+( curTab==='inicial'?'Inventario Inicial':'Inventario Final')+'?')) return;
+  savePeriod(curTab, {});
+  renderCatalog();
+  showToast('Limpiado');
+}
+
+// ── CLOSE PERIOD (carry Final → next month Initial) ──
+function closePeriod() {
+  const fin = loadPeriod('final');
+  const count = Object.keys(fin).length;
+  if(count===0){showToast('Primero guarda el Inventario Final','err');return;}
+  if(!confirm(`¿Cerrar el período ${periodLabel(curY,curM)}?\n\nEl Inventario Final se trasladará como Inventario Inicial de ${periodLabel(curM===11?curY+1:curY, (curM+1)%12)}.`)) return;
+
+  // Save to history
+  const iniData = loadPeriod('inicial');
+  let iniTotal=0, finTotal=0;
+  INVENTORY_CATALOG.forEach(p => {
+    iniTotal += (parseFloat(iniData[p.name]||0)) * getPrice(p.name);
+    finTotal += (parseFloat(fin[p.name]||0)) * getPrice(p.name);
+  });
+  const history = JSON.parse(localStorage.getItem('cayena_inv_history')||'[]');
+  history.push({
+    period: periodKey(curY,curM),
+    label: periodLabel(curY,curM),
+    iniTotal: parseFloat(iniTotal.toFixed(2)),
+    finTotal: parseFloat(finTotal.toFixed(2)),
+    products: count,
+    closedAt: new Date().toISOString()
+  });
+  localStorage.setItem('cayena_inv_history', JSON.stringify(history));
+
+  // Carry Final → next month Initial
+  const nextM = (curM+1)%12;
+  const nextY = curM===11 ? curY+1 : curY;
+  localStorage.setItem(storageKey('inicial', nextY, nextM), JSON.stringify(fin));
+  if(typeof DB_Inv !== 'undefined'){
+    const perN = nextY+'-'+String(nextM+1).padStart(2,'0');
+    Object.entries(fin||{}).forEach(([prod,qty])=>{ DB_Inv.upsertInventario(perN,'inicial',prod,qty).catch(()=>{}); });
+  }
+
+  showToast(`Período cerrado. ${periodLabel(nextY,nextM)} listo como Inicial`,'ok');
+
+  // Move to next period
+  setTimeout(() => {
+    curY=nextY; curM=nextM;
+    updatePeriodUI();
+    switchTab('inicial');
+  }, 1000);
+}
+
+// ── COMPARISON ──
+function renderComparison() {
+  const ini = loadPeriod('inicial');
+  const fin = loadPeriod('final');
+
+  const renderList = (data, elId, totalId) => {
+    const body = el(elId);
+    let total = 0;
+    const rows = [];
+    INVENTORY_CATALOG.forEach(p => {
+      const qty = parseFloat(data[p.name]||0);
+      if(qty>0) {
+        const val = qty * getPrice(p.name);
+        total += val;
+        rows.push({name:p.name, qty, val});
+      }
+    });
+    el(totalId).textContent = Lf(total);
+    if(!rows.length){body.innerHTML='<div class="empty-st">Sin datos registrados.</div>';return;}
+    body.innerHTML = rows.map(r=>`
+      <div class="cmp-row">
+        <span class="cmp-name">${r.name}</span>
+        <span class="cmp-val">${Lf(r.val)}</span>
+      </div>`).join('');
+  };
+
+  renderList(ini, 'cmp-ini-body', 'cmp-ini-total');
+  renderList(fin, 'cmp-fin-body', 'cmp-fin-total');
+
+  // Diff table
+  const wrap = el('diff-table-wrap');
+  const diffs = [];
+  INVENTORY_CATALOG.forEach(p => {
+    const qi = parseFloat(ini[p.name]||0);
+    const qf = parseFloat(fin[p.name]||0);
+    const price = getPrice(p.name);
+    const vi = qi*price, vf = qf*price;
+    if(qi>0||qf>0) diffs.push({name:p.name, qi, qf, vi, vf, diff:vf-vi});
+  });
+  if(!diffs.length){wrap.innerHTML='';return;}
+  diffs.sort((a,b)=>Math.abs(b.diff)-Math.abs(a.diff));
+  wrap.innerHTML = `
+    <div class="sl">Variación por producto</div>
+    <div class="history-card" style="overflow-x:auto">
+      <table class="ht" style="min-width:500px">
+        <thead><tr>
+          <th style="text-align:left">Producto</th>
+          <th>Cant. Inicial</th><th>Cant. Final</th>
+          <th>Valor Inicial</th><th>Valor Final</th>
+          <th>Variación</th>
+        </tr></thead>
+        <tbody>
+          ${diffs.map(d=>`<tr>
+            <td>${d.name}</td>
+            <td>${d.qi||'—'}</td><td>${d.qf||'—'}</td>
+            <td>${d.vi>0?Lf(d.vi):'—'}</td>
+            <td>${d.vf>0?Lf(d.vf):'—'}</td>
+            <td style="font-weight:700;color:${d.diff>0?'var(--green-ui)':d.diff<0?'var(--red)':'var(--muted)'}">${d.diff>0?'+':''}${d.diff!==0?Lf(Math.abs(d.diff)):'—'}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+// ── HISTORY ──
+function renderHistory() {
+  const history = JSON.parse(localStorage.getItem('cayena_inv_history')||'[]').reverse();
+  const tbody = el('history-tbody');
+  if(!history.length){tbody.innerHTML='<tr><td colspan="6" class="empty-st">No hay períodos cerrados aún.</td></tr>';return;}
+  tbody.innerHTML = history.map(h => {
+    const varAmt = h.finTotal - h.iniTotal;
+    return `<tr>
+      <td>${h.label} <span class="carried-badge">✓ Cerrado</span></td>
+      <td>${Lf(h.iniTotal)}</td>
+      <td>${Lf(h.finTotal)}</td>
+      <td style="font-weight:700;color:${varAmt>=0?'var(--green-ui)':'var(--red)'}">${varAmt>=0?'+':''}${Lf(Math.abs(varAmt))}</td>
+      <td>${h.products}</td>
+      <td><button class="btn" style="font-size:11px;padding:5px 10px" onclick="loadHistoryPeriod('${h.period}')">Ver</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function loadHistoryPeriod(key) {
+  const [y,m] = key.split('-');
+  curY=parseInt(y); curM=parseInt(m)-1;
+  updatePeriodUI();
+  switchTab('comparar');
+  renderComparison();
+}
+
+// ── EXPORT ──
+
+
+function showToast(msg,type){
+  const t=el('toast');t.textContent=msg;t.className='toast'+(type==='err'?' err':type==='ok'?' ok':'');
+  setTimeout(()=>t.classList.add('show'),10);
+  setTimeout(()=>t.classList.remove('show'),2800);
+}
+var CSS_BLOCK = '<style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;font-size:11px;color:#0F172A;background:#fff;padding:24px}.header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;padding-bottom:14px;border-bottom:2px solid #2563EB}.header h1{font-size:20px;font-weight:800;color:#1E3A8A}.header .meta{text-align:right;font-size:10px;color:#64748B;line-height:1.8}.kpi-row{display:grid;gap:10px;margin-bottom:18px}.kpi{background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:12px 14px}.kpi-lbl{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:#64748B;margin-bottom:4px}.kpi-val{font-size:18px;font-weight:800;color:#2563EB}table{width:100%;border-collapse:collapse;margin-bottom:16px}thead th{background:#1E3A8A;color:#fff;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:8px 10px;text-align:left}thead th:not(:first-child){text-align:right}tbody tr:nth-child(even){background:#F8FAFC}tbody td{padding:7px 10px;font-size:10px;color:#334155;border-bottom:1px solid #E2E8F0}tbody td:not(:first-child){text-align:right;font-variant-numeric:tabular-nums}tfoot td{background:#EFF6FF;font-weight:700;font-size:11px;padding:9px 10px;border-top:2px solid #2563EB;color:#1E3A8A}tfoot td:not(:first-child){text-align:right}.section{margin-bottom:20px}.section-title{font-size:12px;font-weight:700;color:#1E3A8A;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid #E2E8F0;text-transform:uppercase;letter-spacing:.5px}.footer{margin-top:20px;padding-top:10px;border-top:1px solid #E2E8F0;font-size:9px;color:#94A3B8;display:flex;justify-content:space-between}@media print{body{padding:0}@page{margin:15mm;size:A4}}</style>';
+
+function exportPDF() {
+  var now = new Date();
+  var fecha = now.toLocaleDateString('es-HN',{day:'2-digit',month:'long',year:'numeric'});
+  var hora = now.toLocaleTimeString('es-HN',{hour:'2-digit',minute:'2-digit'});
+  var Lf = function(n){return 'L ' + parseFloat(n||0).toLocaleString('es-HN',{minimumFractionDigits:2,maximumFractionDigits:2});};
+  var padM = String(curM+1).padStart(2,'0');
+  var ini = JSON.parse(localStorage.getItem('cayena_inv_inicial_'+curY+'-'+padM)||'{}');
+  var fin = JSON.parse(localStorage.getItem('cayena_inv_final_'+curY+'-'+padM)||'{}');
+  var iniTot=0, finTot=0;
+  var allNames={};
+  Object.keys(ini).forEach(function(k){allNames[k]=1;});
+  Object.keys(fin).forEach(function(k){allNames[k]=1;});
+  var rows = Object.keys(allNames).map(function(name){
+    var qi=parseFloat(ini[name]||0), qf=parseFloat(fin[name]||0);
+    if(qi===0&&qf===0) return '';
+    var price=getPrice(name);
+    var vi=qi*price, vf=qf*price, diff=vf-vi;
+    iniTot+=vi; finTot+=vf;
+    return '<tr><td>'+name+'</td><td>'+(qi||'—')+'</td><td>'+Lf(vi)+'</td><td>'+(qf||'—')+'</td><td>'+Lf(vf)+'</td>'
+      +'<td style="color:'+(diff>0?'#16A34A':diff<0?'#EF4444':'#64748B')+';font-weight:700">'+(diff>0?'+':'')+(diff!==0?Lf(Math.abs(diff)):'—')+'</td></tr>';
+  }).filter(Boolean).join('');
+  var perLabel = MO[curM] + ' ' + curY;
+  var varAmt = finTot - iniTot;
+  var html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Inventario Cayena</title>' + CSS_BLOCK + '</head><body>'
+    + '<div class="header"><div><h1>Inventario</h1><div style="font-size:11px;color:#64748B;margin-top:4px">Cayena - RTN: 0318-2001-022079</div></div>'
+    + '<div class="meta">Exportado: ' + fecha + ' ' + hora + '<br>Per\u00EDodo: ' + perLabel + '</div></div>'
+    + '<div class="kpi-row" style="grid-template-columns:repeat(3,1fr)">'
+    + '<div class="kpi"><div class="kpi-lbl">Inventario Inicial</div><div class="kpi-val">'+Lf(iniTot)+'</div></div>'
+    + '<div class="kpi"><div class="kpi-lbl">Inventario Final</div><div class="kpi-val" style="color:#16A34A">'+Lf(finTot)+'</div></div>'
+    + '<div class="kpi"><div class="kpi-lbl">Variaci\u00F3n</div><div class="kpi-val" style="color:'+(varAmt>=0?'#16A34A':'#EF4444')+'">'+( varAmt>=0?'+':'')+Lf(Math.abs(varAmt))+'</div></div></div>'
+    + '<table><thead><tr><th>Producto</th><th>Cant. Ini.</th><th>Valor Ini.</th><th>Cant. Fin.</th><th>Valor Fin.</th><th>Variaci\u00F3n</th></tr></thead>'
+    + '<tbody>'+(rows||'<tr><td colspan="6" style="text-align:center;padding:20px;color:#94A3B8">Sin datos registrados</td></tr>')+'</tbody>'
+    + '<tfoot><tr><td>TOTALES</td><td></td><td>'+Lf(iniTot)+'</td><td></td><td>'+Lf(finTot)+'</td>'
+    + '<td style="color:'+(varAmt>=0?'#16A34A':'#EF4444')+'">'+( varAmt>=0?'+':'')+Lf(Math.abs(varAmt))+'</td></tr></tfoot>'
+    + '</table>'
+    + '<div class="footer"><span>Cayena - Inventario '+perLabel+'</span><span>' + fecha + '</span></div>'
+    + '</body></html>';
+  var w = window.open('','_blank','width=900,height=700');
+  w.document.write(html);
+  w.document.close();
+  setTimeout(function(){w.print();}, 600);
+}
+
+</script>
+<script src="supabase-config.js"></script>
+</body>
+</html>

@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<script>(function(){var href=window.location.href;var p=href.split("/").pop().split("?")[0].split("#")[0]||"dashboard.html";if(!p||p==="")p="dashboard.html";if(p==="index.html")return;var s=sessionStorage.getItem("cayena_session");if(!s){window.location.replace("index.html");return;}try{var d=JSON.parse(s);if(!d||!d.role){window.location.replace("index.html");return;}if(Date.now()-d.ts>14400000){sessionStorage.removeItem("cayena_session");window.location.replace("index.html");return;}var pages=d.pages;if(pages!=="all"&&pages.indexOf(p)<0){var dest={gerencia:"dashboard.html",emp_inv:"inventario.html",emp_cc:"cuenta-corriente.html"}[d.role]||"index.html";if(p!==dest)window.location.replace(dest);return;}}catch(e){window.location.replace("index.html");}})();</script>
+<script src="supabase-config.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Cayena — Registro de Gastos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --blue:#2563EB;--blue-deep:#1E3A8A;--blue-soft:#60A5FA;
+  --green:#84CC16;--green-ui:#16A34A;
+  --text:#0F172A;--body:#334155;--muted:#64748B;
+  --border:#E2E8F0;--bg:#F8FAFC;--white:#FFFFFF;
+  --red:#EF4444;--red-soft:#FEE2E2;--orange:#F97316;
+  --purple:#7C3AED;--amber:#D97706;
+  --shadow:0 4px 20px rgba(0,0,0,0.05);
+  --shadow-md:0 10px 25px rgba(0,0,0,0.08);
+  --shadow-lg:0 20px 40px rgba(0,0,0,0.12);
+  --r:12px;--r-lg:16px;--r-xl:20px;
+  --font:'Inter',sans-serif;
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font);font-size:14px}
+body{overflow-x:hidden}
+*{-webkit-font-smoothing:antialiased}
+
+/* ── LAYOUT ── */
+.app{display:flex;height:100vh;overflow:hidden}
+.sidebar{width:240px;min-width:240px;background:var(--white);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;transition:transform .28s cubic-bezier(.4,0,.2,1);z-index:90;box-shadow:var(--shadow)}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.logo-wrap{padding:24px 20px 20px;border-bottom:1px solid var(--border)}
+.logo{font-size:22px;font-weight:800;letter-spacing:-0.5px;color:var(--text);line-height:1;display:flex;align-items:center;gap:8px}
+.logo-dot{width:8px;height:8px;border-radius:50%;background:linear-gradient(135deg,#2563EB,#84CC16)}
+.logo-rtn{font-size:10px;color:var(--muted);margin-top:4px}
+.nav{flex:1;padding:12px 12px}
+.ng{font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);padding:12px 10px 6px}
+.ni{display:flex;align-items:center;gap:10px;padding:10px 12px;font-size:13px;font-weight:500;color:var(--body);cursor:pointer;border-radius:var(--r);transition:all .15s;text-decoration:none;margin-bottom:2px}
+.ni svg{width:16px;height:16px;flex-shrink:0;opacity:.6}
+.ni:hover{color:var(--blue);background:#EFF6FF}
+.ni.active{color:var(--blue);background:#EFF6FF;font-weight:600}
+.ni.active svg{opacity:1}
+.su{padding:14px 16px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px;margin-top:auto}
+.av{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--blue-soft));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0}
+.un{font-size:13px;font-weight:600;color:var(--text)}
+.ur{font-size:11px;color:var(--muted)}
+
+/* ── TOPBAR ── */
+.topbar{height:58px;background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;flex-shrink:0;gap:10px;box-shadow:var(--shadow)}
+.mb{display:none;background:none;border:none;color:var(--muted);cursor:pointer;padding:6px;line-height:1;border-radius:8px}
+.mb:hover{background:var(--bg)}
+.tl{display:flex;align-items:center;gap:10px;min-width:0}
+.tey{font-size:11px;font-weight:500;color:var(--muted);white-space:nowrap}
+.tsep{width:1px;height:14px;background:var(--border);flex-shrink:0}
+.ttl{font-size:16px;font-weight:700;color:var(--text);white-space:nowrap}
+.tper-chip{font-size:12px;font-weight:600;color:var(--blue);background:#EFF6FF;padding:3px 10px;border-radius:999px}
+.tr2{display:flex;align-items:center;gap:7px;flex-shrink:0}
+.btn{font-family:var(--font);font-size:13px;font-weight:600;padding:9px 16px;border-radius:var(--r);cursor:pointer;transition:all .15s;white-space:nowrap;border:1px solid var(--border);background:var(--white);color:var(--body)}
+.btn:hover{border-color:var(--blue-soft);color:var(--blue)}
+.btn-primary{background:var(--blue);color:#fff;border-color:var(--blue)}
+.btn-primary:hover{background:var(--blue-deep)}
+.btn-sm{padding:6px 12px;font-size:12px}
+
+/* ── CONTENT ── */
+.content{flex:1;overflow-y:auto;padding:24px 24px 80px;-webkit-overflow-scrolling:touch}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+
+/* ── HERO ── */
+.page-hero{background:linear-gradient(135deg,#1E3A8A 0%,#2563EB 60%,#60A5FA 100%);border-radius:var(--r-xl);padding:22px 24px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.pey{font-size:11px;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,.6);margin-bottom:4px}
+.ptitle{font-size:26px;font-weight:800;color:#fff;line-height:1.1;letter-spacing:-0.3px}
+.hero-right{text-align:right;flex-shrink:0}
+.hero-total-lbl{font-size:11px;color:rgba(255,255,255,.6);margin-bottom:4px}
+.hero-total{font-size:32px;font-weight:800;color:#fff;font-variant-numeric:tabular-nums;line-height:1}
+
+/* ── SECTION LABEL ── */
+.sl{font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin:22px 0 10px;display:flex;align-items:center;gap:10px}
+.sl::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* ── KPI GRID ── */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
+.kpi{background:var(--white);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px 18px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--c,var(--blue));border-radius:var(--r-lg) var(--r-lg) 0 0}
+.kpi-lbl{font-size:11px;font-weight:500;color:var(--muted);margin-bottom:8px}
+.kpi-val{font-size:20px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1}
+.kpi-sub{font-size:11px;color:var(--muted);margin-top:5px}
+
+/* ── TABS ── */
+.tabs{display:flex;gap:4px;background:var(--bg);border:1px solid var(--border);border-radius:var(--r-lg);padding:4px;margin-bottom:20px}
+.tab{flex:1;padding:10px;font-family:var(--font);font-size:13px;font-weight:600;border:none;background:none;cursor:pointer;border-radius:10px;color:var(--muted);transition:all .15s;display:flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap}
+.tab:hover{color:var(--text)}
+.tab.active{background:var(--white);color:var(--blue);box-shadow:var(--shadow)}
+.tab svg{width:14px;height:14px;flex-shrink:0}
+
+/* ── FIXED EXPENSES LIST ── */
+.fixed-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow);margin-bottom:10px}
+.fixed-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:var(--bg);border-bottom:1px solid var(--border)}
+.fixed-title{font-size:13px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:8px}
+.fixed-total{font-size:15px;font-weight:800;color:var(--blue);font-variant-numeric:tabular-nums}
+
+/* ── GASTO ROW ── */
+.gasto-row{display:grid;grid-template-columns:auto 1fr 130px 110px 120px 100px auto;align-items:center;gap:10px;padding:12px 18px;border-bottom:1px solid var(--border);transition:background .1s}
+.gasto-row:last-child{border-bottom:none}
+.gasto-row:hover{background:#FAFAFA}
+.gasto-row.pending{background:#FFFBEB}
+.gasto-num{font-size:11px;font-weight:600;color:var(--muted);width:20px;text-align:center}
+.gasto-info{}
+.gasto-name{font-size:13px;font-weight:600;color:var(--text)}
+.gasto-desc{font-size:11px;color:var(--muted);margin-top:2px}
+.gasto-amount-wrap{position:relative}
+.gasto-amount{width:100%;font-family:var(--font);font-size:14px;font-weight:700;color:var(--text);background:var(--bg);border:1.5px solid var(--border);border-radius:var(--r);padding:8px 12px;outline:none;transition:all .15s;text-align:right;font-variant-numeric:tabular-nums;-webkit-appearance:none}
+.gasto-amount:focus{border-color:var(--blue);background:var(--white);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+.gasto-amount.pending-input{border-color:var(--amber);background:#FFFBEB}
+.gasto-amount::-webkit-outer-spin-button,.gasto-amount::-webkit-inner-spin-button{-webkit-appearance:none}
+.gasto-cat-sel{width:100%;font-family:var(--font);font-size:11px;font-weight:600;color:var(--body);background:var(--bg);border:1.5px solid var(--border);border-radius:var(--r);padding:7px 10px;outline:none;transition:all .15s;cursor:pointer;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2364748B' stroke-width='1.2' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;padding-right:24px}
+.gasto-cat-sel:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+.isv-sel{width:100%;font-family:var(--font);font-size:11px;font-weight:700;border:1.5px solid var(--border);border-radius:var(--r);padding:7px 8px;outline:none;cursor:pointer;transition:all .15s;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2364748B' stroke-width='1.2' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;padding-right:22px}
+.isv-sel.isv-0{background-color:#F0FDF4;color:var(--green-ui);border-color:#BBF7D0}
+.isv-sel.isv-15{background-color:#FFF7ED;color:var(--orange);border-color:#FED7AA}
+.isv-sel.isv-18{background-color:var(--red-soft);color:var(--red);border-color:#FECACA}
+.isv-sel:focus{box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+.del-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;padding:4px 6px;border-radius:6px;line-height:1;transition:all .15s;flex-shrink:0}
+.del-btn:hover{color:var(--red);background:var(--red-soft)}
+
+/* ── CAT SUMMARY ── */
+.cat-summary{background:var(--white);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow);margin-bottom:10px}
+.cat-sum-row{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-bottom:1px solid var(--border)}
+.cat-sum-row:last-child{border-bottom:none;background:#F0F9FF;font-weight:700}
+.cat-sum-name{font-size:13px;color:var(--body);display:flex;align-items:center;gap:8px}
+.cat-sum-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.cat-sum-val{font-size:14px;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums}
+
+/* ── ADD FORM ── */
+.add-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow);margin-bottom:10px}
+.add-head{padding:14px 18px;background:var(--bg);border-bottom:1px solid var(--border);font-size:13px;font-weight:700;color:var(--text)}
+.add-body{padding:18px}
+.add-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.add-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px}
+.field label{display:block;font-size:11px;font-weight:500;color:var(--muted);margin-bottom:6px}
+.field input,.field select,.field textarea{width:100%;font-family:var(--font);font-size:14px;font-weight:500;color:var(--text);background:var(--bg);border:1.5px solid var(--border);border-radius:var(--r);padding:10px 14px;outline:none;transition:all .15s;-webkit-appearance:none}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--blue);background:var(--white);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+.field select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2364748B' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:36px}
+.save-btn{width:100%;font-family:var(--font);font-size:14px;font-weight:700;padding:14px;border:none;cursor:pointer;background:var(--blue);color:#fff;border-radius:var(--r);display:flex;align-items:center;justify-content:center;gap:8px;transition:all .15s}
+.save-btn:hover{background:var(--blue-deep)}
+
+/* ── HISTORY TABLE ── */
+.table-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow)}
+.table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.dt{width:100%;border-collapse:collapse;min-width:650px}
+.dt th{font-size:11px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);padding:12px 16px;text-align:right;border-bottom:1px solid var(--border);background:var(--bg)}
+.dt th:first-child,.dt th:nth-child(2),.dt th:nth-child(3){text-align:left}
+.dt td{font-size:13px;padding:11px 16px;text-align:right;color:var(--body);border-bottom:1px solid var(--border);font-variant-numeric:tabular-nums;vertical-align:middle}
+.dt td:first-child,.dt td:nth-child(2),.dt td:nth-child(3){text-align:left}
+.dt td:first-child{font-weight:600;color:var(--text);white-space:nowrap}
+.dt tr:last-child td{border-bottom:none}
+.dt tr:hover td{background:var(--bg)}
+.tfoot-row td{font-weight:700;background:#F0F9FF;border-top:2px solid #BFDBFE;color:var(--blue-deep)}
+.tddel{background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:2px 6px;border-radius:6px;transition:all .15s}
+.tddel:hover{color:var(--red);background:var(--red-soft)}
+.isv-badge{display:inline-flex;align-items:center;font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px}
+.isv-badge.b0{background:#F0FDF4;color:var(--green-ui);border:1px solid #BBF7D0}
+.isv-badge.b15{background:#FFF7ED;color:var(--orange);border:1px solid #FED7AA}
+.isv-badge.b18{background:var(--red-soft);color:var(--red);border:1px solid #FECACA}
+.cat-badge{display:inline-flex;font-size:10px;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--bg);color:var(--muted);border:1px solid var(--border)}
+
+/* ── EMPTY ── */
+.empty-st{padding:40px;text-align:center;color:var(--muted);font-size:12px;line-height:1.8}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--text);color:#fff;font-size:12px;font-weight:600;padding:10px 20px;border-radius:999px;z-index:999;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;box-shadow:var(--shadow-md)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.ok{background:var(--green-ui)}
+.toast.err{background:var(--red)}
+
+/* OVBG */
+.ovbg{display:none;position:fixed;inset:0;background:rgba(15,23,42,.4);z-index:89}
+.ovbg.open{display:block}
+
+/* MOBILE */
+@media(max-width:720px){
+  .sidebar{position:fixed;left:0;top:0;bottom:0;transform:translateX(-100%)}
+  .sidebar.open{transform:translateX(0)}
+  .mb{display:flex}
+  .kpi-grid{grid-template-columns:1fr 1fr}
+  .gasto-row{grid-template-columns:1fr 110px 90px;gap:6px}
+  .gasto-row .gasto-cat-sel,.gasto-row .isv-sel,.gasto-row .del-btn,.gasto-row .gasto-num{display:none}
+  .add-grid,.add-grid-3{grid-template-columns:1fr}
+  .page-hero{flex-direction:column;gap:12px}
+  .hero-right{text-align:left}
+  .content{padding:16px 16px 80px}
+  .tabs{flex-wrap:wrap}
+}
+</style>
+</head>
+<body>
+<div class="ovbg" id="ovbg" onclick="closeSB()"></div>
+<div class="app">
+
+  <aside class="sidebar" id="sb">
+    <div class="logo-wrap">
+      <div class="logo"><div class="logo-dot"></div>Cayena</div>
+      <div class="logo-rtn">RTN: 0318-2001-022079</div>
+    </div>
+    <nav class="nav">
+      <div class="ng">Principal</div>
+      <a class="ni" href="dashboard.html"><svg viewBox="0 0 16 16" fill="none"><rect x="1.5" y="1.5" width="5.5" height="5.5" rx="1.5" stroke="currentColor" stroke-width="1.4"/><rect x="9" y="1.5" width="5.5" height="5.5" rx="1.5" stroke="currentColor" stroke-width="1.4" opacity=".5"/><rect x="1.5" y="9" width="5.5" height="5.5" rx="1.5" stroke="currentColor" stroke-width="1.4" opacity=".5"/><rect x="9" y="9" width="5.5" height="5.5" rx="1.5" stroke="currentColor" stroke-width="1.4" opacity=".5"/></svg>Dashboard</a>
+      <div class="ng">Operaciones</div>
+      <a class="ni" href="ingresos.html"><svg viewBox="0 0 16 16" fill="none"><path d="M2 12L5.5 7.5L8.5 10L11 5.5L14 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Ingresos</a>
+      <a class="ni" href="isv.html"><svg viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="M5 8h6M8 5v6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Resumen ISV</a>
+      <a class="ni" href="compras.html"><svg viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="11" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M5 3V2M11 3V2M2 7h12" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Compras</a>
+      <a class="ni" href="proveedores.html"><svg viewBox="0 0 16 16" fill="none"><circle cx="6" cy="5" r="2.5" stroke="currentColor" stroke-width="1.4"/><path d="M2 13c0-2.21 1.79-4 4-4s4 1.79 4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M11 7l1.5 1.5L15 6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Proveedores</a>
+      <a class="ni" href="inventario.html"><svg viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="5.5" height="5.5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="8.5" y="2" width="5.5" height="5.5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="2" y="8.5" width="5.5" height="5.5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="8.5" y="8.5" width="5.5" height="5.5" rx="1" stroke="currentColor" stroke-width="1.4"/></svg>Inventario</a>
+      <a class="ni active" href="gastos.html"><svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.4"/><path d="M8 5v3.5l2.5 1.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Gastos</a>
+      <div class="ng">Personas</div>
+      <a class="ni" href="planilla.html"><svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5.5" r="2.5" stroke="currentColor" stroke-width="1.4"/><path d="M3 13c0-2.76 2.24-5 5-5s5 2.24 5 5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Planilla</a>
+      <a class="ni" href="cuenta-corriente.html"><svg viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M2 7h12M5 10h3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Cuenta Corriente</a>
+      <a class="ni" href="asistencia.html"><svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.4"/><path d="M8 5v3l2 2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Asistencia</a>
+      <div class="ng">Análisis</div>
+      <a class="ni" href="#"><svg viewBox="0 0 16 16" fill="none"><path d="M2 13L5 9l3 2.5L11 5l3 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Costo de Ventas</a>
+    </nav>
+    <div class="su">
+      <div class="av">AD</div>
+      <div><div class="un">Administrador</div><div class="ur">Admin general</div></div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="tl">
+        <button class="mb" onclick="toggleSB()"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M2 5h16M2 10h16M2 15h16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
+        <span class="tey">Cayena</span><div class="tsep"></div>
+        <span class="ttl">Registro de Gastos</span><div class="tsep"></div>
+        <span class="tper-chip" id="tper">—</span>
+      </div>
+      <div class="tr2">
+        <button class="btn" onclick="exportPDF()">Exportar PDF</button>
+        <button class="btn btn-primary" onclick="switchTab('nuevo')">+ Nuevo gasto</button>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="page-hero">
+        <div>
+          <div class="pey">Operaciones · Control de egresos</div>
+          <div class="ptitle">Registro de Gastos</div>
+        </div>
+        <div class="hero-right">
+          <div class="hero-total-lbl">Total del mes</div>
+          <div class="hero-total" id="hero-total">L 0.00</div>
+        </div>
+      </div>
+
+      <!-- KPIs -->
+      <div class="kpi-grid">
+        <div class="kpi" style="--c:var(--red)">
+          <div class="kpi-lbl">Total gastos</div>
+          <div class="kpi-val" style="color:var(--red)" id="k-total">L 0.00</div>
+          <div class="kpi-sub" id="k-count">0 registros</div>
+        </div>
+        <div class="kpi" style="--c:var(--orange)">
+          <div class="kpi-lbl">Gastos fijos</div>
+          <div class="kpi-val" style="color:var(--orange)" id="k-fijos">L 0.00</div>
+          <div class="kpi-sub" id="k-fijos-n">0 pagados</div>
+        </div>
+        <div class="kpi" style="--c:var(--purple)">
+          <div class="kpi-lbl">Gastos variables</div>
+          <div class="kpi-val" style="color:var(--purple)" id="k-vars">L 0.00</div>
+          <div class="kpi-sub" id="k-vars-n">0 registros</div>
+        </div>
+        <div class="kpi" style="--c:var(--amber)">
+          <div class="kpi-lbl">Pendientes de pago</div>
+          <div class="kpi-val" style="color:var(--amber)" id="k-pend">0</div>
+          <div class="kpi-sub">Gastos fijos sin valor</div>
+        </div>
+      </div>
+
+      <!-- TABS -->
+      <div class="tabs">
+        <button class="tab active" id="tab-fijos" onclick="switchTab('fijos')">
+          <svg viewBox="0 0 16 16" fill="none"><path d="M3 4h10M3 8h7M3 12h5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+          Gastos Fijos
+        </button>
+        <button class="tab" id="tab-variables" onclick="switchTab('variables')">
+          <svg viewBox="0 0 16 16" fill="none"><path d="M2 12L5.5 7.5L8.5 10L11 5.5L14 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Variables / Extras
+        </button>
+        <button class="tab" id="tab-nuevo" onclick="switchTab('nuevo')">
+          <svg viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          + Nuevo Gasto
+        </button>
+        <button class="tab" id="tab-resumen" onclick="switchTab('resumen')">
+          <svg viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="9" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="2" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="9" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/></svg>
+          Por Cuenta
+        </button>
+      </div>
+
+      <!-- ═══ GASTOS FIJOS ═══ -->
+      <div id="pane-fijos">
+        <div style="background:#FFF7ED;border:1px solid #FED7AA;border-radius:var(--r);padding:12px 16px;margin-bottom:14px;font-size:12px;color:var(--amber);line-height:1.6">
+          <strong>Gastos fijos del mes</strong> — estos se cargan automáticamente cada mes. Los marcados en amarillo requieren que ingreses el valor manualmente (ej: ENEE varía cada mes). Edita el monto y presiona Enter o toca otro campo para guardar.
+        </div>
+        <div class="fixed-card">
+          <div class="fixed-head">
+            <div class="fixed-title">
+              <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M3 8h7M3 12h5" stroke="var(--blue)" stroke-width="1.4" stroke-linecap="round"/></svg>
+              Gastos fijos recurrentes
+            </div>
+            <div class="fixed-total" id="fixed-total">L 0.00</div>
+          </div>
+          <!-- Column headers -->
+          <div style="display:grid;grid-template-columns:auto 1fr 130px 110px 120px 100px auto;gap:10px;padding:9px 18px;background:var(--bg);border-bottom:1px solid var(--border)">
+            <span style="width:20px"></span>
+            <span style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)">Servicio / Proveedor</span>
+            <span style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);text-align:right">Monto (L.)</span>
+            <span style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)">Cuenta</span>
+            <span style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)">ISV</span>
+            <span style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)">Forma de pago</span>
+            <span style="width:28px"></span>
+          </div>
+          <div id="fixed-rows"></div>
+        </div>
+      </div>
+
+      <!-- ═══ VARIABLES ═══ -->
+      <div id="pane-variables" style="display:none">
+        <div class="table-card">
+          <div class="table-scroll">
+            <table class="dt">
+              <thead><tr>
+                <th>Fecha</th>
+                <th>Descripción</th>
+                <th>Cuenta contable</th>
+                <th>ISV</th>
+                <th>Monto</th>
+                <th></th>
+              </tr></thead>
+              <tbody id="var-tbody">
+                <tr><td colspan="6" class="empty-st">Sin gastos variables registrados.<br>Usa "+ Nuevo Gasto" para agregar.</td></tr>
+              </tbody>
+              <tfoot id="var-tfoot" style="display:none">
+                <tr class="tfoot-row">
+                  <td colspan="4">Total gastos variables</td>
+                  <td id="var-total-foot">—</td>
+                  <td></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ NUEVO GASTO ═══ -->
+      <div id="pane-nuevo" style="display:none">
+        <div class="add-card">
+          <div class="add-head">Registrar nuevo gasto</div>
+          <div class="add-body">
+            <div class="add-grid">
+              <div class="field">
+                <label>Fecha</label>
+                <input type="date" id="f-fecha" style="color:var(--text)">
+              </div>
+              <div class="field">
+                <label>Descripción del gasto</label>
+                <input type="text" id="f-desc" placeholder="Ej: Mantenimiento A/C, Suministros oficina...">
+              </div>
+            </div>
+            <div class="add-grid-3">
+              <div class="field">
+                <label>Monto (L.)</label>
+                <input type="number" id="f-monto" placeholder="0.00" min="0" step="0.01" inputmode="decimal">
+              </div>
+              <div class="field">
+                <label>Cuenta contable</label>
+                <select id="f-cuenta">
+                  <option value="">— Seleccionar —</option>
+                  <optgroup label="Gastos">
+                    <option value="Nómina">Nómina</option>
+                    <option value="Alquiler">Alquiler</option>
+                    <option value="Servicios públicos">Servicios públicos</option>
+                    <option value="Mantenimiento y reparaciones">Mantenimiento y reparaciones</option>
+                    <option value="Publicidad y marketing">Publicidad y marketing</option>
+                    <option value="Otros gastos operativos">Otros gastos operativos</option>
+                    <option value="Gastos de Oficina">Gastos de Oficina</option>
+                    <option value="Otros Gastos Administrativos">Otros Gastos Administrativos</option>
+                    <option value="Gastos financieros">Gastos financieros</option>
+                  </optgroup>
+                  <optgroup label="Ingresos">
+                    <option value="Otros Ingresos">Otros Ingresos</option>
+                  </optgroup>
+                </select>
+              </div>
+              <div class="field">
+                <label>ISV aplicable</label>
+                <select id="f-isv" onchange="updateISVStyle(this)">
+                  <option value="exento">Exento (0%)</option>
+                  <option value="15">Gravado 15%</option>
+                  <option value="18">Gravado 18%</option>
+                </select>
+              </div>
+            </div>
+            <div class="add-grid">
+              <div class="field">
+                <label>Forma de pago</label>
+                <select id="f-pago">
+                  <option value="">— Seleccionar —</option>
+                  <option value="Transferencia">💳 Transferencia</option>
+                  <option value="Efectivo">💵 Efectivo</option>
+                  <option value="TC Gold">🟡 TC Gold</option>
+                  <option value="TC PS">🔵 TC PS</option>
+                  <option value="TC Socio">🟣 TC Socio</option>
+                  <option value="Débito">🏦 Débito</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Notas (opcional)</label>
+                <input type="text" id="f-notas" placeholder="Referencia, número de factura...">
+              </div>
+            </div>
+            <button class="save-btn" onclick="saveVariable()">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 9l4 4 8-8" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Guardar gasto
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ RESUMEN POR CUENTA ═══ -->
+      <div id="pane-resumen" style="display:none">
+        <div class="sl">Resumen por cuenta contable</div>
+        <div class="cat-summary" id="cat-summary-body"></div>
+        <div class="sl" style="margin-top:20px">ISV de gastos del mes</div>
+        <div class="cat-summary" id="isv-summary-body"></div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════
+//  GASTOS FIJOS (pre-cargados del Excel)
+// ══════════════════════════════
+const GASTOS_FIJOS = [
+  {id:'f01', nombre:'Internet Comercial',       desc:'Multicable S.A · 730205481',          montoBase:1500,    pending:false, cuenta:'Otros Gastos Administrativos', isv:'15',    pago:'Transferencia'},
+  {id:'f02', nombre:'ENEE',                     desc:'Código 5269353',                       montoBase:null,    pending:true,  cuenta:'Servicios públicos',           isv:'exento', pago:'Transferencia'},
+  {id:'f03', nombre:'Arriendo del Local',        desc:'Local Renta y Energía',                montoBase:6500,    pending:false, cuenta:'Alquiler',                     isv:'exento', pago:'Transferencia'},
+  {id:'f04', nombre:'PC de Edición',             desc:'Minicuota 6/12',                       montoBase:1125.31, pending:false, cuenta:'Otros Gastos Administrativos', isv:'exento', pago:'TC Gold'},
+  {id:'f05', nombre:'Hermez Seguridad',          desc:'Mensualidad de Seguridad',             montoBase:10000,   pending:false, cuenta:'Otros gastos operativos',      isv:'15',    pago:'Transferencia'},
+  {id:'f06', nombre:'Hondutel',                  desc:'Línea 27734798',                       montoBase:63.91,   pending:false, cuenta:'Servicios públicos',           isv:'exento', pago:'Transferencia'},
+  {id:'f07', nombre:'JC Consultores',            desc:'Juan Carlos · Pago de Impuestos',      montoBase:2508.33, pending:false, cuenta:'Otros Gastos Administrativos', isv:'exento', pago:'Transferencia'},
+  {id:'f08', nombre:'Aguas de Siguatepeque',     desc:'Agua potable · Negocio',               montoBase:455.34,  pending:false, cuenta:'Servicios públicos',           isv:'exento', pago:'Transferencia'},
+  {id:'f09', nombre:'Banco Occidente',           desc:'Pago de Préstamo',                     montoBase:10000,   pending:false, cuenta:'Gastos financieros',           isv:'exento', pago:'Transferencia'},
+  {id:'f10', nombre:'BAC',                       desc:'Seguro HRE Mensual',                   montoBase:47.52,   pending:false, cuenta:'Gastos financieros',           isv:'exento', pago:'Débito'},
+  {id:'f11', nombre:'Swap WolfSA',               desc:'Extra Teléfono',                       montoBase:494.80,  pending:false, cuenta:'Gastos financieros',           isv:'15',    pago:'TC PS'},
+  {id:'f12', nombre:'BAC',                       desc:'Seguro de Saldo de Deuda Anual',       montoBase:94.12,   pending:false, cuenta:'Otros gastos operativos',      isv:'exento', pago:'Débito'},
+  {id:'f13', nombre:'Reserva Planilla',          desc:'Liquidaciones y Aguinaldos',           montoBase:3000,    pending:false, cuenta:'Gastos financieros',           isv:'exento', pago:'Efectivo'},
+  {id:'f14', nombre:'Aguas de Siguatepeque',     desc:'Agua potable · Administrador',         montoBase:306.82,  pending:false, cuenta:'Otros Gastos Administrativos', isv:'exento', pago:'Transferencia'},
+  {id:'f15', nombre:'The Classified Hn',         desc:'Manejo de Redes Sociales',             montoBase:3000,    pending:false, cuenta:'Publicidad y marketing',       isv:'15',    pago:'Transferencia'},
+];
+
+const CUENTAS = [
+  'Nómina','Alquiler','Servicios públicos','Mantenimiento y reparaciones',
+  'Publicidad y marketing','Otros gastos operativos',
+  'Gastos de Oficina','Otros Gastos Administrativos','Gastos financieros',
+  '— Ingresos —',
+  'Otros Ingresos'
+];
+const CAT_COLORS = {
+  'Nómina':'#EF4444','Alquiler':'#F97316','Servicios públicos':'#0891B2',
+  'Mantenimiento y reparaciones':'#D97706','Publicidad y marketing':'#7C3AED',
+  'Otros gastos operativos':'#64748B','Gastos de Oficina':'#16A34A',
+  'Otros Gastos Administrativos':'#2563EB','Gastos financieros':'#DC2626',
+  'Otros Ingresos':'#16A34A'
+};
+const PAGO_ICONS = {'Transferencia':'💳','Efectivo':'💵','TC Gold':'🟡','TC PS':'🔵','TC Socio':'🟣','Débito':'🏦'};
+
+// ══════════════════════════════
+//  STATE
+// ══════════════════════════════
+const el = id => document.getElementById(id);
+const Lf = n => 'L ' + parseFloat(n||0).toLocaleString('es-HN',{minimumFractionDigits:2,maximumFractionDigits:2});
+const MO = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+let curTab = 'fijos';
+
+// Storage keys per month
+function monthKey() {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+}
+function fixedKey() { return `cayena_gastos_fijos_${monthKey()}`; }
+function varKey()   { return `cayena_gastos_vars_${monthKey()}`; }
+
+// ── Storage: Supabase primario, localStorage caché offline ───────────────────
+async function loadFixedData() {
+  try {
+    const sbMes = await DB_Gastos.getMes(monthKey());
+    const local = JSON.parse(localStorage.getItem(fixedKey()) || '{}');
+    const merged = { ...sbMes, ...local };
+    localStorage.setItem(fixedKey(), JSON.stringify(merged));
+    return merged;
+  } catch(e) {
+    return JSON.parse(localStorage.getItem(fixedKey()) || '{}');
+  }
+}
+async function await saveFixedData(data) {
+  localStorage.setItem(fixedKey(), JSON.stringify(data));
+  const periodo = monthKey();
+  for (const [gastoId, val] of Object.entries(data)) {
+    const monto = (val !== null && typeof val === 'object') ? (val.monto ?? null) : val;
+    try { await DB_Gastos.upsertMes(gastoId, periodo, monto); } catch(e) {}
+  }
+}
+async function loadVarData() {
+  try {
+    const rows = await DB_Gastos.getVars(monthKey());
+    if (rows.length > 0) {
+      localStorage.setItem(varKey(), JSON.stringify(rows));
+      return rows;
+    }
+  } catch(e) {}
+  return JSON.parse(localStorage.getItem(varKey()) || '[]');
+}
+async function await saveVarData(data) {
+  localStorage.setItem(varKey(), JSON.stringify(data));
+}
+
+// ══════════════════════════════
+//  INIT
+// ══════════════════════════════
+(function(){
+  const now = new Date();
+  const per = MO[now.getMonth()] + ' ' + now.getFullYear();
+  el('tper').textContent = per;
+  // Set today as default date
+  el('f-fecha').value = now.toISOString().split('T')[0];
+  renderFixed();
+  updateKPIs();
+})();
+
+function toggleSB(){el('sb').classList.toggle('open');el('ovbg').classList.toggle('open');}
+function closeSB(){el('sb').classList.remove('open');el('ovbg').classList.remove('open');}
+
+// ══════════════════════════════
+//  TABS
+// ══════════════════════════════
+async function switchTab(t) {
+  curTab = t;
+  ['fijos','variables','nuevo','resumen'].forEach(id => {
+    el('tab-'+id).classList.toggle('active', id===t);
+    el('pane-'+id).style.display = id===t ? 'block' : 'none';
+  });
+  if(t==='variables') renderVariables();
+  if(t==='resumen') renderResumen();
+}
+
+// ══════════════════════════════
+//  FIXED EXPENSES
+// ══════════════════════════════
+async function renderFixed() {
+  const saved = await loadFixedData();
+  const container = el('fixed-rows');
+  container.innerHTML = '';
+  let total = 0;
+  let pending = 0;
+
+  GASTOS_FIJOS.forEach((g, idx) => {
+    // Get saved override or base value
+    const saved_val = saved[g.id];
+    const monto = saved_val !== undefined ? saved_val.monto : g.montoBase;
+    const isv = saved_val !== undefined ? saved_val.isv : g.isv;
+    const pago = saved_val !== undefined ? saved_val.pago : g.pago;
+    const isPending = monto === null || monto === undefined;
+    if(!isPending) total += parseFloat(monto)||0;
+    if(isPending) pending++;
+
+    const row = document.createElement('div');
+    row.className = 'gasto-row' + (isPending ? ' pending' : '');
+    row.id = 'frow-'+g.id;
+
+    const cuentaOpts = CUENTAS.map(c =>
+      `<option value="${c}" ${(saved_val?.cuenta||g.cuenta)===c?'selected':''}>${c}</option>`
+    ).join('');
+    const pagoOpts = Object.keys(PAGO_ICONS).map(p =>
+      `<option value="${p}" ${pago===p?'selected':''}>${PAGO_ICONS[p]} ${p}</option>`
+    ).join('');
+    const isvClass = isv==='exento'?'isv-0':isv==='15'?'isv-15':'isv-18';
+    const isvLabel = isv==='exento'?'Exento':'Grav. '+isv+'%';
+
+    row.innerHTML = `
+      <span class="gasto-num">${idx+1}</span>
+      <div class="gasto-info">
+        <div class="gasto-name">${g.nombre}</div>
+        <div class="gasto-desc">${g.desc}</div>
+      </div>
+      <div class="gasto-amount-wrap">
+        <input class="gasto-amount ${isPending?'pending-input':''}"
+          type="number" id="famount-${g.id}"
+          value="${isPending?'':monto}" placeholder="${isPending?'Ingresar valor':'0.00'}"
+          min="0" step="0.01" inputmode="decimal"
+          onchange="onFixedChange('${g.id}',this)"
+          onblur="onFixedChange('${g.id}',this)">
+        ${isPending?'<div style="font-size:9px;color:var(--amber);text-align:right;margin-top:3px">⚠ Requiere valor</div>':''}
+      </div>
+      <select class="gasto-cat-sel" onchange="onFixedMetaChange('${g.id}','cuenta',this.value)">${cuentaOpts}</select>
+      <select class="isv-sel ${isvClass}" onchange="onFixedMetaChange('${g.id}','isv',this.value);updateISVSelStyle(this)">
+        <option value="exento" ${isv==='exento'?'selected':''}>Exento 0%</option>
+        <option value="15" ${isv==='15'?'selected':''}>Gravado 15%</option>
+        <option value="18" ${isv==='18'?'selected':''}>Gravado 18%</option>
+      </select>
+      <select class="gasto-cat-sel" onchange="onFixedMetaChange('${g.id}','pago',this.value)">${pagoOpts}</select>
+      <button class="del-btn" onclick="resetFixed('${g.id}')" title="Limpiar valor">↺</button>
+    `;
+    container.appendChild(row);
+  });
+
+  el('fixed-total').textContent = Lf(total);
+  updateKPIs();
+}
+
+async function onFixedChange(id, input) {
+  const val = parseFloat(input.value);
+  const saved = await loadFixedData();
+  if(!saved[id]) saved[id] = getFixedDefaults(id);
+  saved[id].monto = isNaN(val) ? null : val;
+  await saveFixedData(saved);
+  // Re-render total
+  let total = 0;
+  GASTOS_FIJOS.forEach(g => {
+    const sv = saved[g.id];
+    const m = sv !== undefined ? sv.monto : g.montoBase;
+    if(m !== null && m !== undefined) total += parseFloat(m)||0;
+  });
+  el('fixed-total').textContent = Lf(total);
+  updateKPIs();
+  // Remove pending styling if value entered
+  if(!isNaN(val) && val > 0) {
+    input.classList.remove('pending-input');
+    const row = document.getElementById('frow-'+id);
+    if(row) row.classList.remove('pending');
+  }
+}
+
+function onFixedMetaChange(id, field, value) {
+  const saved = await loadFixedData();
+  if(!saved[id]) saved[id] = getFixedDefaults(id);
+  saved[id][field] = value;
+  await saveFixedData(saved);
+}
+
+function getFixedDefaults(id) {
+  const g = GASTOS_FIJOS.find(x => x.id===id);
+  return {monto:g.montoBase, isv:g.isv, cuenta:g.cuenta, pago:g.pago};
+}
+
+async function resetFixed(id) {
+  const g = GASTOS_FIJOS.find(x => x.id===id);
+  if(!g) return;
+  const saved = await loadFixedData();
+  delete saved[id];
+  await saveFixedData(saved);
+  renderFixed();
+  showToast('Restaurado al valor base');
+}
+
+// ══════════════════════════════
+//  VARIABLES
+// ══════════════════════════════
+async function renderVariables() {
+  const vars = await loadVarData();
+  const tbody = el('var-tbody');
+  if(!vars.length){
+    tbody.innerHTML='<tr><td colspan="6" class="empty-st">Sin gastos variables registrados.<br>Usa "+ Nuevo Gasto" para agregar.</td></tr>';
+    el('var-tfoot').style.display='none';
+    return;
+  }
+  let total = 0;
+  tbody.innerHTML = vars.map(v => {
+    total += v.monto||0;
+    const isvClass = v.isv==='exento'?'b0':v.isv==='15'?'b15':'b18';
+    const isvLabel = v.isv==='exento'?'Exento':'Grav. '+v.isv+'%';
+    return `<tr>
+      <td>${fmtD(v.fecha)}</td>
+      <td>${v.desc}<br><span style="font-size:10px;color:var(--muted)">${v.notas||''}</span></td>
+      <td><span class="cat-badge">${v.cuenta||'—'}</span></td>
+      <td><span class="isv-badge ${isvClass}">${isvLabel}</span></td>
+      <td style="font-weight:700;color:var(--red)">${Lf(v.monto)}</td>
+      <td><button class="tddel" onclick="deleteVar(${v.id})">×</button></td>
+    </tr>`;
+  }).join('');
+  el('var-total-foot').textContent = Lf(total);
+  el('var-tfoot').style.display='';
+}
+
+async function saveVariable() {
+  const fecha = el('f-fecha').value;
+  const desc = el('f-desc').value.trim();
+  const monto = parseFloat(el('f-monto').value)||0;
+  const cuenta = el('f-cuenta').value;
+  const isv = el('f-isv').value;
+  const pago = el('f-pago').value;
+  const notas = el('f-notas').value.trim();
+
+  if(!fecha){showToast('Selecciona una fecha','err');return;}
+  if(!desc){showToast('Ingresa una descripción','err');return;}
+  if(monto<=0){showToast('Ingresa un monto válido','err');return;}
+  if(!cuenta){showToast('Selecciona la cuenta contable','err');return;}
+
+  const vars = await loadVarData();
+  vars.push({id:Date.now(), fecha, desc, monto, cuenta, isv, pago, notas});
+  vars.sort((a,b)=>a.fecha.localeCompare(b.fecha));
+  await saveVarData(vars);
+  updateKPIs();
+
+  // Reset form
+  el('f-desc').value=''; el('f-monto').value='';
+  el('f-cuenta').value=''; el('f-isv').value='exento';
+  el('f-pago').value=''; el('f-notas').value='';
+  const now=new Date(); el('f-fecha').value=now.toISOString().split('T')[0];
+
+  showToast('Gasto guardado','ok');
+  switchTab('variables');
+}
+
+async function deleteVar(id) {
+  if(!confirm('¿Eliminar este gasto?')) return;
+  const vars = await loadVarData().filter(v => v.id !== id);
+  await saveVarData(vars);
+  renderVariables();
+  updateKPIs();
+  showToast('Eliminado');
+}
+
+// ══════════════════════════════
+//  RESUMEN POR CUENTA
+// ══════════════════════════════
+function renderResumen() {
+  const saved = await loadFixedData();
+  const vars = await loadVarData();
+
+  // Aggregate by cuenta
+  const bycat = {};
+  GASTOS_FIJOS.forEach(g => {
+    const sv = saved[g.id];
+    const monto = sv !== undefined ? (sv.monto||0) : (g.montoBase||0);
+    const cuenta = sv?.cuenta || g.cuenta;
+    if(!bycat[cuenta]) bycat[cuenta] = 0;
+    bycat[cuenta] += parseFloat(monto)||0;
+  });
+  vars.forEach(v => {
+    if(!bycat[v.cuenta]) bycat[v.cuenta] = 0;
+    bycat[v.cuenta] += v.monto||0;
+  });
+
+  const body = el('cat-summary-body');
+  const sorted = Object.entries(bycat).sort((a,b)=>b[1]-a[1]);
+  // Separate ingresos from gastos
+  const gastosCats = sorted.filter(([cat]) => cat !== 'Otros Ingresos');
+  const ingresosCats = sorted.filter(([cat]) => cat === 'Otros Ingresos');
+  const gastosTotal = gastosCats.reduce((s,[,v])=>s+v, 0);
+  const ingresosTotal = ingresosCats.reduce((s,[,v])=>s+v, 0);
+
+  if(!sorted.length){body.innerHTML='<div class="empty-st">Sin datos de gastos aún.</div>';return;}
+
+  let html = '';
+  if(gastosCats.length) {
+    html += '<div style="padding:10px 18px;background:var(--bg);border-bottom:1px solid var(--border);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--red)">Egresos</div>';
+    html += gastosCats.map(([cat,val])=>`
+      <div class="cat-sum-row">
+        <div class="cat-sum-name"><div class="cat-sum-dot" style="background:${CAT_COLORS[cat]||'#64748B'}"></div>${cat}</div>
+        <div class="cat-sum-val">${Lf(val)}</div>
+      </div>`).join('');
+    html += `<div class="cat-sum-row"><div class="cat-sum-name" style="font-weight:700;color:var(--red)"><div class="cat-sum-dot" style="background:var(--red)"></div>Total Egresos</div><div class="cat-sum-val" style="color:var(--red)">${Lf(gastosTotal)}</div></div>`;
+  }
+  if(ingresosCats.length) {
+    html += '<div style="padding:10px 18px;background:var(--bg);border-bottom:1px solid var(--border);border-top:2px solid var(--border);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--green-ui)">Ingresos</div>';
+    html += ingresosCats.map(([cat,val])=>`
+      <div class="cat-sum-row">
+        <div class="cat-sum-name"><div class="cat-sum-dot" style="background:var(--green-ui)"></div>${cat}</div>
+        <div class="cat-sum-val" style="color:var(--green-ui)">${Lf(val)}</div>
+      </div>`).join('');
+  }
+  body.innerHTML = html;
+
+  // ISV summary
+  const isvMap = {exento:0,'15':0,'18':0};
+  GASTOS_FIJOS.forEach(g => {
+    const sv = saved[g.id];
+    const monto = sv !== undefined ? (sv.monto||0) : (g.montoBase||0);
+    const isv = sv?.isv || g.isv;
+    isvMap[isv] = (isvMap[isv]||0) + (parseFloat(monto)||0);
+  });
+  vars.forEach(v => { isvMap[v.isv] = (isvMap[v.isv]||0) + (v.monto||0); });
+
+  const isv15 = isvMap['15'] * 0.15;
+  const isv18 = isvMap['18'] * 0.18;
+  el('isv-summary-body').innerHTML = `
+    <div class="cat-sum-row">
+      <div class="cat-sum-name"><div class="cat-sum-dot" style="background:var(--green-ui)"></div>Exentos de ISV</div>
+      <div class="cat-sum-val" style="color:var(--green-ui)">${Lf(isvMap['exento'])}</div>
+    </div>
+    <div class="cat-sum-row">
+      <div class="cat-sum-name"><div class="cat-sum-dot" style="background:var(--orange)"></div>Gravados 15% · base imponible</div>
+      <div class="cat-sum-val" style="color:var(--orange)">${Lf(isvMap['15'])}</div>
+    </div>
+    <div class="cat-sum-row" style="padding-left:36px">
+      <div class="cat-sum-name" style="font-size:11px;color:var(--muted)">ISV a acreditar (15%)</div>
+      <div class="cat-sum-val" style="font-size:12px;color:var(--orange)">${Lf(isv15)}</div>
+    </div>
+    <div class="cat-sum-row">
+      <div class="cat-sum-name"><div class="cat-sum-dot" style="background:var(--red)"></div>Gravados 18% · base imponible</div>
+      <div class="cat-sum-val" style="color:var(--red)">${Lf(isvMap['18'])}</div>
+    </div>
+    <div class="cat-sum-row" style="padding-left:36px">
+      <div class="cat-sum-name" style="font-size:11px;color:var(--muted)">ISV a acreditar (18%)</div>
+      <div class="cat-sum-val" style="font-size:12px;color:var(--red)">${Lf(isv18)}</div>
+    </div>
+    <div class="cat-sum-row">
+      <div class="cat-sum-name" style="font-weight:700;color:var(--blue)"><div class="cat-sum-dot" style="background:var(--blue)"></div>Total ISV acreditable</div>
+      <div class="cat-sum-val" style="color:var(--blue)">${Lf(isv15+isv18)}</div>
+    </div>`;
+}
+
+// ══════════════════════════════
+//  KPIs
+// ══════════════════════════════
+async function updateKPIs() {
+  const saved = await loadFixedData();
+  const vars = await loadVarData();
+
+  let fixedTotal = 0, pendingCount = 0;
+  GASTOS_FIJOS.forEach(g => {
+    const sv = saved[g.id];
+    const m = sv !== undefined ? sv.monto : g.montoBase;
+    if(m === null || m === undefined) pendingCount++;
+    else fixedTotal += parseFloat(m)||0;
+  });
+
+  const varTotal = vars.reduce((s,v)=>s+(v.monto||0), 0);
+  const grandTotal = fixedTotal + varTotal;
+
+  el('k-total').textContent = Lf(grandTotal);
+  el('k-count').textContent = (GASTOS_FIJOS.length + vars.length) + ' registros';
+  el('k-fijos').textContent = Lf(fixedTotal);
+  el('k-fijos-n').textContent = (GASTOS_FIJOS.length - pendingCount) + ' pagados';
+  el('k-vars').textContent = Lf(varTotal);
+  el('k-vars-n').textContent = vars.length + ' registro' + (vars.length!==1?'s':'');
+  el('k-pend').textContent = pendingCount;
+  el('hero-total').textContent = Lf(grandTotal);
+
+  // Save to localStorage for Estado de Resultados sync
+  saveMonthlyTotals(fixedTotal, varTotal, saved, vars);
+}
+
+// ── SYNC TO ESTADO DE RESULTADOS ──
+function saveMonthlyTotals(fixedTotal, varTotal, saved, vars) {
+  const bycat = {};
+  GASTOS_FIJOS.forEach(g => {
+    const sv = saved[g.id];
+    const monto = sv !== undefined ? (sv.monto||0) : (g.montoBase||0);
+    const cuenta = sv?.cuenta || g.cuenta;
+    bycat[cuenta] = (bycat[cuenta]||0) + (parseFloat(monto)||0);
+  });
+  vars.forEach(v => { bycat[v.cuenta] = (bycat[v.cuenta]||0) + (v.monto||0); });
+
+  // Separate Otros Ingresos from expense total
+  const otrosIngresos = parseFloat((bycat['Otros Ingresos']||0).toFixed(2));
+  const expenseTotal = parseFloat((fixedTotal + varTotal - otrosIngresos).toFixed(2));
+
+  const totalesObj = {
+    total: parseFloat((fixedTotal+varTotal).toFixed(2)),
+    expenseTotal, otrosIngresos, bycat,
+    periodo: monthKey(), updatedAt: new Date().toISOString()
+  };
+  localStorage.setItem('cayena_gastos_totales', JSON.stringify(totalesObj));
+}
+
+// ── ISV STYLE HELPERS ──
+function updateISVStyle(sel) {
+  // for add form - visual feedback
+}
+function updateISVSelStyle(sel) {
+  sel.className = 'isv-sel ' + (sel.value==='exento'?'isv-0':sel.value==='15'?'isv-15':'isv-18');
+  onFixedMetaChange(sel.closest('.gasto-row').id.replace('frow-',''), 'isv', sel.value);
+}
+
+// ── EXPORT PDF ──
+var CSS_BLOCK = '<style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;font-size:11px;color:#0F172A;background:#fff;padding:24px}.header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;padding-bottom:14px;border-bottom:2px solid #2563EB}.header h1{font-size:20px;font-weight:800;color:#1E3A8A}.header .meta{text-align:right;font-size:10px;color:#64748B;line-height:1.8}.kpi-row{display:grid;gap:10px;margin-bottom:18px}.kpi{background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:12px 14px}.kpi-lbl{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:#64748B;margin-bottom:4px}.kpi-val{font-size:18px;font-weight:800;color:#2563EB}table{width:100%;border-collapse:collapse;margin-bottom:16px}thead th{background:#1E3A8A;color:#fff;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:8px 10px;text-align:left}thead th:not(:first-child){text-align:right}tbody tr:nth-child(even){background:#F8FAFC}tbody td{padding:7px 10px;font-size:10px;color:#334155;border-bottom:1px solid #E2E8F0}tbody td:not(:first-child){text-align:right}tfoot td{background:#EFF6FF;font-weight:700;font-size:11px;padding:9px 10px;border-top:2px solid #2563EB;color:#1E3A8A}tfoot td:not(:first-child){text-align:right}.section{margin-bottom:20px}.section-title{font-size:12px;font-weight:700;color:#1E3A8A;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid #E2E8F0;text-transform:uppercase;letter-spacing:.5px}.footer{margin-top:20px;padding-top:10px;border-top:1px solid #E2E8F0;font-size:9px;color:#94A3B8;display:flex;justify-content:space-between}@media print{body{padding:0}@page{margin:15mm;size:A4}}</style>';
+
+function exportPDF() {
+  var now = new Date();
+  var fecha = now.toLocaleDateString('es-HN',{day:'2-digit',month:'long',year:'numeric'});
+  var hora = now.toLocaleTimeString('es-HN',{hour:'2-digit',minute:'2-digit'});
+  var per = MO[now.getMonth()] + ' ' + now.getFullYear();
+  var Lf2 = function(n){return 'L ' + parseFloat(n||0).toLocaleString('es-HN',{minimumFractionDigits:2,maximumFractionDigits:2});};
+  var saved = await loadFixedData();
+  var vars = await loadVarData();
+  var fixedTotal=0, varTotal=0;
+
+  var fixedRows = GASTOS_FIJOS.map(function(g,i){
+    var sv=saved[g.id];
+    var m=sv!==undefined?(sv.monto||0):(g.montoBase||0);
+    var c=sv&&sv.cuenta?sv.cuenta:g.cuenta;
+    var isv=sv&&sv.isv?sv.isv:g.isv;
+    fixedTotal+=parseFloat(m)||0;
+    var isvLbl=isv==='exento'?'Exento':'Grav. '+isv+'%';
+    return '<tr><td>'+(i+1)+'</td><td>'+g.nombre+'</td><td style="font-size:9px">'+g.desc+'</td><td>'+c+'</td><td>'+isvLbl+'</td><td><b>'+Lf2(m)+'</b></td></tr>';
+  }).join('');
+
+  var varRows = vars.map(function(v){
+    varTotal+=v.monto||0;
+    var isvLbl=v.isv==='exento'?'Exento':'Grav. '+v.isv+'%';
+    return '<tr><td>'+fmtD(v.fecha)+'</td><td>'+v.desc+'</td><td>'+v.cuenta+'</td><td>'+isvLbl+'</td><td><b>'+Lf2(v.monto)+'</b></td></tr>';
+  }).join('');
+
+  var html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Gastos Cayena</title>' + CSS_BLOCK + '</head><body>'
+    + '<div class="header"><div><h1>Registro de Gastos</h1><div style="font-size:11px;color:#64748B;margin-top:4px">Cayena \xB7 RTN: 0318-2001-022079</div></div>'
+    + '<div class="meta">Exportado: '+fecha+' '+hora+'<br>Per\u00EDodo: '+per+'</div></div>'
+    + '<div class="kpi-row" style="grid-template-columns:1fr 1fr 1fr">'
+    + '<div class="kpi"><div class="kpi-lbl">Total gastos</div><div class="kpi-val" style="color:#EF4444">'+Lf2(fixedTotal+varTotal)+'</div></div>'
+    + '<div class="kpi"><div class="kpi-lbl">Gastos fijos</div><div class="kpi-val" style="color:#F97316">'+Lf2(fixedTotal)+'</div></div>'
+    + '<div class="kpi"><div class="kpi-lbl">Gastos variables</div><div class="kpi-val" style="color:#7C3AED">'+Lf2(varTotal)+'</div></div></div>'
+    + '<div class="section"><div class="section-title">Gastos Fijos</div>'
+    + '<table><thead><tr><th>#</th><th>Servicio</th><th>Descripci\u00F3n</th><th>Cuenta</th><th>ISV</th><th>Monto</th></tr></thead>'
+    + '<tbody>'+fixedRows+'</tbody>'
+    + '<tfoot><tr><td colspan="5">Total gastos fijos</td><td>'+Lf2(fixedTotal)+'</td></tr></tfoot></table></div>'
+    + (vars.length ? '<div class="section"><div class="section-title">Gastos Variables / Extras</div>'
+    + '<table><thead><tr><th>Fecha</th><th>Descripci\u00F3n</th><th>Cuenta</th><th>ISV</th><th>Monto</th></tr></thead>'
+    + '<tbody>'+varRows+'</tbody>'
+    + '<tfoot><tr><td colspan="4">Total gastos variables</td><td>'+Lf2(varTotal)+'</td></tr></tfoot></table></div>' : '')
+    + '<div style="background:linear-gradient(135deg,#1E3A8A,#2563EB);border-radius:10px;padding:20px 24px;display:flex;justify-content:space-between;align-items:center;color:#fff">'
+    + '<div style="font-size:14px;font-weight:700">Total Gastos del Mes</div>'
+    + '<div style="font-size:28px;font-weight:800">'+Lf2(fixedTotal+varTotal)+'</div></div>'
+    + '<div class="footer"><span>Cayena - Registro de Gastos</span><span>'+fecha+'</span></div>'
+    + '
+<script id="sidebar-role-script">
+(function(){
+  var s = null;
+  try{ s = JSON.parse(sessionStorage.getItem('cayena_session')); }catch{}
+  if(!s || s.pages === 'all') return; // gerencia ve todo
+  var pages = s.pages;
+  // Ocultar links no permitidos EXCEPTO cuenta-corriente que siempre es visible si está en pages
+  document.querySelectorAll('.ni[href]').forEach(function(link){
+    var href = link.getAttribute('href');
+    if(!href || href === '#') return;
+    var page = href.split('/').pop();
+    if(pages.indexOf(page) < 0){
+      link.style.display = 'none';
+    }
+  });
+  // Ocultar ng vacíos EXCEPTO "Personas" si cuenta-corriente está en pages
+  document.querySelectorAll('.ng').forEach(function(ng){
+    var text = ng.textContent.trim();
+    if(text === 'Personas' && pages.indexOf('cuenta-corriente.html') >= 0) return;
+    var next = ng.nextElementSibling;
+    var hasVisible = false;
+    while(next && !next.classList.contains('ng')){
+      if(next.classList.contains('ni') && next.style.display !== 'none') hasVisible = true;
+      next = next.nextElementSibling;
+    }
+    if(!hasVisible) ng.style.display = 'none';
+  });
+  // Actualizar nombre en sidebar desde sesion
+  var av = document.querySelector('.av, .sav');
+  var un = document.querySelector('.un, .sun');
+  var ur = document.querySelector('.ur, .sur');
+  if(av){ av.textContent = s.initials || s.name.slice(0,2).toUpperCase(); if(s.bg) av.style.background = s.bg; }
+  if(un) un.textContent = s.name;
+  if(ur) ur.textContent = s.cargo || '';
+})();
+</script>
+
+</body></html>';
+
+  var w = window.open('','_blank','width=900,height=700');
+  w.document.write(html);
+  w.document.close();
+  setTimeout(function(){w.print();},600);
+}
+
+// ── UTILS ──
+function fmtD(iso){if(!iso)return'—';var p=iso.split('-');return p[2]+'/'+p[1]+'/'+p[0];}
+function showToast(msg,type){
+  var t=el('toast');t.textContent=msg;t.className='toast'+(type==='err'?' err':type==='ok'?' ok':'');
+  setTimeout(function(){t.classList.add('show');},10);
+  setTimeout(function(){t.classList.remove('show');},2800);
+}
+</script>
+</body>
+</html>

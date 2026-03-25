@@ -1,0 +1,1463 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<script>(function(){var href=window.location.href;var p=href.split("/").pop().split("?")[0].split("#")[0]||"index.html";if(!p||p==="")p="index.html";if(p==="index.html")return;var s=sessionStorage.getItem("cayena_session");if(!s){window.location.replace("index.html");return;}try{var d=JSON.parse(s);if(!d||!d.role){window.location.replace("index.html");return;}if(Date.now()-d.ts>14400000){sessionStorage.removeItem("cayena_session");window.location.replace("index.html");return;}var pages=d.pages;if(pages!=="all"&&pages.indexOf(p)<0){var dest={gerencia:"dashboard.html",emp_inv:"inventario.html",emp_cc:"cuenta-corriente.html"}[d.role]||"index.html";if(p!==dest)window.location.replace(dest);return;}}catch(e){window.location.replace("index.html");}})();</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Cayena — Registro de Compras</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --blue:#2563EB;--blue-deep:#1E3A8A;--blue-soft:#60A5FA;
+  --green:#84CC16;--green-soft:#D9F99D;--green-ui:#16A34A;
+  --text:#0F172A;--body:#334155;--muted:#64748B;
+  --border:#E2E8F0;--bg:#F8FAFC;--white:#FFFFFF;
+  --red:#EF4444;--red-soft:#FEE2E2;--orange:#F97316;
+  --purple:#7C3AED;--amber:#D97706;
+  --shadow:0 4px 20px rgba(0,0,0,0.05);
+  --shadow-md:0 10px 25px rgba(0,0,0,0.08);
+  --r:12px;--r-lg:16px;--r-xl:20px;
+  --font:'Inter',sans-serif;
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font);font-size:14px}
+body{overflow-x:hidden}
+*{-webkit-font-smoothing:antialiased}
+.app{display:flex;height:100vh;overflow:hidden}
+.sidebar{width:240px;min-width:240px;background:var(--white);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;transition:transform .28s cubic-bezier(.4,0,.2,1);z-index:90;box-shadow:var(--shadow)}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.logo-wrap{padding:24px 20px 20px;border-bottom:1px solid var(--border)}
+.logo{font-size:22px;font-weight:800;letter-spacing:-0.5px;color:var(--text);line-height:1;display:flex;align-items:center;gap:8px}
+.logo-dot{width:8px;height:8px;border-radius:50%;background:linear-gradient(135deg,#2563EB,#84CC16)}
+.logo-rtn{font-size:10px;color:var(--muted);margin-top:4px}
+.nav{flex:1;padding:12px 12px}
+.ng{font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);padding:12px 10px 6px}
+.ni{display:flex;align-items:center;gap:10px;padding:10px 12px;font-size:13px;font-weight:500;color:var(--body);cursor:pointer;border-radius:var(--r);transition:all .15s;text-decoration:none;margin-bottom:2px}
+.ni svg{width:16px;height:16px;flex-shrink:0;opacity:.6}
+.ni:hover{color:var(--blue);background:#EFF6FF}
+.ni.active{color:var(--blue);background:#EFF6FF;font-weight:600}
+.ni.active svg{opacity:1}
+.su{padding:14px 16px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px;margin-top:auto}
+.av{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--blue-soft));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0}
+.un{font-size:13px;font-weight:600;color:var(--text)}
+.ur{font-size:11px;color:var(--muted)}
+.topbar{height:58px;background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;flex-shrink:0;gap:10px;box-shadow:var(--shadow)}
+.mb{display:none;background:none;border:none;color:var(--muted);cursor:pointer;padding:6px;line-height:1;border-radius:8px}
+.mb:hover{background:var(--bg)}
+.tl{display:flex;align-items:center;gap:10px;min-width:0}
+.tey{font-size:11px;font-weight:500;color:var(--muted);white-space:nowrap}
+.tsep{width:1px;height:14px;background:var(--border);flex-shrink:0}
+.ttl{font-size:16px;font-weight:700;color:var(--text);white-space:nowrap}
+.tr2{display:flex;align-items:center;gap:7px;flex-shrink:0}
+.btn{font-family:var(--font);font-size:13px;font-weight:600;padding:9px 16px;border-radius:var(--r);cursor:pointer;transition:all .15s;white-space:nowrap;border:1px solid var(--border);background:var(--white);color:var(--body)}
+.btn:hover{border-color:var(--blue-soft);color:var(--blue)}
+.btn-primary{background:var(--blue);color:#fff;border-color:var(--blue)}
+.btn-primary:hover{background:var(--blue-deep)}
+.btn-ai{background:linear-gradient(135deg,#7C3AED,#2563EB);color:#fff;border:none}
+.btn-ai:hover{opacity:.9;color:#fff}
+.content{flex:1;overflow-y:auto;padding:24px 24px 80px;-webkit-overflow-scrolling:touch}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+
+/* HERO */
+.page-hero{background:linear-gradient(135deg,#1E3A8A 0%,#2563EB 60%,#60A5FA 100%);border-radius:var(--r-xl);padding:22px 24px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.pey{font-size:11px;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,.6);margin-bottom:4px}
+.ptitle{font-size:26px;font-weight:800;color:#fff;line-height:1.1;letter-spacing:-0.3px}
+.hero-right{text-align:right;flex-shrink:0}
+.period-chip{display:inline-block;background:rgba(255,255,255,.2);color:#fff;font-size:12px;font-weight:600;padding:6px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.3)}
+
+/* SECTION LABEL */
+.sl{font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin:22px 0 10px;display:flex;align-items:center;gap:10px}
+.sl::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* KPI GRID */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
+.kpi{background:var(--white);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px 18px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--c,var(--blue));border-radius:var(--r-lg) var(--r-lg) 0 0}
+.kpi-lbl{font-size:11px;font-weight:500;color:var(--muted);margin-bottom:8px}
+.kpi-val{font-size:20px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1}
+.kpi-sub{font-size:11px;color:var(--muted);margin-top:5px}
+
+/* TABS */
+.tabs{display:flex;gap:4px;background:var(--bg);border:1px solid var(--border);border-radius:var(--r-lg);padding:4px;margin-bottom:20px}
+.tab{flex:1;padding:10px 16px;font-family:var(--font);font-size:13px;font-weight:600;border:none;background:none;cursor:pointer;border-radius:10px;color:var(--muted);transition:all .15s;display:flex;align-items:center;justify-content:center;gap:7px}
+.tab:hover{color:var(--text)}
+.tab.active{background:var(--white);color:var(--blue);box-shadow:var(--shadow)}
+.tab svg{width:15px;height:15px}
+
+/* CARD */
+.card{background:var(--white);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;margin-bottom:12px;box-shadow:var(--shadow)}
+.card-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);background:var(--bg)}
+.card-title{font-size:13px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:8px}
+.card-title svg{width:15px;height:15px}
+.card-body{padding:18px}
+
+/* FORM FIELDS */
+.form-row{display:grid;gap:10px;margin-bottom:12px}
+.form-row-2{grid-template-columns:1fr 1fr}
+.form-row-3{grid-template-columns:1fr 1fr 1fr}
+.form-row-4{grid-template-columns:1fr 1fr 1fr 1fr}
+.field{position:relative}
+.field label{display:block;font-size:11px;font-weight:500;color:var(--muted);margin-bottom:6px}
+.field input,.field select{width:100%;font-family:var(--font);font-size:14px;font-weight:500;color:var(--text);background:var(--bg);border:1.5px solid var(--border);border-radius:var(--r);padding:10px 14px;outline:none;transition:all .15s;-webkit-appearance:none}
+.field input:focus,.field select:focus{border-color:var(--blue);background:var(--white);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+.field input::placeholder{color:var(--muted);font-weight:400}
+.field select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2364748B' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:36px}
+
+/* ISV BADGE */
+.isv-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;padding:3px 8px;border-radius:999px;text-transform:uppercase;letter-spacing:.5px}
+.isv-15{background:#FFF7ED;color:var(--orange);border:1px solid #FED7AA}
+.isv-18{background:var(--red-soft);color:var(--red);border:1px solid #FECACA}
+.isv-0{background:#F0FDF4;color:var(--green-ui);border:1px solid #BBF7D0}
+
+/* PRODUCT ROWS */
+.product-rows{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
+.product-row{display:grid;grid-template-columns:1fr 1fr 90px 90px 90px auto;gap:8px;align-items:end;padding:12px;background:var(--bg);border:1.5px solid var(--border);border-radius:var(--r);transition:all .15s}
+.product-row:focus-within{border-color:var(--blue);background:var(--white)}
+.pr-field{display:flex;flex-direction:column;gap:5px}
+.pr-field label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
+.pr-field input,.pr-field select{width:100%;font-family:var(--font);font-size:13px;font-weight:500;color:var(--text);background:transparent;border:none;border-bottom:1.5px solid var(--border);padding:5px 0;outline:none;transition:all .15s;-webkit-appearance:none}
+.pr-field input:focus,.pr-field select:focus{border-bottom-color:var(--blue)}
+.pr-field select{cursor:pointer;background:transparent;padding-right:16px}
+.pr-isv{display:flex;align-items:flex-end;padding-bottom:7px}
+.pr-del{display:flex;align-items:flex-end;padding-bottom:4px}
+.del-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;padding:4px 6px;border-radius:6px;line-height:1;transition:all .15s}
+.del-btn:hover{color:var(--red);background:var(--red-soft)}
+.add-row-btn{display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--bg);border:1.5px dashed var(--border);border-radius:var(--r);cursor:pointer;font-family:var(--font);font-size:13px;font-weight:500;color:var(--muted);width:100%;transition:all .15s}
+.add-row-btn:hover{border-color:var(--blue);color:var(--blue);background:#EFF6FF}
+
+/* ISV SUMMARY */
+.isv-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+.isv-box{border-radius:var(--r);padding:14px 16px;border:1px solid var(--border)}
+.isv-box-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:6px}
+.isv-box-val{font-size:18px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1}
+
+/* SAVE BTN */
+.save-btn{width:100%;font-family:var(--font);font-size:14px;font-weight:700;padding:16px;border:none;cursor:pointer;background:var(--blue);color:#fff;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:var(--r)}
+.save-btn:hover{background:var(--blue-deep)}
+.save-btn:active{opacity:.9}
+
+/* DATE */
+.date-wrap{position:relative}
+.date-inp{width:100%;font-family:var(--font);font-size:14px;font-weight:500;background:var(--bg);color:var(--text);border:1.5px solid var(--border);border-radius:var(--r);padding:10px 42px 10px 14px;outline:none;transition:all .15s}
+.date-inp:focus{border-color:var(--blue);background:var(--white);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+.date-inp::placeholder{color:var(--muted);font-weight:400;font-size:12px}
+.cal-btn{position:absolute;right:0;top:0;height:100%;width:42px;background:none;border:none;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:color .15s}
+.cal-btn:hover{color:var(--blue)}
+.cal-drop{display:none;position:absolute;top:calc(100% + 6px);left:0;right:0;z-index:200;background:var(--white);border:1.5px solid var(--border);border-radius:var(--r-lg);padding:14px;box-shadow:var(--shadow-md)}
+.cal-drop.open{display:block}
+.cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.cal-nb{background:var(--bg);border:1px solid var(--border);color:var(--body);cursor:pointer;font-size:16px;width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.cal-nb:hover{border-color:var(--blue);color:var(--blue)}
+.cal-mo{font-size:13px;font-weight:600;color:var(--text)}
+.cal-g{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.cdh{font-size:10px;font-weight:500;text-align:center;color:var(--muted);padding:4px 0}
+.cd{font-size:12px;font-weight:500;text-align:center;padding:7px 4px;border-radius:8px;cursor:pointer;color:var(--body);transition:all .12s}
+.cd:hover{background:#EFF6FF;color:var(--blue)}
+.cd.today{color:var(--blue);font-weight:700}
+.cd.sel{background:var(--blue);color:#fff;font-weight:700}
+.cd.emp{pointer-events:none;opacity:0}
+
+/* AI SCAN */
+.ai-panel{background:var(--white);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow);margin-bottom:12px}
+.ai-panel-head{padding:18px 20px;background:linear-gradient(135deg,#4C1D95,#7C3AED,#2563EB);display:flex;align-items:center;justify-content:space-between}
+.ai-panel-title{font-size:15px;font-weight:700;color:#fff;display:flex;align-items:center;gap:10px}
+.ai-panel-sub{font-size:11px;color:rgba(255,255,255,.7);margin-top:3px}
+.ai-badge{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.3);letter-spacing:.5px}
+.upload-zone{margin:18px;border:2px dashed var(--border);border-radius:var(--r-lg);padding:36px;text-align:center;cursor:pointer;transition:all .2s;background:var(--bg);position:relative}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--purple);background:#F5F3FF}
+.upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer}
+.upload-icon{width:48px;height:48px;margin:0 auto 12px;background:linear-gradient(135deg,#7C3AED,#2563EB);border-radius:14px;display:flex;align-items:center;justify-content:center}
+.upload-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:6px}
+.upload-sub{font-size:12px;color:var(--muted);line-height:1.6}
+.upload-actions{display:flex;gap:8px;justify-content:center;margin-top:14px}
+.scan-preview{display:none;margin:18px;border-radius:var(--r-lg);overflow:hidden;border:1px solid var(--border)}
+.scan-preview img{width:100%;display:block;max-height:300px;object-fit:contain;background:#000}
+.scan-preview.show{display:block}
+.ai-processing{display:none;padding:24px;text-align:center}
+.ai-processing.show{display:block}
+.ai-spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--purple);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ai-step{font-size:12px;color:var(--muted);margin-top:6px}
+.ai-result{display:none;padding:18px}
+.ai-result.show{display:block}
+.ai-result-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.ai-result-title{font-size:14px;font-weight:700;color:var(--text)}
+.ai-confidence{font-size:11px;font-weight:600;padding:4px 10px;border-radius:999px;background:#F0FDF4;color:var(--green-ui)}
+.ai-items{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.ai-item{display:grid;grid-template-columns:1fr 80px 90px auto;gap:8px;align-items:center;padding:10px 14px;background:var(--bg);border-radius:var(--r);border:1px solid var(--border)}
+.ai-item-name{font-size:13px;font-weight:500;color:var(--text)}
+.ai-item-qty{font-size:13px;font-weight:600;color:var(--body);text-align:center}
+.ai-item-total{font-size:13px;font-weight:700;color:var(--blue);text-align:right;font-variant-numeric:tabular-nums}
+.ai-accept-btn{background:var(--green-ui);color:#fff;font-family:var(--font);font-size:12px;font-weight:700;padding:10px 18px;border:none;border-radius:var(--r);cursor:pointer;width:100%;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:8px}
+.ai-accept-btn:hover{opacity:.9}
+.ai-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.ai-info-box{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px}
+.ai-info-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:5px}
+.ai-info-val{font-size:14px;font-weight:700;color:var(--text)}
+
+/* ISV INFO */
+.isv-info-panel{background:var(--white);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow);margin-bottom:12px}
+.isv-info-head{padding:14px 18px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.isv-info-title{font-size:13px;font-weight:700;color:var(--text)}
+.isv-cats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0}
+.isv-cat{padding:16px 18px;border-right:1px solid var(--border)}
+.isv-cat:last-child{border-right:none}
+.isv-cat-badge{margin-bottom:10px}
+.isv-cat-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px}
+.isv-cat-list{font-size:11px;color:var(--muted);line-height:1.9}
+
+/* TABLE */
+.table-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow)}
+.table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.dt{width:100%;border-collapse:collapse;min-width:700px}
+.dt th{font-size:11px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);padding:12px 16px;text-align:right;border-bottom:1px solid var(--border);background:var(--bg)}
+.dt th:first-child,.dt th:nth-child(2){text-align:left}
+.dt td{font-size:13px;padding:11px 16px;text-align:right;color:var(--body);border-bottom:1px solid var(--border);font-variant-numeric:tabular-nums}
+.dt td:first-child{text-align:left;font-weight:600;color:var(--text);white-space:nowrap}
+.dt td:nth-child(2){text-align:left}
+.dt tr:last-child td{border-bottom:none}
+.dt tr:hover td{background:var(--bg)}
+.tfoot td{font-weight:700;color:var(--text);background:#F0F9FF;border-top:2px solid #BFDBFE}
+.tddel{background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:2px 6px;border-radius:6px;transition:all .15s}
+.tddel:hover{color:var(--red);background:var(--red-soft)}
+.tag-pill{font-size:10px;font-weight:600;padding:2px 8px;border-radius:999px;display:inline-block}
+
+/* CATALOG PANEL */
+.catalog-panel{display:none}
+.catalog-panel.show{display:block}
+.cat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.cat-section{background:var(--white);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow)}
+.cat-head{padding:12px 16px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.cat-title{font-size:12px;font-weight:700;color:var(--text)}
+.cat-count{font-size:10px;color:var(--muted)}
+.cat-body{padding:0}
+.cat-item{padding:9px 16px;border-bottom:1px solid var(--border);font-size:12px;color:var(--body);display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:background .1s}
+.cat-item:last-child{border-bottom:none}
+.cat-item:hover{background:#EFF6FF;color:var(--blue)}
+.cat-item-total{font-size:11px;font-weight:600;color:var(--blue);font-variant-numeric:tabular-nums}
+
+/* TOAST */
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--text);color:#fff;font-size:12px;font-weight:600;padding:10px 20px;border-radius:999px;z-index:999;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;box-shadow:var(--shadow-md)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.ok{background:var(--green-ui)}
+.toast.err{background:var(--red)}
+
+/* OVERLAY */
+.ovbg{display:none;position:fixed;inset:0;background:rgba(15,23,42,.4);z-index:89}
+.ovbg.open{display:block}
+
+/* MOBILE */
+@media(max-width:720px){
+  .sidebar{position:fixed;left:0;top:0;bottom:0;transform:translateX(-100%)}
+  .sidebar.open{transform:translateX(0)}
+  .mb{display:flex}
+  .kpi-grid{grid-template-columns:1fr 1fr}
+  .product-row{grid-template-columns:1fr 1fr;grid-template-rows:auto auto auto}
+  .isv-summary{grid-template-columns:1fr 1fr}
+  .isv-cats{grid-template-columns:1fr}
+  .isv-cat{border-right:none;border-bottom:1px solid var(--border)}
+  .isv-cat:last-child{border-bottom:none}
+  .cat-grid{grid-template-columns:1fr}
+  .form-row-2,.form-row-3,.form-row-4{grid-template-columns:1fr}
+  .ai-item{grid-template-columns:1fr 70px 80px auto}
+  .ai-info-grid{grid-template-columns:1fr}
+  .content{padding:16px 16px 80px}
+  .page-hero{flex-direction:column;gap:12px}
+  .hero-right{text-align:left}
+  .tabs{flex-direction:column}
+}
+</style>
+</head>
+<body>
+<div class="ovbg" id="ovbg" onclick="closeSB()"></div>
+<div class="app">
+
+  <aside class="sidebar" id="sb">
+    <div class="logo-wrap">
+      <div class="logo"><div class="logo-dot"></div>Cayena</div>
+      <div class="logo-rtn">RTN: 0318-2001-022079</div>
+    </div>
+    <nav class="nav">
+      <div class="ng">Principal</div>
+      <a class="ni" href="dashboard.html"><svg viewBox="0 0 16 16" fill="none"><rect x="1.5" y="1.5" width="5.5" height="5.5" rx="1.5" stroke="currentColor" stroke-width="1.4"/><rect x="9" y="1.5" width="5.5" height="5.5" rx="1.5" stroke="currentColor" stroke-width="1.4" opacity=".5"/><rect x="1.5" y="9" width="5.5" height="5.5" rx="1.5" stroke="currentColor" stroke-width="1.4" opacity=".5"/><rect x="9" y="9" width="5.5" height="5.5" rx="1.5" stroke="currentColor" stroke-width="1.4" opacity=".5"/></svg>Dashboard</a>
+      <div class="ng">Operaciones</div>
+      <a class="ni" href="ingresos.html"><svg viewBox="0 0 16 16" fill="none"><path d="M2 12L5.5 7.5L8.5 10L11 5.5L14 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Ingresos</a>
+      <a class="ni" href="isv.html"><svg viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="M5 8h6M8 5v6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Resumen ISV</a>
+      <a class="ni active" href="compras.html"><svg viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="11" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M5 3V2M11 3V2M2 7h12" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Compras</a>
+      <a class="ni" href="proveedores.html"><svg viewBox="0 0 16 16" fill="none"><circle cx="6" cy="5" r="2.5" stroke="currentColor" stroke-width="1.4"/><path d="M2 13c0-2.21 1.79-4 4-4s4 1.79 4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M11 7l1.5 1.5L15 6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Proveedores</a>
+      <a class="ni" href="inventario.html"><svg viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="5.5" height="5.5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="8.5" y="2" width="5.5" height="5.5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="2" y="8.5" width="5.5" height="5.5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="8.5" y="8.5" width="5.5" height="5.5" rx="1" stroke="currentColor" stroke-width="1.4"/></svg>Inventario</a>
+      <a class="ni" href="gastos.html"><svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.4"/><path d="M8 5v3.5l2.5 1.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Gastos</a>
+      <div class="ng">Personas</div>
+      <a class="ni" href="planilla.html"><svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5.5" r="2.5" stroke="currentColor" stroke-width="1.4"/><path d="M3 13c0-2.76 2.24-5 5-5s5 2.24 5 5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Planilla</a>
+      <a class="ni" href="cuenta-corriente.html"><svg viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M2 7h12M5 10h3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Cuenta Corriente</a>
+      <a class="ni" href="asistencia.html"><svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.4"/><path d="M8 5v3l2 2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Asistencia</a>
+      <div class="ng">Análisis</div>
+      <a class="ni" href="#"><svg viewBox="0 0 16 16" fill="none"><path d="M2 13L5 9l3 2.5L11 5l3 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Costo de Ventas</a>
+    </nav>
+    <div class="su">
+      <div class="av">AD</div>
+      <div><div class="un">Administrador</div><div class="ur">Admin general</div></div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="tl">
+        <button class="mb" onclick="toggleSB()"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M2 5h16M2 10h16M2 15h16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
+        <span class="tey">Cayena</span><div class="tsep"></div>
+        <span class="ttl">Registro de Compras</span>
+      </div>
+      <div class="tr2">
+        <button class="btn" onclick="exportPDF()">Exportar PDF</button>
+        <button class="btn btn-primary" onclick="switchTab('manual')">+ Nueva compra</button>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="page-hero">
+        <div>
+          <div class="pey">Operaciones</div>
+          <div class="ptitle">Registro de Compras</div>
+        </div>
+        <div class="hero-right">
+          <div class="period-chip" id="period-chip">— Período</div>
+        </div>
+      </div>
+
+      <!-- KPIs -->
+      <div class="kpi-grid">
+        <div class="kpi" style="--c:var(--blue)"><div class="kpi-lbl">Total compras del mes</div><div class="kpi-val" style="color:var(--blue)" id="k-total">L 0.00</div><div class="kpi-sub" id="k-count">0 facturas</div></div>
+        <div class="kpi" style="--c:var(--orange)"><div class="kpi-lbl">Gravadas 15%</div><div class="kpi-val" style="color:var(--orange)" id="k-g15">L 0.00</div><div class="kpi-sub" id="k-g15-isv">ISV: L 0.00</div></div>
+        <div class="kpi" style="--c:var(--red)"><div class="kpi-lbl">Gravadas 18%</div><div class="kpi-val" style="color:var(--red)" id="k-g18">L 0.00</div><div class="kpi-sub" id="k-g18-isv">ISV: L 0.00</div></div>
+        <div class="kpi" style="--c:var(--green-ui)"><div class="kpi-lbl">Exentas</div><div class="kpi-val" style="color:var(--green-ui)" id="k-exent">L 0.00</div><div class="kpi-sub">Sin impuesto</div></div>
+      </div>
+
+      <!-- TABS -->
+      <div class="tabs">
+        <button class="tab active" id="tab-manual" onclick="switchTab('manual')">
+          <svg viewBox="0 0 16 16" fill="none"><path d="M3 4h10M3 8h7M3 12h5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+          Ingreso Manual
+        </button>
+        <button class="tab" id="tab-scan" onclick="switchTab('scan')">
+          <svg viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="9" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="2" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/><path d="M9 11.5h5M11.5 9v5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+          Escanear Factura ✦ IA
+        </button>
+        <button class="tab" id="tab-catalog" onclick="switchTab('catalog')">
+          <svg viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="5.5" height="5.5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="8.5" y="2" width="5.5" height="5.5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="2" y="8.5" width="5.5" height="5.5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="8.5" y="8.5" width="5.5" height="5.5" rx="1" stroke="currentColor" stroke-width="1.4"/></svg>
+          Catálogo de Productos
+        </button>
+      </div>
+
+      <!-- ═══ TAB: MANUAL ═══ -->
+      <div id="pane-manual">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">
+              <svg viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="11" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M5 3V2M11 3V2M2 7h12" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+              Datos de la factura
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="form-row form-row-2">
+              <div class="field">
+                <label>Fecha</label>
+                <div class="date-wrap">
+                  <input class="date-inp" type="text" id="fecha-txt" placeholder="dd/mm/aaaa" oninput="onDateType(this.value)" autocomplete="off" inputmode="numeric">
+                  <button class="cal-btn" onclick="toggleCal(event)">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="11" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M5 3V2M11 3V2M2 7h12" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+                  </button>
+                  <div class="cal-drop" id="cal-drop">
+                    <div class="cal-nav"><button class="cal-nb" onclick="calShift(-1)">‹</button><span class="cal-mo" id="cal-mo"></span><button class="cal-nb" onclick="calShift(1)">›</button></div>
+                    <div class="cal-g" id="cal-g"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="field">
+                <label>Proveedor <span style="font-size:10px;color:var(--muted);font-weight:400">— escribe para agregar nuevo</span></label>
+                <div style="position:relative">
+                  <input type="text" id="f-proveedor" list="proveedores-list" placeholder="Escribe o selecciona un proveedor..." autocomplete="off" style="width:100%;font-family:var(--font);font-size:14px;font-weight:500;color:var(--text);background:var(--bg);border:1.5px solid var(--border);border-radius:var(--r);padding:10px 40px 10px 14px;outline:none;transition:all .15s" onfocus="this.style.borderColor='var(--blue)';this.style.background='var(--white)';this.style.boxShadow='0 0 0 3px rgba(37,99,235,.1)'" onblur="this.style.borderColor='var(--border)';this.style.background='var(--bg)';this.style.boxShadow='none'">
+                  <datalist id="proveedores-list"></datalist>
+                  <button onclick="deleteProveedorInput()" title="Limpiar" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;line-height:1;padding:2px 4px">×</button>
+                </div>
+              </div>
+            </div>
+            <div class="form-row form-row-2">
+              <div class="field">
+                <label>Forma de pago</label>
+                <select id="f-pago" onchange="onPagoChange(this.value)">
+                  <option value="">— Seleccionar —</option>
+                  <option value="Transferencia">💳 Transferencia</option>
+                  <option value="Efectivo">💵 Efectivo</option>
+                  <option value="TC Gold">🟡 Tarjeta de Crédito Gold</option>
+                  <option value="TC PS">🔵 Tarjeta de Crédito PS</option>
+                  <option value="TC Socio">🟣 Tarjeta de Crédito de Socio</option>
+                  <option value="Pendiente">⏳ Pendiente de Pago</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>No. de Factura (opcional)</label>
+                <input type="text" id="f-numfact" placeholder="Ej: 001-002-13456">
+              </div>
+            </div>
+            <!-- Payment badge -->
+            <div id="pago-badge-wrap" style="display:none;margin-bottom:14px">
+              <span id="pago-badge" style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:6px 14px;border-radius:999px;border:1px solid var(--border);background:var(--bg);color:var(--body)"></span>
+            </div>
+
+            <div class="sl" style="margin-top:8px">Productos comprados</div>
+            <div class="product-rows" id="product-rows"></div>
+            <button class="add-row-btn" onclick="addProductRow()">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+              Agregar producto
+            </button>
+
+            <div class="sl">Resumen ISV de esta factura</div>
+            <div class="isv-summary">
+              <div class="isv-box" style="background:#FFF7ED;border-color:#FED7AA">
+                <div class="isv-box-lbl" style="color:var(--orange)">Gravadas 15%</div>
+                <div class="isv-box-val" style="color:var(--orange)" id="sum-g15">L 0.00</div>
+              </div>
+              <div class="isv-box" style="background:var(--red-soft);border-color:#FECACA">
+                <div class="isv-box-lbl" style="color:var(--red)">Gravadas 18%</div>
+                <div class="isv-box-val" style="color:var(--red)" id="sum-g18">L 0.00</div>
+              </div>
+              <div class="isv-box" style="background:#F0FDF4;border-color:#BBF7D0">
+                <div class="isv-box-lbl" style="color:var(--green-ui)">Exentas</div>
+                <div class="isv-box-val" style="color:var(--green-ui)" id="sum-exent">L 0.00</div>
+              </div>
+              <div class="isv-box" style="background:#EFF6FF;border-color:#BFDBFE">
+                <div class="isv-box-lbl" style="color:var(--blue)">Total Factura</div>
+                <div class="isv-box-val" style="color:var(--blue)" id="sum-total">L 0.00</div>
+              </div>
+            </div>
+
+            <button class="save-btn" onclick="saveEntry()">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 9l4 4 8-8" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Guardar compra
+            </button>
+          </div>
+        </div>
+
+        <!-- ISV GUIDE -->
+        <div class="isv-info-panel">
+          <div class="isv-info-head">
+            <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="var(--blue)" stroke-width="1.3"/><path d="M8 7v5M8 5.5v.3" stroke="var(--blue)" stroke-width="1.4" stroke-linecap="round"/></svg>
+            <span class="isv-info-title">Guía ISV — ¿Qué es gravado y qué es exento?</span>
+          </div>
+          <div class="isv-cats">
+            <div class="isv-cat">
+              <div class="isv-cat-badge"><span class="isv-badge isv-0">0% · Exento</span></div>
+              <div class="isv-cat-title">Sin impuesto</div>
+              <div class="isv-cat-list">
+                🥩 Carnes frescas y pollo<br>
+                🥚 Huevos<br>
+                🥦 Frutas y verduras frescas<br>
+                🧀 Lácteos básicos (leche, queso)<br>
+                🌽 Granos básicos, tortillas<br>
+                🧂 Sal, condimentos básicos<br>
+                💧 Agua purificada
+              </div>
+            </div>
+            <div class="isv-cat">
+              <div class="isv-cat-badge"><span class="isv-badge isv-15">15% · ISV Estándar</span></div>
+              <div class="isv-cat-title">Impuesto normal</div>
+              <div class="isv-cat-list">
+                🥫 Productos procesados / enlatados<br>
+                🥤 Bebidas carbonatadas y jugos<br>
+                🧴 Salsas y aderezos embotellados<br>
+                📦 Plásticos y empaques<br>
+                🧹 Artículos de limpieza<br>
+                🍞 Pan empacado / procesado<br>
+                🧊 Hielo comercial
+              </div>
+            </div>
+            <div class="isv-cat">
+              <div class="isv-cat-badge"><span class="isv-badge isv-18">18% · ISV Especial</span></div>
+              <div class="isv-cat-title">Alcohol y tabaco</div>
+              <div class="isv-cat-list">
+                🍹 Vodka, Ron, Gin, Tequila<br>
+                🥃 Licores y aguardientes<br>
+                🍺 Cerveza y bebidas alcohólicas<br>
+                🚬 Cigarros y tabaco<br>
+                🍸 Mixers con alcohol<br>
+                <br>
+                <em style="color:var(--muted);font-size:10px">Ley de Impuesto Sobre Ventas, Honduras</em>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- HISTORY TABLE -->
+        <div class="sl">Registro del mes</div>
+        <div class="table-card">
+          <div class="table-scroll">
+            <table class="dt">
+              <thead><tr>
+                <th style="text-align:left">Fecha</th>
+                <th style="text-align:left">Proveedor</th>
+                <th style="text-align:left">Forma de Pago</th>
+                <th>Grav. 15%</th>
+                <th>Grav. 18%</th>
+                <th>Exentas</th>
+                <th style="color:var(--blue)">Total</th>
+                <th>Fuente</th>
+                <th></th>
+              </tr></thead>
+              <tbody id="tbody">
+                <tr><td colspan="9" style="text-align:center;padding:36px;color:var(--muted);font-size:12px;line-height:1.8">No hay compras registradas.<br>Ingresa la primera factura arriba.</td></tr>
+              </tbody>
+              <tfoot id="tfoot" style="display:none">
+                <tr class="tfoot">
+                  <td colspan="3">Totales del mes</td>
+                  <td id="ft-g15">—</td><td id="ft-g18">—</td><td id="ft-ex">—</td>
+                  <td style="color:var(--blue)" id="ft-tot">—</td><td></td><td></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ TAB: SCAN ═══ -->
+      <div id="pane-scan" style="display:none">
+        <div class="ai-panel">
+          <div class="ai-panel-head">
+            <div>
+              <div class="ai-panel-title">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 7V4a1 1 0 011-1h3M17 7V4a1 1 0 00-1-1h-3M3 13v3a1 1 0 001 1h3M17 13v3a1 1 0 01-1 1h-3" stroke="white" stroke-width="1.6" stroke-linecap="round"/><circle cx="10" cy="10" r="3" stroke="white" stroke-width="1.6"/></svg>
+                Escanear Factura con IA
+              </div>
+              <div class="ai-panel-sub">Extracción automática de productos desde una foto o PDF de factura</div>
+            </div>
+            <div class="ai-badge">✦ CLAUDE AI</div>
+          </div>
+
+          <!-- STANDBY -->
+          <div style="padding:48px 32px;text-align:center">
+            <div style="width:64px;height:64px;border-radius:18px;background:linear-gradient(135deg,#F3F0FF,#EFF6FF);border:1.5px solid #DDD6FE;display:flex;align-items:center;justify-content:center;margin:0 auto 18px">
+              <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="10" stroke="#7C3AED" stroke-width="1.6" stroke-dasharray="4 3"/><path d="M14 9v6M14 17.5v.5" stroke="#7C3AED" stroke-width="1.8" stroke-linecap="round"/></svg>
+            </div>
+            <div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:8px">Función en standby</div>
+            <div style="font-size:13px;color:var(--muted);line-height:1.7;max-width:340px;margin:0 auto">
+              El escaneo con IA requiere configurar una <strong>API Key de Anthropic</strong>.<br>
+              Cuando estés listo, actívalo en minutos.
+            </div>
+            <div style="margin-top:24px;display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:600;padding:8px 18px;border-radius:999px;background:#F5F3FF;color:#7C3AED;border:1px solid #DDD6FE">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="#7C3AED" stroke-width="1.2"/><path d="M6 4v3M6 8.5v.3" stroke="#7C3AED" stroke-width="1.2" stroke-linecap="round"/></svg>
+              Pendiente de configuración
+            </div>
+          </div>
+        </div>
+
+        <!-- What it will do -->
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">
+              <svg viewBox="0 0 16 16" fill="none"><path d="M2 13L5 9l3 2.5L11 5l3 4" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Cuando se active, podrás...
+            </div>
+          </div>
+          <div class="card-body" style="display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;align-items:flex-start;gap:12px;padding:12px;background:var(--bg);border-radius:var(--r);border:1px solid var(--border)">
+              <span style="font-size:20px">📷</span>
+              <div><div style="font-size:13px;font-weight:600;color:var(--text)">Tomar foto desde el teléfono</div><div style="font-size:11px;color:var(--muted);margin-top:2px">Apunta la cámara a la factura y la IA extrae todo automáticamente</div></div>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:12px;padding:12px;background:var(--bg);border-radius:var(--r);border:1px solid var(--border)">
+              <span style="font-size:20px">📄</span>
+              <div><div style="font-size:13px;font-weight:600;color:var(--text)">Subir PDF o imagen desde computadora</div><div style="font-size:11px;color:var(--muted);margin-top:2px">JPG, PNG o PDF — detecta productos, cantidades, precios y proveedor</div></div>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:12px;padding:12px;background:var(--bg);border-radius:var(--r);border:1px solid var(--border)">
+              <span style="font-size:20px">🏷️</span>
+              <div><div style="font-size:13px;font-weight:600;color:var(--text)">Clasificación ISV automática</div><div style="font-size:11px;color:var(--muted);margin-top:2px">Cada producto se clasifica en Exento, 15% o 18% según la ley hondureña</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ TAB: CATALOG ═══ -->
+      <div id="pane-catalog" style="display:none" class="catalog-panel">
+        <div style="background:var(--white);border:1px solid var(--border);border-radius:var(--r-lg);padding:14px 18px;margin-bottom:16px;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:space-between;gap:12px">
+          <div>
+            <div style="font-size:13px;font-weight:600;color:var(--text)">Resumen de compras por producto</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:3px">Acumulado del mes · basado en facturas registradas</div>
+          </div>
+          <div style="font-size:20px;font-weight:800;color:var(--blue);font-variant-numeric:tabular-nums" id="cat-total-display">L 0.00</div>
+        </div>
+        <div class="cat-grid" id="cat-grid"></div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<div class="toast" id="toast"></div>
+<datalist id="products-global-datalist"></datalist>
+
+
+
+<script>
+// ══════════════════════════════════
+//  CATALOG DATA
+// ══════════════════════════════════
+const CATALOG = {
+  'Proteínas': {
+    color:'#EF4444', isv:'exento',
+    items:['Alas de pollo (Libra)','Pechuga Congelada (Libra)','Tortas Angus (Unidades)','Carne Molida Regular Del Corral','Chorizo Molido Baleada Del Corral','Carne Molida de Pollo','Carton de Huevos (30 unidades)','Bacon Zaragoza','Chorizo Zamorano','Muslo Deshuesado','Lomo de Cerdo (Libra)','Tajo de Cerdo (Libra)']
+  },
+  'Lácteos': {
+    color:'#60A5FA', isv:'exento',
+    items:['Leche Semidescremada MS (Fardo de 12)','Mozzarella MS (Unidad)','Pepperjack MS','Quesillo Boqueron Libra','Queso Americano MS','Parmesano 680g','Queso Para Nachos (Libra)','Mantequilla Escurrida (Libra)']
+  },
+  'Carbohidratos': {
+    color:'#D97706', isv:'mixto',
+    items:['Papas Corte Recto Caja','Pan de Hamburguesa','Tortillas la Selecta','Papas Waffle 737g','Tortillas Milpa Real']
+  },
+  'Frutas y Verduras': {
+    color:'#16A34A', isv:'exento',
+    items:['Cebolla Amarilla (Libra)','Cebolla Roja (Libra)','Red de Ajo','Zanahoria','Tomate Manzano (Libra)','Lechuga escarola (unidades)','Menta (Unidad)','Hierba Buena (Unidad)','Jengibre (Libra)','Piña (Unidad)','Limon (Unidad)','Maracuya (Unidad)','Fresas Congeladas (5 Libras)','Arandanos Congelados','Aguacates Unidad','Repollo (Libra)','Jalapeños (Libra)']
+  },
+  'Salsas y Aderezos': {
+    color:'#F97316', isv:'gravado15',
+    items:['Barbacoa Best Choice','Cayenne Franks Redhot','Ajo y Buffalo','Sweet Chilli','Salsa Soya','Miel','Mostaza Galon','Vinagre Blanco','Ranch','Ranch Marina','Mayonesa Best Choice','Ketchup Pouch Heinz','Blue Cheese','Margarina','Lemon Pepper']
+  },
+  'Plásticos y Empaques': {
+    color:'#7C3AED', isv:'gravado15',
+    items:['Copa Plastica 2 Oz Tapa (Fardo 2500)','Contenedor Negro 9*9 (Fardo 50)','Contenedor Negro 8*8 (Fardo 50)','Contenedor Negro 6*6 (Fardo 50)','Bolsa Café No 10 (Fardo)','Caja Papas Fritas (Fardo 100)','Bolsa Transparente 7*14 (9000u)','Pajilla Forrada Negra 7.75\'','Papel Hamburguesa Cuadriculado','Papel plateado (Fardo 500)','Ketchup en Sobre (Fardo 1000)','Servilleta White C 16.5*33cm','Tenedor Cuchillo Servilleta 3g (500)','Papel Cayena (1000 Unidades)','Vasos 14 oz (Fardo 50)','Bolsas 7x14 Fardo','Tapaderas Vaso 14 oz (Fardo 50)','Bolsa Camiseta 12\" (Thank you)','Bolsa Camiseta No2 Blanca']
+  },
+  'Artículos de Limpieza': {
+    color:'#64748B', isv:'gravado15',
+    items:['Jumbo Roll Papel Higiénico','Papel interfoleado Scott','Azistin Lysol','Ace Bolsa 10kg','Jabón Ajax','Windex','Bolsas negras 50 Litros','Bolsa Blanca Liston Naranja','Magia Blanca Cloro 20 galones','Jabón Limpia Platos']
+  },
+  'Condimentos': {
+    color:'#CA8A04', isv:'exento',
+    items:['Pimienta Cayena','Pimienta Negra','Adobo sin Pimienta','Paprika','Sal de Ajo la Buena Cocina','Sazonador Completo','Azúcar','Sal yodada','Consomé de Pollo','Bacon Bites','Sal y pimienta DJ','Harina Fardo','Maizena','Canela','Zuko de Mango']
+  },
+  'Producto Enlatado': {
+    color:'#0891B2', isv:'gravado15',
+    items:['Jalapeno la Costena (Fardo 24)','Pepino en Rodajas Car Int','Margarina Liquida Oasis','Leche Condensada Nestle (Fardo 24)','Chipotle la Costena','Leche de Coco Roland (Fardo 24)','Crema de Coco JAJA','Cerezas Rojas Diamante','Lyches Roland']
+  },
+  'Bebidas': {
+    color:'#0284C7', isv:'gravado15',
+    items:['Cocacola Lata (Fardo de 12)','Canada-Dry Soda (Fardo de 24)','Canada-Dry Quina (Fardo de 24)','Canada-Dry Ginger Ale (Fardo de 24)','Fresca Toronja (Fardo de 12)','Agua Dasani (Fardo de 12)','Jugo de Naranja (Unidad)','Hielo (Unidades)','Cocacola Zero (Fardo de 12)','Té frío 2200g']
+  },
+  'Cocteles / Licores': {
+    color:'#7C3AED', isv:'gravado18',
+    items:['Tajin Salsa en Polvo','Chamoi Tajin (475ml)','Dailys Margarita 750ml','Vodka Barton 750ml','Ron Bacardi 750ml','Gin Bombay 1000ml','Tequila Jarana 1750ml','Barton Triple Sec 750ml']
+  },
+  'Otros': {
+    color:'#94A3B8', isv:'mixto',
+    items:['Café','Envío de Voy Sigua','Botellón con agua','Aceite 20 Libras','Otros Artículos']
+  }
+};
+
+// All products flat for autocomplete
+const ALL_PRODUCTS = Object.entries(CATALOG).flatMap(([cat, d]) =>
+  d.items.map(name => ({name, cat, isv: d.isv, color: d.color}))
+);
+
+// ISV default per product (can be overridden)
+const ISV_DEFAULTS = {};
+ALL_PRODUCTS.forEach(p => { ISV_DEFAULTS[p.name] = p.isv; });
+
+// ── CATALOG PRICES (from Excel column S formulas) ──
+const CATALOG_PRICES = {
+  'Ace Bolsa 10kg': 434.95,
+  'Aceite 20 Libras': 680.0,
+  'Adobo sin Pimienta': 183.77,
+  'Agua Dasani (Fardo de 12)': 130.0,
+  'Aguacates Unidad': 13.0,
+  'Ajo y Buffalo': 411.5,
+  'Alas de pollo (Libra)': 66.0,
+  'Arandanos Congelados': 294.95,
+  'Azistin Lysol': 399.95,
+  'Azucar': 464.95,
+  'Bacon Bites': 188.26,
+  'Bacon Zaragoza': 199.95,
+  'Barbacoa Best Choice': 157.0,
+  'Barton Triple Sec 750ml': 66.5,
+  'Blue Cheese': 784.99,
+  'Bolsa Blanca Liston Naranja': 599.95,
+  'Bolsa Café No 10 (Fardo)': 392.0,
+  'Bolsa Camiseta 12" (Thank you)': 37.95,
+  'Bolsa Camiseta No2 Blanca': 34.38,
+  'Bolsa Transparente 7*14 (9000u)': 2740.45,
+  'Bolsas negras 50 Litros': 479.95,
+  'Botellon con agua': 25.0,
+  'Café': 38.9,
+  'Caja Papas Fritas (Fardo 100)': 172.5,
+  'Canada-Dry Ginger Ale (Fardo de 24)': 400.0,
+  'Canada-Dry Quina (Fardo de 24)': 400.0,
+  'Canada-Dry Soda (Fardo de 24)': 400.0,
+  'Canela': 194.95,
+  'Carne Molida Regular Del Corral': 62.5,
+  'Carne Molida de Pollo': 42.5,
+  'Carton de Huevos (30 unidades)': 109.95,
+  'Cayenne Franks Redhot': 545.0,
+  'Cebolla Amarilla (Libra)': 20.0,
+  'Cebolla Roja (Libra)': 30.0,
+  'Cerezas Rojas Diamante': 759.0,
+  'Chamoi Tajin (475ml)': 76.82,
+  'Chipotle la Costena': 50.14,
+  'Chorizo Molido Baleada Del Corral': 66.5,
+  'Chorizo Zamorano': 204.95,
+  'Cocacola Lata (Fardo de 12)': 200.0,
+  'Cocacola Zero (Fardo de 12)': 180.0,
+  'Consome de Pollo': 128.8,
+  'Contenedor Negro 6*6 (Fardo 50)': 86.83,
+  'Contenedor Negro 8*8 (Fardo 50)': 120.75,
+  'Contenedor Negro 9*9 (Fardo 50)': 138.86,
+  'Copa Plastica 2 Oz Tapa (Fardo 2500)': 1173.0,
+  'Crema de Coco JAJA': 61.7,
+  'Dailys Margarita 750ml': 142.13,
+  'Fresas Congeladas (5 Libras)': 200.0,
+  'Fresca Toronja (Fardo de 12)': 220.0,
+  'Gin Bombay 1000ml': 634.66,
+  'Harina Fardo': 99.95,
+  'Hielo (Unidades)': 12.0,
+  'Hierba Buena (Unidad)': 22.9,
+  'Jabon Ajax': 15.22,
+  'Jabon Limpia Platos': 179.95,
+  'Jalapeno la Costena (Fardo 24)': 623.04,
+  'Jalapeños (Libra)': 15.0,
+  'Jengibre (Libra)': 42.5,
+  'Jugo de Naranja (Unidad)': 27.5,
+  'Jumbo Roll Papel Higiénico': 80.0,
+  'Ketchup Pouch Heinz': 182.0,
+  'Ketchup en Sobre (Fardo 1000)': 782.0,
+  'Leche Condensada Nestle (Fardo 24)': 1010.85,
+  'Leche Semidescremada MS (Fardo de 12)': 379.95,
+  'Leche de Coco Roland (Fardo 24)': 1010.85,
+  'Lechuga escarola (unidades)': 17.5,
+  'Lemon Pepper': 460.0,
+  'Limon (Unidad)': 2.5,
+  'Lomo de Cerdo (Libra)': 72.0,
+  'Lyches Roland': 125.01,
+  'Magia Blanca Cloro 20 galones': 275.95,
+  'Maizena': 315.0,
+  'Mantequilla Escurrida (Libra)': 50.0,
+  'Maracuya (Unidad)': 5.0,
+  'Margarina': 29.9,
+  'Margarina Liquida Oasis': 355.01,
+  'Mayonesa Best Choice': 290.95,
+  'Menta (Unidad)': 22.9,
+  'Miel': 800.0,
+  'Mostaza Galon': 189.75,
+  'Mozzarella MS (Unidad)': 419.95,
+  'Muslo Deshuesado': 48.0,
+  "Pajilla Forrada Negra 7.75' (Fardo 250)": 58.85,
+  'Pan de Hamburguesa': 17.77,
+  'Papas Corte Recto Caja': 530.0,
+  'Papas Waffle 737g': 138.0,
+  'Papel Cayena (1000 Unidades)': 2000.0,
+  'Papel Hamburguesa Cuadriculado': 879.75,
+  'Papel interfoleado Scott': 74.68,
+  'Papel plateado (Fardo 500)': 1078.0,
+  'Paprika': 174.95,
+  'Parmesano 680g': 374.95,
+  'Pechuga Congelada (Libra)': 61.65,
+  'Pepino en Rodajas Car Int': 247.0,
+  'Pepperjack MS': 244.95,
+  'Pimienta Cayena': 166.75,
+  'Pimienta Negra': 264.95,
+  'Piña (Unidad)': 45.0,
+  'Quesillo Boqueron Libra': 51.5,
+  'Queso Americano MS': 199.95,
+  'Queso Para Nachos (Libra)': 60.0,
+  'Ranch': 354.95,
+  'Ranch Marina': 360.0,
+  'Red de Ajo': 40.0,
+  'Repollo (Libra)': 10.0,
+  'Ron Bacardi 750ml': 634.66,
+  'Sal de Ajo la Buena Cocina': 77.95,
+  'Sal y pimienta DJ': 30.0,
+  'Sal yodada': 32.99,
+  'Salsa Soya': 141.45,
+  'Sazonador Completo': 224.83,
+  'Servilleta White C 16.5*33cm': 253.92,
+  'Sweet Chilli': 525.0,
+  'Tajin Salsa en Polvo': 56.95,
+  'Tajo de Cerdo (Libra)': 80.0,
+  'Tapaderas Vaso 14 oz (Fardo 50)': 49.8,
+  'Té frío 2200g': 189.95,
+  'Tenedor Cuchillo Servilleta 3g (500)': 770.5,
+  'Tequila Jarana 1750ml': 583.66,
+  'Tomate Manzano (Libra)': 16.0,
+  'Tortas Angus (Unidades)': 37.95,
+  'Tortillas Milpa Real': 14.5,
+  'Tortillas la Selecta': 10.0,
+  'Vasos 14 oz (Fardo 50)': 108.33,
+  'Vinagre Blanco': 134.95,
+  'Vodka Barton 750ml': 56.95,
+  'Windex': 75.5,
+  'Zanahoria': 15.0,
+  'Zuko de Mango': 5.64,
+};
+
+// ══════════════════════════════════
+//  STATE
+// ══════════════════════════════════
+let records = JSON.parse(localStorage.getItem('cayena_compras') || '[]');
+let proveedores = JSON.parse(localStorage.getItem('cayena_proveedores') || '[]');
+let selDate = null, calY, calM;
+let rowCount = 0;
+let aiPendingData = null;
+
+const el = id => document.getElementById(id);
+const Lf = n => 'L ' + parseFloat(n||0).toLocaleString('es-HN', {minimumFractionDigits:2, maximumFractionDigits:2});
+const MO = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const DE = ['Do','Lu','Ma','Mi','Ju','Vi','Sa'];
+
+// ── PAGO ──
+const PAGO_STYLES = {
+  'Transferencia':  {bg:'#EFF6FF',color:'#2563EB',icon:'💳'},
+  'Efectivo':       {bg:'#F0FDF4',color:'#16A34A',icon:'💵'},
+  'TC Gold':        {bg:'#FFFBEB',color:'#D97706',icon:'🟡'},
+  'TC PS':          {bg:'#EFF6FF',color:'#0284C7',icon:'🔵'},
+  'TC Socio':       {bg:'#F5F3FF',color:'#7C3AED',icon:'🟣'},
+  'Pendiente':      {bg:'#FEF2F2',color:'#EF4444',icon:'⏳'},
+};
+function onPagoChange(val) {
+  const wrap = el('pago-badge-wrap');
+  const badge = el('pago-badge');
+  if(!val){wrap.style.display='none';return;}
+  const s = PAGO_STYLES[val]||{bg:'var(--bg)',color:'var(--body)',icon:''};
+  wrap.style.display='block';
+  badge.style.background=s.bg;badge.style.color=s.color;badge.style.borderColor=s.color+'44';
+  badge.textContent=s.icon+' '+val;
+}
+function pagoBadge(val) {
+  if(!val) return '<span style="color:var(--muted);font-size:12px">—</span>';
+  const s = PAGO_STYLES[val]||{bg:'var(--bg)',color:'var(--body)',icon:''};
+  return `<span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:3px 9px;border-radius:999px;background:${s.bg};color:${s.color};border:1px solid ${s.color}44">${s.icon} ${val}</span>`;
+}
+
+// ── INIT ──
+(function(){
+  const now = new Date();
+  calY = now.getFullYear(); calM = now.getMonth();
+  el('period-chip').textContent = MO[calM] + ' ' + calY;
+  renderCal(); renderTable(); updateKPIs(); buildCatalog();
+  // Seed proveedores from existing records
+  records.forEach(r => { if(r.proveedor && r.proveedor !== 'Varios') saveProveedor(r.proveedor); });
+  renderProveedoresList();
+  // Seed price memory from existing records (most recent price wins)
+  const prices = JSON.parse(localStorage.getItem('cayena_precios') || '{}');
+  let changed = false;
+  records.forEach(r => {
+    (r.items||[]).forEach(i => {
+      if(i.name && i.precio > 0 && !prices[i.name]) { prices[i.name] = i.precio; changed = true; }
+    });
+  });
+  if(changed) localStorage.setItem('cayena_precios', JSON.stringify(prices));
+  // Build products datalist from catalog + custom
+  buildProductsDatalist();
+  addProductRow(); // start with one empty row
+})();
+
+// ── SIDEBAR ──
+function toggleSB(){el('sb').classList.toggle('open');el('ovbg').classList.toggle('open');}
+function closeSB(){el('sb').classList.remove('open');el('ovbg').classList.remove('open');}
+
+// ── PROVEEDORES ──
+function renderProveedoresList() {
+  const dl = el('proveedores-list');
+  if(!dl) return;
+  dl.innerHTML = proveedores.map(p => `<option value="${p}">`).join('');
+}
+function saveProveedor(name) {
+  const trimmed = name.trim();
+  if(!trimmed || proveedores.includes(trimmed)) return;
+  proveedores.push(trimmed);
+  proveedores.sort((a,b) => a.localeCompare(b));
+  localStorage.setItem('cayena_proveedores', JSON.stringify(proveedores));
+  renderProveedoresList();
+}
+function deleteProveedorInput() {
+  el('f-proveedor').value = '';
+  el('f-proveedor').focus();
+}
+
+// ── TABS ──
+function switchTab(t) {
+  ['manual','scan','catalog'].forEach(id => {
+    el('pane-'+id).style.display = id===t ? 'block' : 'none';
+    el('tab-'+id).classList.toggle('active', id===t);
+  });
+  if(t==='catalog') buildCatalog();
+}
+
+// ── CALENDAR ──
+function toggleCal(e) {e.stopPropagation(); el('cal-drop').classList.toggle('open');}
+document.addEventListener('click', e => {
+  const d = el('cal-drop'); if(d && !d.contains(e.target) && e.target !== el('fecha-txt')) d.classList.remove('open');
+});
+function calShift(d) {calM+=d; if(calM>11){calM=0;calY++;} if(calM<0){calM=11;calY--;} renderCal();}
+function renderCal() {
+  el('cal-mo').textContent = MO[calM]+' '+calY;
+  const g = el('cal-g'); g.innerHTML = '';
+  DE.forEach(d => {const h=document.createElement('div');h.className='cdh';h.textContent=d;g.appendChild(h);});
+  const first = new Date(calY,calM,1).getDay();
+  const days = new Date(calY,calM+1,0).getDate();
+  const today = new Date();
+  for(let i=0;i<first;i++){const b=document.createElement('div');b.className='cd emp';g.appendChild(b);}
+  for(let d=1;d<=days;d++){
+    const cell=document.createElement('div'); cell.className='cd';
+    const iso=`${calY}-${String(calM+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    cell.textContent=d;
+    if(d===today.getDate()&&calM===today.getMonth()&&calY===today.getFullYear()) cell.classList.add('today');
+    if(selDate===iso) cell.classList.add('sel');
+    cell.onclick=()=>pickDate(iso); g.appendChild(cell);
+  }
+}
+function pickDate(iso) {
+  selDate=iso; const[y,m,d]=iso.split('-');
+  el('fecha-txt').value=`${d}/${m}/${y}`;
+  el('cal-drop').classList.remove('open'); renderCal();
+}
+function onDateType(val) {
+  const c=val.split('/');
+  if(c.length===3&&c[2].length===4){
+    const iso=`${c[2]}-${c[1].padStart(2,'0')}-${c[0].padStart(2,'0')}`;
+    if(!isNaN(new Date(iso).getTime())){selDate=iso;calY=parseInt(c[2]);calM=parseInt(c[1])-1;renderCal();}
+  }
+}
+
+// ── PRODUCT ROWS ──
+function buildProductsDatalist() {
+  const dl = document.getElementById('products-global-datalist');
+  if(!dl) return;
+  const customProducts = JSON.parse(localStorage.getItem('cayena_productos_custom') || '[]');
+  const seen = new Set();
+  const allOptions = [];
+  // Catalog products first
+  ALL_PRODUCTS.forEach(p => {
+    if(!seen.has(p.name)) { seen.add(p.name); allOptions.push(p.name); }
+  });
+  // Then custom products
+  customProducts.forEach(n => {
+    if(!seen.has(n)) { seen.add(n); allOptions.push(n); }
+  });
+  allOptions.sort((a,b) => a.localeCompare(b));
+  dl.innerHTML = allOptions.map(n => `<option value="${n}">`).join('');
+}
+
+function saveCustomProduct(name) {
+  const trimmed = name.trim();
+  if(!trimmed) return;
+  // Already in catalog? skip
+  if(ISV_DEFAULTS[trimmed] !== undefined) return;
+  const custom = JSON.parse(localStorage.getItem('cayena_productos_custom') || '[]');
+  if(custom.includes(trimmed)) return;
+  custom.push(trimmed);
+  custom.sort((a,b) => a.localeCompare(b));
+  localStorage.setItem('cayena_productos_custom', JSON.stringify(custom));
+  buildProductsDatalist();
+}
+
+function addProductRow(name='', qty='', precio='', isvType='') {
+  const id = 'row-' + (++rowCount);
+  const div = document.createElement('div');
+  div.className='product-row'; div.id=id;
+
+  // Detect ISV from catalog if name known
+  const detectedISV = isvType || (name ? (ISV_DEFAULTS[name] || 'exento') : 'exento');
+
+  div.innerHTML = `
+    <div class="pr-field" style="grid-column:1/-1 span 2">
+      <label>Producto</label>
+      <input type="text" id="${id}-prod" list="products-global-datalist"
+        value="${name}"
+        placeholder="Escribe para buscar o agregar..."
+        autocomplete="off"
+        inputmode="text"
+        oninput="onProductInput('${id}',this)"
+        onchange="onProductInput('${id}',this)"
+        style="width:100%;font-family:var(--font);font-size:13px;font-weight:500;color:var(--text);background:transparent;border:none;border-bottom:1.5px solid var(--border);padding:5px 0;outline:none;transition:border-color .15s"
+        onfocus="this.style.borderBottomColor='var(--blue)'"
+        onblur="onProductInput('${id}',this);this.style.borderBottomColor='var(--border)'">
+    </div>
+    <div class="pr-field">
+      <label>Cantidad</label>
+      <input type="number" id="${id}-qty" value="${qty}" placeholder="0" min="0" step="0.01" inputmode="decimal" oninput="recalcRow('${id}')">
+    </div>
+    <div class="pr-field">
+      <label>Precio unitario (L.)</label>
+      <input type="number" id="${id}-precio" value="${precio}" placeholder="0.00" min="0" step="0.01" inputmode="decimal" oninput="recalcRow('${id}')" onblur="updatePrecioMemory('${id}')">
+    </div>
+    <div class="pr-field">
+      <label>Subtotal</label>
+      <input type="text" id="${id}-sub" readonly value="L 0.00" style="color:var(--blue);font-weight:700;cursor:default">
+    </div>
+    <div class="pr-isv">
+      <select id="${id}-isv" onchange="recalcAll()" style="font-size:11px;font-weight:700;padding:4px 8px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg);cursor:pointer;color:var(--body);font-family:var(--font)">
+        <option value="exento" ${detectedISV==='exento'?'selected':''}>Exento 0%</option>
+        <option value="gravado15" ${detectedISV==='gravado15'?'selected':''}>Grav. 15%</option>
+        <option value="gravado18" ${detectedISV==='gravado18'?'selected':''}>Grav. 18%</option>
+      </select>
+    </div>
+    <div class="pr-del">
+      <button class="del-btn" onclick="removeRow('${id}')">×</button>
+    </div>
+  `;
+
+  div.style.gridTemplateColumns = '2fr 80px 110px 100px 100px auto';
+  el('product-rows').appendChild(div);
+
+  if(qty && precio) recalcRow(id);
+}
+
+function onProductInput(rowId, input) {
+  const name = input.value.trim();
+  if(!name) return;
+  // Auto-assign ISV if name matches catalog
+  if(ISV_DEFAULTS[name] !== undefined) {
+    el(rowId+'-isv').value = ISV_DEFAULTS[name];
+  }
+  // Auto-fill price — catalog price takes priority, then last learned price
+  const precioEl = el(rowId+'-precio');
+  if(precioEl && !precioEl.value) {
+    const catalogPrice = CATALOG_PRICES[name];
+    if(catalogPrice) {
+      precioEl.value = catalogPrice;
+      recalcRow(rowId);
+    } else {
+      const learnedPrices = JSON.parse(localStorage.getItem('cayena_precios') || '{}');
+      if(learnedPrices[name]) {
+        precioEl.value = learnedPrices[name];
+        recalcRow(rowId);
+      }
+    }
+  }
+  recalcAll();
+}
+
+function recalcRow(rowId) {
+  const qty = parseFloat(el(rowId+'-qty').value)||0;
+  const precio = parseFloat(el(rowId+'-precio').value)||0;
+  const sub = qty*precio;
+  el(rowId+'-sub').value = Lf(sub);
+  recalcAll();
+}
+
+function updatePrecioMemory(rowId) {
+  const prodEl = el(rowId+'-prod');
+  const precioEl = el(rowId+'-precio');
+  if(!prodEl || !precioEl) return;
+  const name = prodEl.value.trim();
+  const precio = parseFloat(precioEl.value);
+  if(!name || !precio || precio <= 0) return;
+  // Update both CATALOG_PRICES (in memory) and cayena_precios (persistent)
+  CATALOG_PRICES[name] = precio;
+  const stored = JSON.parse(localStorage.getItem('cayena_precios') || '{}');
+  stored[name] = precio;
+  localStorage.setItem('cayena_precios', JSON.stringify(stored));
+  if(typeof DB_Inv !== 'undefined'){
+    Object.entries(stored||prices||{}).forEach(([p,pr])=>{
+      DB_Inv.upsertPrecio(p,pr).catch(()=>{});
+    });
+  }
+}
+
+function removeRow(id) {
+  const el2 = document.getElementById(id);
+  if(el2) el2.remove();
+  recalcAll();
+}
+
+function recalcAll() {
+  const rows = el('product-rows').querySelectorAll('.product-row');
+  let g15=0, g18=0, exent=0;
+  rows.forEach(row => {
+    const id = row.id;
+    const qty = parseFloat(el(id+'-qty')?.value)||0;
+    const precio = parseFloat(el(id+'-precio')?.value)||0;
+    const sub = qty*precio;
+    const isv = el(id+'-isv')?.value||'exento';
+    if(isv==='gravado15') g15+=sub;
+    else if(isv==='gravado18') g18+=sub;
+    else exent+=sub;
+  });
+  const total = g15+g18+exent;
+  el('sum-g15').textContent=Lf(g15);
+  el('sum-g18').textContent=Lf(g18);
+  el('sum-exent').textContent=Lf(exent);
+  el('sum-total').textContent=Lf(total);
+}
+
+function getRowsData() {
+  const rows = el('product-rows').querySelectorAll('.product-row');
+  const items = [];
+  rows.forEach(row => {
+    const id = row.id;
+    const prodEl = el(id+'-prod');
+    const name = prodEl ? prodEl.value.trim() : '';
+    const qty = parseFloat(el(id+'-qty')?.value)||0;
+    const precio = parseFloat(el(id+'-precio')?.value)||0;
+    const isv = el(id+'-isv')?.value||'exento';
+    if(name||qty||precio) items.push({name:name||'Sin nombre', qty, precio, sub:parseFloat((qty*precio).toFixed(2)), isv});
+  });
+  return items;
+}
+
+// ── SAVE ──
+function saveEntry(overrideData) {
+  if(!selDate) {showToast('Selecciona una fecha primero','err'); return;}
+  const proveedor = el('f-proveedor')?.value || overrideData?.proveedor || '';
+  const numfact = el('f-numfact')?.value || '';
+  const pago = el('f-pago')?.value || overrideData?.pago || '';
+  const items = overrideData?.items || getRowsData();
+  // Accept if item has a name AND (qty>0 or precio>0)
+  const validItems = items.filter(i => i.name && i.name !== 'Sin nombre' && (i.qty > 0 || i.precio > 0));
+  if(!validItems.length) {showToast('Agrega al menos un producto con nombre y precio','err'); return;}
+
+  let g15=0,g18=0,exent=0;
+  validItems.forEach(i=>{
+    if(i.isv==='gravado15') g15+=i.sub;
+    else if(i.isv==='gravado18') g18+=i.sub;
+    else exent+=i.sub;
+  });
+  const total=g15+g18+exent;
+
+  records.push({
+    id: Date.now(),
+    fecha: selDate,
+    proveedor: proveedor||'Varios',
+    numfact,
+    pago,
+    items: validItems,
+    g15: parseFloat(g15.toFixed(2)),
+    g18: parseFloat(g18.toFixed(2)),
+    exent: parseFloat(exent.toFixed(2)),
+    total: parseFloat(total.toFixed(2)),
+    fuente: overrideData?.fuente || 'manual'
+  });
+
+  records.sort((a,b)=>a.fecha.localeCompare(b.fecha));
+  localStorage.setItem('cayena_compras', JSON.stringify(records));
+  if(typeof DB_Compras !== 'undefined' && records.length > 0){
+    const last = records[records.length-1];
+    DB_Compras.insert(last).catch(e=>console.warn('compras SB:',e));
+  }
+
+  // Save proveedor to persistent list
+  if(proveedor && proveedor !== 'Varios') saveProveedor(proveedor);
+  // Save any new custom products + update price memory
+  const prices = JSON.parse(localStorage.getItem('cayena_precios') || '{}');
+  items.forEach(i => {
+    if(i.name && i.name !== 'Sin nombre') {
+      saveCustomProduct(i.name);
+      if(i.precio > 0) prices[i.name] = i.precio;
+    }
+  });
+  localStorage.setItem('cayena_precios', JSON.stringify(prices));
+
+  renderTable(); updateKPIs(); buildCatalog();
+
+  // Reset form
+  el('product-rows').innerHTML='';rowCount=0;
+  el('f-proveedor').value=''; el('f-numfact').value='';
+  el('f-pago').value='';
+  el('pago-badge-wrap').style.display='none';
+  el('fecha-txt').value=''; selDate=null;
+  el('sum-g15').textContent=Lf(0);el('sum-g18').textContent=Lf(0);el('sum-exent').textContent=Lf(0);el('sum-total').textContent=Lf(0);
+  addProductRow();
+  showToast('Compra guardada','ok');
+}
+
+function deleteEntry(id) {
+  if(!confirm('¿Eliminar esta compra?')) return;
+  records = records.filter(r=>r.id!==id);
+  localStorage.setItem('cayena_compras', JSON.stringify(records));
+  if(typeof DB_Compras !== 'undefined' && records.length > 0){
+    const last = records[records.length-1];
+    DB_Compras.insert(last).catch(e=>console.warn('compras SB:',e));
+  }
+  renderTable(); updateKPIs(); buildCatalog(); showToast('Eliminado');
+}
+
+// ── RENDER TABLE ──
+function renderTable() {
+  const tb = el('tbody');
+  if(!records.length){
+    tb.innerHTML='<tr><td colspan="9" style="text-align:center;padding:36px;color:var(--muted);font-size:12px;line-height:1.8">No hay compras registradas.<br>Ingresa la primera factura arriba.</td></tr>';
+    el('tfoot').style.display='none'; return;
+  }
+  tb.innerHTML = records.map(r=>`<tr>
+    <td>${fmtD(r.fecha)}</td>
+    <td>${r.proveedor}</td>
+    <td>${pagoBadge(r.pago||'')}</td>
+    <td style="color:var(--orange)">${r.g15>0?Lf(r.g15):'—'}</td>
+    <td style="color:var(--red)">${r.g18>0?Lf(r.g18):'—'}</td>
+    <td style="color:var(--green-ui)">${r.exent>0?Lf(r.exent):'—'}</td>
+    <td style="font-weight:700;color:var(--blue)">${Lf(r.total)}</td>
+    <td><span class="tag-pill" style="${r.fuente==='ia'?'background:#F5F3FF;color:#7C3AED;':'background:var(--bg);color:var(--muted);'}">${r.fuente==='ia'?'✦ IA':'Manual'}</span></td>
+    <td><button class="tddel" onclick="deleteEntry(${r.id})">×</button></td>
+  </tr>`).join('');
+
+  let sg15=0,sg18=0,sex=0,stot=0;
+  records.forEach(r=>{sg15+=r.g15;sg18+=r.g18;sex+=r.exent;stot+=r.total;});
+  el('ft-g15').textContent=Lf(sg15);el('ft-g18').textContent=Lf(sg18);
+  el('ft-ex').textContent=Lf(sex);el('ft-tot').textContent=Lf(stot);
+  el('tfoot').style.display='';
+}
+
+// ── KPIS ──
+function updateKPIs() {
+  let g15=0,g18=0,exent=0,total=0;
+  records.forEach(r=>{g15+=r.g15;g18+=r.g18;exent+=r.exent;total+=r.total;});
+  el('k-total').textContent=Lf(total);
+  el('k-count').textContent=records.length+' factura'+(records.length!==1?'s':'');
+  el('k-g15').textContent=Lf(g15);
+  el('k-g15-isv').textContent='ISV: '+Lf(g15*0.15);
+  el('k-g18').textContent=Lf(g18);
+  el('k-g18-isv').textContent='ISV: '+Lf(g18*0.18);
+  el('k-exent').textContent=Lf(exent);
+}
+
+// ── CATALOG ──
+function buildCatalog() {
+  // Aggregate spending per product from records
+  const spent = {};
+  records.forEach(r => {
+    (r.items||[]).forEach(i => {
+      if(!spent[i.name]) spent[i.name]={total:0,qty:0};
+      spent[i.name].total += i.sub;
+      spent[i.name].qty += i.qty;
+    });
+  });
+
+  const total = Object.values(spent).reduce((s,v)=>s+v.total,0);
+  el('cat-total-display').textContent = Lf(total);
+
+  const grid = el('cat-grid'); grid.innerHTML='';
+  Object.entries(CATALOG).forEach(([catName, catData]) => {
+    const div = document.createElement('div');
+    div.className='cat-section';
+    const itemsHTML = catData.items.map(name => {
+      const s = spent[name]||{total:0,qty:0};
+      return `<div class="cat-item">
+        <span>${name}</span>
+        <span class="cat-item-total">${s.total>0?Lf(s.total):'—'}</span>
+      </div>`;
+    }).join('');
+    const catTotal = catData.items.reduce((s,n)=>s+(spent[n]?.total||0),0);
+    const isvBadge = catData.isv==='gravado18'
+      ? '<span class="isv-badge isv-18">18%</span>'
+      : catData.isv==='gravado15'
+      ? '<span class="isv-badge isv-15">15%</span>'
+      : catData.isv==='mixto'
+      ? '<span class="isv-badge isv-15" style="background:#F0F9FF;color:var(--blue);border-color:#BFDBFE">Mixto</span>'
+      : '<span class="isv-badge isv-0">Exento</span>';
+    div.innerHTML=`
+      <div class="cat-head">
+        <div>
+          <div class="cat-title" style="color:${catData.color}">${catName}</div>
+          ${isvBadge}
+        </div>
+        <div>
+          <div class="cat-count">${catData.items.length} productos</div>
+          <div style="font-size:12px;font-weight:700;color:${catData.color};font-variant-numeric:tabular-nums">${catTotal>0?Lf(catTotal):'L 0.00'}</div>
+        </div>
+      </div>
+      <div class="cat-body">${itemsHTML}</div>
+    `;
+    grid.appendChild(div);
+  });
+}
+
+// ── AI SCAN ──
+function handleFile(file) {
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    el('scan-preview').classList.add('show');
+    el('preview-img').src = e.target.result;
+    el('upload-zone').style.display='none';
+    processWithAI(e.target.result, file.type);
+  };
+  reader.readAsDataURL(file);
+}
+
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('upload-zone').classList.remove('drag');
+  const file = e.dataTransfer.files[0];
+  if(file) handleFile(file);
+}
+
+async function processWithAI(base64Data, mimeType) {
+  el('ai-processing').classList.add('show');
+  el('ai-result').classList.remove('show');
+  const steps = ['Extrayendo texto de la imagen...','Identificando productos...','Clasificando ISV...','Calculando totales...'];
+  let step = 0;
+  const stepInt = setInterval(()=>{
+    el('ai-step').textContent = steps[Math.min(step++,steps.length-1)];
+  }, 900);
+
+  try {
+    const imgData = base64Data.split(',')[1];
+    const mediaType = mimeType === 'application/pdf' ? 'application/pdf' : mimeType || 'image/jpeg';
+
+    const prompt = `Eres un asistente de contabilidad para Cayena, un restaurante en Honduras.
+Analiza esta factura de compra y extrae TODOS los productos, cantidades y precios.
+Para cada producto, clasifica el ISV según la ley hondureña:
+- "gravado18": alcohol (vodka, ron, gin, tequila, cerveza, licores) y cigarros
+- "gravado15": productos procesados, bebidas no alcohólicas (Coca-Cola, jugos), empaques, plásticos, artículos de limpieza, salsas embotelladas, enlatados, pan procesado, papas fritas procesadas, hielo comercial
+- "exento": carnes frescas, pollo, mariscos frescos, huevos, frutas frescas, verduras frescas, lácteos básicos (leche, queso, mantequilla básica), granos básicos, tortillas, sal, condimentos básicos sin procesar, agua purificada
+
+Responde SOLO con JSON válido, sin texto adicional, sin comentarios:
+{
+  "proveedor": "nombre del proveedor o empresa",
+  "items": [
+    {"name": "nombre del producto", "qty": 1, "precio": 0.00, "sub": 0.00, "isv": "gravado15|gravado18|exento"}
+  ],
+  "g15": 0.00,
+  "g18": 0.00,
+  "exento": 0.00,
+  "total": 0.00,
+  "confianza": "alta|media|baja"
+}`;
+
+    const msgContent = mimeType === 'application/pdf'
+      ? [{type:'document',source:{type:'base64',media_type:'application/pdf',data:imgData}},{type:'text',text:prompt}]
+      : [{type:'image',source:{type:'base64',media_type:mediaType,data:imgData}},{type:'text',text:prompt}];
+
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:2000,
+        messages:[{role:'user',content:msgContent}]
+      })
+    });
+
+    clearInterval(stepInt);
+    const data = await resp.json();
+    const text = data.content.map(b=>b.text||'').join('');
+    const clean = text.replace(/```json|```/g,'').trim();
+    const parsed = JSON.parse(clean);
+    aiPendingData = parsed;
+    renderAIResult(parsed);
+  } catch(err) {
+    clearInterval(stepInt);
+    el('ai-processing').classList.remove('show');
+    showToast('Error al analizar la imagen. Intenta de nuevo.','err');
+    console.error(err);
+    resetScan();
+  }
+}
+
+function renderAIResult(data) {
+  el('ai-processing').classList.remove('show');
+  el('ai-result').classList.add('show');
+  el('ai-proveedor').textContent = data.proveedor||'No detectado';
+  el('ai-total-det').textContent = Lf(data.total||0);
+
+  const conf = data.confianza||'media';
+  const confEl = el('ai-confidence');
+  confEl.textContent = conf==='alta'?'Alta confianza':conf==='media'?'Confianza media':'Confianza baja';
+  confEl.style.background = conf==='alta'?'#F0FDF4':conf==='media'?'#FFFBEB':'#FEF2F2';
+  confEl.style.color = conf==='alta'?'#16A34A':conf==='media'?'#D97706':'#EF4444';
+
+  const itemsEl = el('ai-items');
+  itemsEl.innerHTML = (data.items||[]).map(item=>{
+    const isvLabel = item.isv==='gravado18'?'<span class="isv-badge isv-18">18%</span>':item.isv==='gravado15'?'<span class="isv-badge isv-15">15%</span>':'<span class="isv-badge isv-0">Exento</span>';
+    return `<div class="ai-item">
+      <span class="ai-item-name">${item.name}</span>
+      <span class="ai-item-qty">${item.qty} u.</span>
+      <span class="ai-item-total">${Lf(item.sub||0)}</span>
+      ${isvLabel}
+    </div>`;
+  }).join('');
+}
+
+function acceptAIResult() {
+  if(!aiPendingData) return;
+  if(!selDate) {
+    // Use today
+    const now = new Date();
+    selDate = now.toISOString().split('T')[0];
+    const[y,m,d]=selDate.split('-');
+    el('fecha-txt').value=`${d}/${m}/${y}`;
+    switchTab('manual');
+  }
+  saveEntry({
+    proveedor: aiPendingData.proveedor||'',
+    items: (aiPendingData.items||[]).map(i=>({
+      name:i.name, qty:i.qty, precio:i.precio||0, sub:i.sub||0, isv:i.isv||'exento'
+    })),
+    fuente: 'ia'
+  });
+  resetScan();
+  switchTab('manual');
+}
+
+function resetScan() {
+  el('scan-preview').classList.remove('show');
+  el('ai-processing').classList.remove('show');
+  el('ai-result').classList.remove('show');
+  el('upload-zone').style.display='block';
+  el('preview-img').src='';
+  el('file-input').value='';
+  el('cam-input').value='';
+  aiPendingData=null;
+}
+
+
+// ── EXPORT ──
+
+
+function fmtD(iso){const[y,m,d]=iso.split('-');return`${d}/${m}/${y}`;}
+function showToast(msg,type){
+  const t=el('toast');t.textContent=msg;t.className='toast'+(type==='err'?' err':type==='ok'?' ok':'');
+  setTimeout(()=>t.classList.add('show'),10);setTimeout(()=>t.classList.remove('show'),2800);
+}
+var CSS_BLOCK = '<style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;font-size:11px;color:#0F172A;background:#fff;padding:24px}.header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;padding-bottom:14px;border-bottom:2px solid #2563EB}.header h1{font-size:20px;font-weight:800;color:#1E3A8A}.header .meta{text-align:right;font-size:10px;color:#64748B;line-height:1.8}.kpi-row{display:grid;gap:10px;margin-bottom:18px}.kpi{background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:12px 14px}.kpi-lbl{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:#64748B;margin-bottom:4px}.kpi-val{font-size:18px;font-weight:800;color:#2563EB}table{width:100%;border-collapse:collapse;margin-bottom:16px}thead th{background:#1E3A8A;color:#fff;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:8px 10px;text-align:left}thead th:not(:first-child){text-align:right}tbody tr:nth-child(even){background:#F8FAFC}tbody td{padding:7px 10px;font-size:10px;color:#334155;border-bottom:1px solid #E2E8F0}tbody td:not(:first-child){text-align:right;font-variant-numeric:tabular-nums}tfoot td{background:#EFF6FF;font-weight:700;font-size:11px;padding:9px 10px;border-top:2px solid #2563EB;color:#1E3A8A}tfoot td:not(:first-child){text-align:right}.section{margin-bottom:20px}.section-title{font-size:12px;font-weight:700;color:#1E3A8A;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid #E2E8F0;text-transform:uppercase;letter-spacing:.5px}.footer{margin-top:20px;padding-top:10px;border-top:1px solid #E2E8F0;font-size:9px;color:#94A3B8;display:flex;justify-content:space-between}@media print{body{padding:0}@page{margin:15mm;size:A4}}</style>';
+
+function exportPDF() {
+  var records = JSON.parse(localStorage.getItem('cayena_compras')||'[]');
+  if(!records.length){alert('No hay datos para exportar.');return;}
+  var now = new Date();
+  var fecha = now.toLocaleDateString('es-HN',{day:'2-digit',month:'long',year:'numeric'});
+  var hora = now.toLocaleTimeString('es-HN',{hour:'2-digit',minute:'2-digit'});
+  var MO2=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  var per = MO2[now.getMonth()] + ' ' + now.getFullYear();
+  var Lf = function(n){return 'L ' + parseFloat(n||0).toLocaleString('es-HN',{minimumFractionDigits:2,maximumFractionDigits:2});};
+  var tg15=0,tg18=0,tex=0,ttot=0;
+  records.forEach(function(r){tg15+=r.g15;tg18+=r.g18;tex+=r.exent;ttot+=r.total;});
+  var ICONOS={'Transferencia':'Transf.','Efectivo':'Efect.','TC Gold':'TC Gold','TC PS':'TC PS','TC Socio':'TC Socio','Pendiente':'Pendiente'};
+  var rows = records.map(function(r){
+    return '<tr><td>'+r.fecha.split('-').reverse().join('/')+'</td>'
+      +'<td>'+r.proveedor+'</td>'
+      +'<td>'+(ICONOS[r.pago]||r.pago||'—')+'</td>'
+      +'<td>'+(r.g15>0?Lf(r.g15):'—')+'</td>'
+      +'<td>'+(r.g18>0?Lf(r.g18):'—')+'</td>'
+      +'<td>'+(r.exent>0?Lf(r.exent):'—')+'</td>'
+      +'<td><b>'+Lf(r.total)+'</b></td></tr>';
+  }).join('');
+  var html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Compras Cayena</title>' + CSS_BLOCK + '</head><body>'
+    + '<div class="header"><div><h1>Registro de Compras</h1><div style="font-size:11px;color:#64748B;margin-top:4px">Cayena · RTN: 0318-2001-022079</div></div>'
+    + '<div class="meta">Exportado: ' + fecha + ' ' + hora + '<br>Per\u00EDodo: ' + per + '</div></div>'
+    + '<div class="kpi-row" style="grid-template-columns:repeat(4,1fr)">'
+    + '<div class="kpi"><div class="kpi-lbl">Total compras</div><div class="kpi-val">'+Lf(ttot)+'</div></div>'
+    + '<div class="kpi"><div class="kpi-lbl">Gravadas 15%</div><div class="kpi-val" style="color:#F97316">'+Lf(tg15)+'</div></div>'
+    + '<div class="kpi"><div class="kpi-lbl">Gravadas 18%</div><div class="kpi-val" style="color:#EF4444">'+Lf(tg18)+'</div></div>'
+    + '<div class="kpi"><div class="kpi-lbl">Exentas</div><div class="kpi-val" style="color:#16A34A">'+Lf(tex)+'</div></div></div>'
+    + '<table><thead><tr><th>Fecha</th><th>Proveedor</th><th>Forma de pago</th><th>Grav. 15%</th><th>Grav. 18%</th><th>Exentas</th><th>Total</th></tr></thead>'
+    + '<tbody>' + rows + '</tbody>'
+    + '<tfoot><tr><td colspan="3">TOTALES</td><td>'+Lf(tg15)+'</td><td>'+Lf(tg18)+'</td><td>'+Lf(tex)+'</td><td>'+Lf(ttot)+'</td></tr></tfoot>'
+    + '</table>'
+    + '<div class="footer"><span>Cayena - Registro de Compras</span><span>' + fecha + '</span></div>'
+    + '</body></html>';
+  var w = window.open('','_blank','width=900,height=700');
+  w.document.write(html);
+  w.document.close();
+  setTimeout(function(){w.print();}, 600);
+}
+
+</script>
+<script src="supabase-config.js"></script>
+</body>
+</html>
