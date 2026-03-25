@@ -576,7 +576,7 @@ async function setHoyRecord(uid, record){
 // ════════════════════════════════
 //  CLOCK IN / OUT
 // ════════════════════════════════
-async async function clockIn(){
+async function clockIn(){
   if(!session) return;
   const hoy = await getHoyRecord(session.id);
 
@@ -590,6 +590,7 @@ async async function clockIn(){
   const ts = now.getTime();
 
   const record = {
+    id: String(session.id) + '_' + todayKey(),
     fecha: todayKey(),
     entrada: hora,
     entradaTs: ts,
@@ -598,8 +599,7 @@ async async function clockIn(){
     horasTrabajadas: null,
     userId: session.id,
     userName: session.name,
-    wifiVerificado: true,
-    ssid: WIFI_SSID
+    wifiOk: true
   };
 
   await setHoyRecord(session.id, record);
@@ -607,7 +607,7 @@ async async function clockIn(){
   await renderHoy();
 }
 
-async async function clockOut(){
+async function clockOut(){
   if(!session) return;
   const hoy = await getHoyRecord(session.id);
 
@@ -716,7 +716,8 @@ async function updateElapsed(){
 // ════════════════════════════════
 async function renderHistorial(){
   if(!session) return;
-  let registros = loadRegistros(session.id);
+  let registros = [];
+  try{ registros = await loadRegistros(session.id); }catch(e){}
   try{
     const sbRows = await DB_Asist.getByUser(Number(session.id));
     if(sbRows.length>0){

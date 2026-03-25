@@ -562,9 +562,9 @@ async function render(){
   el('badgeEmpleados').textContent='👥 '+USERS.length+' empleados';
   el('kPend').textContent=pendientes.length;
 
-  renderPlanilla();
-  renderSolicitudes();
-  renderHistorial();
+  await renderPlanilla();
+  await renderSolicitudes();
+  await renderHistorial();
 }
 
 // ═══════════════════════════════════════
