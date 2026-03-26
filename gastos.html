@@ -1684,45 +1684,7 @@ async function exportPDF() {
     + '<div style="font-size:14px;font-weight:700">Total Gastos del Mes</div>'
     + '<div style="font-size:28px;font-weight:800">'+Lf2(fixedTotal+varTotal)+'</div></div>'
     + '<div class="footer"><span>Cayena - Registro de Gastos</span><span>'+fecha+'</span></div>'
-    + '
-<script id="sidebar-role-script">
-(function(){
-  var s = null;
-  try{ s = JSON.parse(sessionStorage.getItem('cayena_session')); }catch{}
-  if(!s || s.pages === 'all') return; // gerencia ve todo
-  var pages = s.pages;
-  // Ocultar links no permitidos EXCEPTO cuenta-corriente que siempre es visible si está en pages
-  document.querySelectorAll('.ni[href]').forEach(function(link){
-    var href = link.getAttribute('href');
-    if(!href || href === '#') return;
-    var page = href.split('/').pop();
-    if(pages.indexOf(page) < 0){
-      link.style.display = 'none';
-    }
-  });
-  // Ocultar ng vacíos EXCEPTO "Personas" si cuenta-corriente está en pages
-  document.querySelectorAll('.ng').forEach(function(ng){
-    var text = ng.textContent.trim();
-    if(text === 'Personas' && pages.indexOf('cuenta-corriente.html') >= 0) return;
-    var next = ng.nextElementSibling;
-    var hasVisible = false;
-    while(next && !next.classList.contains('ng')){
-      if(next.classList.contains('ni') && next.style.display !== 'none') hasVisible = true;
-      next = next.nextElementSibling;
-    }
-    if(!hasVisible) ng.style.display = 'none';
-  });
-  // Actualizar nombre en sidebar desde sesion
-  var av = document.querySelector('.av, .sav');
-  var un = document.querySelector('.un, .sun');
-  var ur = document.querySelector('.ur, .sur');
-  if(av){ av.textContent = s.initials || s.name.slice(0,2).toUpperCase(); if(s.bg) av.style.background = s.bg; }
-  if(un) un.textContent = s.name;
-  if(ur) ur.textContent = s.cargo || '';
-})();
-</script>
-
-</body></html>';
+    + '</body></html>';
 
   var w = window.open('','_blank','width=900,height=700');
   w.document.write(html);
