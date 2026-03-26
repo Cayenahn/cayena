@@ -3,7 +3,7 @@
 <head>
 <script>(function(){var href=window.location.href;var p=href.split("/").pop().split("?")[0].split("#")[0]||"index.html";if(!p||p==="")p="index.html";if(p==="index.html")return;var s=sessionStorage.getItem("cayena_session");if(!s){window.location.replace("index.html");return;}try{var d=JSON.parse(s);if(!d||!d.role){window.location.replace("index.html");return;}if(Date.now()-d.ts>14400000){sessionStorage.removeItem("cayena_session");window.location.replace("index.html");return;}var pages=d.pages;if(pages!=="all"&&pages.indexOf(p)<0){var dest={gerencia:"dashboard.html",emp_inv:"inventario.html",emp_cc:"cuenta-corriente.html"}[d.role]||"index.html";if(p!==dest)window.location.replace(dest);return;}}catch(e){window.location.replace("index.html");}})();</script>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
 <title>Cayena — Estado de Resultados</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -184,6 +184,475 @@ body{overflow:hidden}
   .tper{display:none}
   .content{padding:16px 16px 60px}
 }
+
+/* ═══════════════════════════════════════════
+   MOBILE RESPONSIVE — Cayena
+   Optimizado para Android/iOS 360px+
+   ═══════════════════════════════════════════ */
+
+/* Tamaño mínimo de touch targets */
+button, .btn, input[type="button"], input[type="submit"],
+a.ni, .tab, .clock-btn, .exp-tab, .exp-close {
+  min-height: 44px;
+}
+
+/* Inputs y selects más grandes en mobile */
+@media(max-width:600px){
+  input, select, textarea {
+    font-size: 16px !important; /* evita zoom automático en iOS */
+    min-height: 44px;
+    padding: 10px 12px;
+  }
+  .field input, .field select {
+    font-size: 16px !important;
+  }
+}
+
+/* ── LAYOUT PRINCIPAL ── */
+@media(max-width:900px){
+  .sidebar {
+    position: fixed;
+    left: 0; top: 0; bottom: 0;
+    transform: translateX(-100%);
+    z-index: 90;
+  }
+  .sidebar.open { transform: translateX(0); }
+  .mb { display: flex !important; }
+  .main { width: 100%; }
+  .content { padding: 12px 12px 80px; }
+  .topbar { padding: 0 14px; }
+}
+
+/* ── HERO ── */
+@media(max-width:600px){
+  .page-hero, .ph-head, .ph-top {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+    padding: 16px !important;
+    border-radius: 14px !important;
+  }
+  .ph-title, .ptitle, .hero-title {
+    font-size: 20px !important;
+  }
+  .hero-total { font-size: 22px !important; }
+  .ph-right, .hero-right { text-align: left !important; }
+  .hero-stats { gap: 12px !important; }
+  .hs-val { font-size: 18px !important; }
+}
+
+/* ── KPI GRIDS ── */
+@media(max-width:700px){
+  .kpi-grid,
+  div[style*="grid-template-columns: repeat(4"],
+  div[style*="grid-template-columns:repeat(4"] {
+    grid-template-columns: 1fr 1fr !important;
+  }
+}
+@media(max-width:400px){
+  .kpi-grid { grid-template-columns: 1fr !important; }
+}
+
+/* ── TABLAS ── */
+.table-wrap, .table-container, .card,
+div:has(> table) {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+@media(max-width:600px){
+  table { min-width: 500px; }
+  th, td { padding: 8px 10px !important; font-size: 12px !important; }
+}
+
+/* ── FORMULARIOS ── */
+@media(max-width:600px){
+  .field-grid, .fg2, .fg3,
+  div[style*="grid-template-columns:1fr 1fr"],
+  div[style*="grid-template-columns: 1fr 1fr"],
+  .cfg-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .form-body, .fm-body { padding: 14px !important; }
+}
+
+/* ── BOTONES ── */
+@media(max-width:600px){
+  .tr2 { gap: 4px; }
+  .tr2 .btn { padding: 8px 10px; font-size: 12px; }
+  .clock-btns { grid-template-columns: 1fr !important; gap: 10px; }
+  .clock-btn { padding: 16px 12px; }
+  .sol-acts, .td-acciones, .td-acc { flex-wrap: wrap; gap: 4px; }
+  .sol-acts .btn, .td-acciones .btn, .td-acc .btn { flex: 1; min-width: 80px; }
+}
+
+/* ── TABS ── */
+@media(max-width:600px){
+  .tabs, .exp-tabs { overflow-x: auto; -webkit-overflow-scrolling: touch; flex-wrap: nowrap; }
+  .tab, .exp-tab { padding: 8px 10px !important; font-size: 11px !important; }
+}
+
+/* ── TARJETAS DE EMPLEADO (planilla) ── */
+@media(max-width:600px){
+  .emp-grid { grid-template-columns: 1fr !important; }
+  .emp-card { border-radius: 14px; }
+  .ec-head { padding: 12px 14px; }
+  .ec-body { padding: 0 14px 10px; }
+  .ec-footer { padding: 8px 14px 12px; gap: 5px; }
+  .ec-footer .btn { padding: 6px 6px; font-size: 11px; }
+  .main-layout.with-exp { grid-template-columns: 1fr !important; }
+  .exp-panel { border-radius: 14px; }
+  .exp-body { max-height: none; }
+}
+
+/* ── SUMMARY GRID (asistencia) ── */
+@media(max-width:500px){
+  .summary-grid { grid-template-columns: 1fr !important; }
+}
+
+/* ── RESUMEN/TOTALES ── */
+@media(max-width:600px){
+  .res-total { flex-direction: column; gap: 4px; align-items: flex-start; }
+  .res-total-val { font-size: 18px !important; }
+}
+
+/* ── TOPBAR ── */
+@media(max-width:500px){
+  .ttl { font-size: 14px !important; }
+  .tey, .tsep { display: none; }
+  #periodoChip { font-size: 11px; padding: 2px 8px; }
+}
+
+/* ── OVERFLOW PREVENTION ── */
+* { max-width: 100%; }
+img, video, iframe { max-width: 100%; height: auto; }
+pre, code { overflow-x: auto; }
+
+/* ── SIDEBAR BOTTOM NAV HINT ── */
+@media(max-width:900px){
+  .su { padding: 12px 14px; }
+  .logout-btn { margin-bottom: 20px; }
+}
+
+/* ── SCROLL SUAVE ── */
+.content, .exp-body, .sidebar {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+/* ── EVITAR ZOOM EN IOS AL HACER FOCUS ── */
+@media(max-width:600px){
+  input[type="text"],
+  input[type="number"],
+  input[type="date"],
+  input[type="email"],
+  select, textarea {
+    font-size: 16px !important;
+  }
+}
+
+
+/* ═══════════════════════════════════════════
+   ANDROID CHROME — Optimizaciones específicas
+   ═══════════════════════════════════════════ */
+
+/* Touch feedback visible en Android (reemplaza :hover que no funciona en touch) */
+.btn:active, button:active,
+.ni:active, .tab:active, .exp-tab:active,
+.clock-btn:active, .emp-card:active,
+.sol-item:active, .pend-pill:active {
+  opacity: 0.75;
+  transform: scale(0.97);
+  transition: opacity 0.1s, transform 0.1s;
+}
+
+/* Botones primarios */
+.btn-primary:active { background: var(--blue-deep) !important; }
+.btn-green:active   { filter: brightness(0.88); }
+.btn-red:active     { filter: brightness(0.88); }
+
+/* Touch action: mejora el scroll y evita retrasos de 300ms en Android */
+button, a, .btn, .ni, .tab, .exp-tab,
+.clock-btn, .emp-card, .sol-item,
+.logout-btn, .exp-close {
+  touch-action: manipulation; /* elimina el delay de 300ms en Android */
+  -webkit-tap-highlight-color: transparent;
+  cursor: pointer;
+}
+
+/* Scroll suave nativo en Android */
+.content, .exp-body, .sidebar,
+.tabs, .exp-tabs, [class*="scroll"] {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain; /* evita que el scroll "pase" al body */
+}
+
+/* Evitar que el teclado Android empuje el contenido y rompa el layout */
+.app { height: 100%; height: 100dvh; } /* dvh = dynamic viewport height */
+
+/* Safe area para Android con barra de navegación por gestos */
+.content {
+  padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+}
+.topbar {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+/* Inputs: evitar zoom automático en Android Chrome */
+input[type="text"],
+input[type="number"],
+input[type="date"],
+input[type="email"],
+input[type="tel"],
+input[type="password"],
+select, textarea {
+  font-size: 16px !important;
+  -webkit-appearance: none; /* evita estilos nativos feos en Android */
+  border-radius: 12px;
+}
+
+/* Select nativo Android — mejor apariencia */
+select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2364748B' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 32px !important;
+}
+
+/* Tablas horizontales en Android — scroll suave */
+.table-wrap, .table-container,
+div[style*="overflow-x:auto"],
+div[style*="overflow-x: auto"] {
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none; /* ocultar scrollbar feo en Android */
+}
+.table-wrap::-webkit-scrollbar { display: none; }
+
+/* Sidebar en Android — velocidad de animación correcta */
+@media(max-width:900px) {
+  .sidebar {
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform; /* acelera la animación con GPU */
+  }
+}
+
+/* Modales/overlays — centrar correctamente en Android con teclado */
+.overlay, .form-modal, #wifiBlock, #checkOverlay {
+  position: fixed;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Toast — posición correcta con barra de navegación Android */
+.toast {
+  bottom: calc(22px + env(safe-area-inset-bottom, 0px));
+}
+
+/* Prevenir selección de texto accidental en botones */
+.btn, button, .ni, .tab, .emp-card,
+.clock-btn, .sol-item {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Texto seleccionable solo donde tiene sentido */
+p, td, .sol-meta, .emp-name, .ec-name,
+input, textarea {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* Grids responsivos en Android — asegurar que no desborden */
+@media(max-width:380px) {
+  .kpi-grid { grid-template-columns: 1fr !important; }
+  .summary-grid { grid-template-columns: 1fr 1fr !important; }
+  .hero-stats { gap: 10px; }
+  .hs-val { font-size: 16px !important; }
+  .ph-title, .ptitle { font-size: 18px !important; }
+  .topbar { height: 52px; }
+}
+
+/* Números en Android — fuente tabular para mejor legibilidad */
+.kpi-val, .sum-val, .emp-neto-val,
+.hero-total, .hs-val, .card-total,
+.sol-monto, .ec-neto-val {
+  font-variant-numeric: tabular-nums;
+  -webkit-font-feature-settings: "tnum";
+  font-feature-settings: "tnum";
+}
+
+/* Animaciones más rápidas en Android (dispositivos lentos) */
+@media(prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+
+/* ═══════════════════════════════════════════
+   iOS SAFARI — Optimizaciones específicas
+   Compatible con iPhone y iPad
+   ═══════════════════════════════════════════ */
+
+/* Prevenir zoom de texto en rotación de pantalla (iOS Safari) */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* Altura correcta en iOS Safari — 100vh incluye la barra del browser */
+html, body { height: 100%; }
+.app {
+  height: 100%;
+  height: -webkit-fill-available; /* iOS Safari fallback */
+  height: 100dvh;                  /* Moderno: dynamic viewport */
+}
+
+/* Inputs y selects — iOS Safari estilo nativo feo */
+input, select, textarea, button {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+/* Inputs de fecha — iOS Safari los muestra raro */
+input[type="date"] {
+  -webkit-appearance: none;
+  appearance: none;
+  min-height: 44px;
+  padding: 10px 12px;
+  font-size: 16px;
+  font-family: var(--font, 'Inter', sans-serif);
+  color: var(--text, #0F172A);
+  background: var(--bg, #F8FAFC);
+  border: 1.5px solid var(--border, #E2E8F0);
+  border-radius: 12px;
+  width: 100%;
+}
+input[type="date"]::-webkit-datetime-edit { padding: 0; }
+input[type="date"]::-webkit-date-and-time-value { text-align: left; }
+
+/* Botones — iOS Safari agrega padding/border no deseado */
+button {
+  -webkit-appearance: none;
+  appearance: none;
+  background: none;
+  border: none;
+}
+
+/* Scroll — iOS Safari necesita estos para funcionar bien */
+.content, .exp-body, .sidebar {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Tap highlight — iOS Safari tiene su propio color azul */
+* {
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Position fixed + teclado iOS — El teclado en iOS empuja position:fixed */
+/* Solución: usar position:sticky en lugar de fixed donde sea posible */
+@supports (-webkit-touch-callout: none) {
+  /* Solo iOS Safari */
+  .toast {
+    position: fixed;
+    bottom: max(22px, env(safe-area-inset-bottom));
+  }
+  /* Topbar en iOS con notch */
+  .topbar {
+    padding-top: max(0px, env(safe-area-inset-top));
+  }
+  /* Content padding bottom para iPhone con home indicator */
+  .content {
+    padding-bottom: max(80px, calc(80px + env(safe-area-inset-bottom)));
+  }
+}
+
+/* Sidebar — iOS Safari tiene bug con transform y overflow */
+.sidebar {
+  -webkit-overflow-scrolling: touch;
+  transform: translateZ(0); /* fuerza compositing layer en iOS */
+}
+
+/* Overlays/modales — iOS Safari no muestra bien backdrop-filter en todos */
+.ovbg {
+  -webkit-backdrop-filter: none; /* desactivar en iOS para rendimiento */
+}
+
+/* Inputs focus — iOS Safari hace scroll extraño al hacer focus en inputs */
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* Selects — iOS Safari muestra dropdown nativo que ignora estilos */
+select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2364748B' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 12px;
+  padding-right: 36px !important;
+  cursor: pointer;
+}
+
+/* Flexbox bugs iOS Safari 14- */
+.app, .main, .sidebar {
+  -webkit-box-orient: vertical;
+}
+.tl, .tr2, .su, .logo {
+  -webkit-box-orient: horizontal;
+}
+
+/* Overflow tables — iOS Safari necesita wrapper explícito */
+.table-scroll-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  max-width: 100%;
+}
+
+/* Momentum scrolling en iOS */
+.content, .exp-body, .table-scroll-wrap {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+}
+
+/* Sticky headers — iOS Safari tiene bugs con position:sticky en tablas */
+thead {
+  position: relative; /* fallback para iOS Safari */
+}
+
+/* Image rendering en iOS retina */
+img, svg {
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+/* Prevenir callout (menú contextual) en elementos no de texto en iOS */
+.btn, button, .ni, .emp-card, .clock-btn {
+  -webkit-touch-callout: none;
+}
+
+/* Permitir callout en texto seleccionable */
+p, td, input, textarea, .sol-meta {
+  -webkit-touch-callout: default;
+}
+
+/* Números — iOS Safari con fuente correcta */
+.kpi-val, .sum-val, .hero-total,
+.sol-monto, .ec-neto-val, .ph-balance {
+  -webkit-font-feature-settings: "tnum";
+  font-feature-settings: "tnum";
+  font-variant-numeric: tabular-nums;
+}
+
+/* iOS_SAFARI_OPTIMIZED */
+
+/* ANDROID_OPTIMIZED */
+
+/* MOBILE_RESPONSIVE */
 </style>
 </head>
 <body>
