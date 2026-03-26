@@ -1112,6 +1112,7 @@ async function renderFixed() {
       const pago    = sv?.pago   || g.pago;
       const cuenta  = sv?.cuenta || g.cuenta;
       const nombre  = sv?.nombre || g.nombre;
+      const desc    = sv?.desc   || g.desc;
       const isPending = monto === null || monto === undefined;
 
       const cuentaOpts = CUENTAS.map(c =>
@@ -1132,7 +1133,10 @@ async function renderFixed() {
             <span class="gasto-name" id="fname-lbl-${g.id}">${nombre}</span>
             <button class="edit-name-btn" onclick="startEditName('${g.id}')" title="Editar nombre">✏</button>
           </div>
-          <div class="gasto-desc">${g.desc}</div>
+          <div class="gasto-desc-wrap" style="display:flex;align-items:center;gap:4px;margin-top:2px">
+            <span class="gasto-desc" id="fdesc-lbl-${g.id}" style="flex:1">${desc}</span>
+            <button class="edit-name-btn" onclick="startEditDesc('${g.id}')" title="Editar descripción" style="font-size:10px;opacity:.4">✏</button>
+          </div>
         </div>
         <div class="gasto-amount-wrap">
           <input class="gasto-amount ${isPending ? 'pending-input' : ''}"
@@ -1200,6 +1204,45 @@ function cancelEditName(id, original, input) {
   `;
 }
 
+// ── Edición inline de descripción ──
+function startEditDesc(id) {
+  const lbl = el('fdesc-lbl-' + id);
+  if (!lbl) return;
+  const curDesc = lbl.textContent.trim();
+  const wrap = lbl.parentElement;
+  wrap.innerHTML = `
+    <input class="name-input" id="dedit-${id}" value="${curDesc}" maxlength="80" style="flex:1;font-size:11px"
+      onblur="commitEditDesc('${id}',this)"
+      onkeydown="if(event.key==='Enter')this.blur();if(event.key==='Escape')cancelEditDesc('${id}','${curDesc}',this)">
+    <button class="edit-name-btn" onclick="el('dedit-${id}').blur()" title="Guardar" style="font-size:10px">✓</button>
+  `;
+  const inp = el('dedit-' + id);
+  if (inp) { inp.focus(); inp.select(); }
+}
+
+async function commitEditDesc(id, input) {
+  const original = GASTOS_FIJOS.find(x => x.id === id)?.desc || '';
+  const newDesc  = input.value.trim() || original;
+  const saved = await loadFixedData();
+  if (!saved[id]) saved[id] = getFixedDefaults(id);
+  saved[id].desc = newDesc;
+  await saveFixedData(saved);
+  const wrap = input.parentElement;
+  wrap.innerHTML = `
+    <span class="gasto-desc" id="fdesc-lbl-${id}" style="flex:1">${newDesc}</span>
+    <button class="edit-name-btn" onclick="startEditDesc('${id}')" title="Editar descripción" style="font-size:10px;opacity:.4">✏</button>
+  `;
+  showToast('Descripción actualizada', 'ok');
+}
+
+function cancelEditDesc(id, original, input) {
+  const wrap = input.parentElement;
+  wrap.innerHTML = `
+    <span class="gasto-desc" id="fdesc-lbl-${id}" style="flex:1">${original}</span>
+    <button class="edit-name-btn" onclick="startEditDesc('${id}')" title="Editar descripción" style="font-size:10px;opacity:.4">✏</button>
+  `;
+}
+
 // ── Recalcular subtotal de un grupo y el total general ──
 async function recalcGrupoTotal(grupoId) {
   const saved = await loadFixedData();
@@ -1251,7 +1294,7 @@ async function onFixedMetaChange(id, field, value) {
 
 function getFixedDefaults(id) {
   const g = GASTOS_FIJOS.find(x => x.id===id);
-  return {monto:g.montoBase, isv:g.isv, cuenta:g.cuenta, pago:g.pago};
+  return { monto: g.montoBase, isv: g.isv, cuenta: g.cuenta, pago: g.pago, nombre: g.nombre, desc: g.desc };
 }
 
 async function resetFixed(id) {
@@ -1649,12 +1692,13 @@ async function exportPDF() {
       var sv = saved[g.id];
       var m = sv !== undefined ? (sv.monto||0) : (g.montoBase||0);
       var nombre = (sv && sv.nombre) ? sv.nombre : g.nombre;
+      var descPdf = (sv && sv.desc) ? sv.desc : g.desc;
       var c = (sv && sv.cuenta) ? sv.cuenta : g.cuenta;
       var isv = (sv && sv.isv) ? sv.isv : g.isv;
       fixedTotal += parseFloat(m)||0;
       grupoTotal += parseFloat(m)||0;
       var isvLbl = isv === 'exento' ? 'Exento' : 'Grav. ' + isv + '%';
-      return '<tr><td>' + nombre + '</td><td style="font-size:9px">' + g.desc + '</td><td>' + c + '</td><td>' + isvLbl + '</td><td><b>' + Lf2(m) + '</b></td></tr>';
+      return '<tr><td>' + nombre + '</td><td style="font-size:9px">' + descPdf + '</td><td>' + c + '</td><td>' + isvLbl + '</td><td><b>' + Lf2(m) + '</b></td></tr>';
     }).join('');
     fixedRows += '<tr style="background:#EFF6FF"><td colspan="4" style="font-weight:700;color:#1E3A8A;font-size:10px;text-transform:uppercase;letter-spacing:.5px">' + grupo.label + '</td><td style="font-weight:800;color:#1E3A8A">' + Lf2(grupoTotal) + '</td></tr>' + grupoRows;
   });
