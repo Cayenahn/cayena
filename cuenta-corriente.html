@@ -313,6 +313,12 @@ let currentTab = 'all';
 
 window.addEventListener('DOMContentLoaded', () => {
   if(!session){ window.location.replace('index.html'); return; }
+
+  // Gerencia gestiona solicitudes desde Planilla, no desde aquí
+  if(session.role === 'gerencia'){
+    window.location.replace('planilla.html');
+    return;
+  }
   const ini = session.initials || session.name.slice(0,2).toUpperCase();
   el('sideAv').textContent = ini;
   if(session.bg) el('sideAv').style.background = session.bg;
