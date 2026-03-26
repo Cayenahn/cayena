@@ -124,6 +124,16 @@ body{overflow-x:hidden}
 .del-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;padding:4px 6px;border-radius:6px;line-height:1;transition:all .15s;flex-shrink:0}
 .del-btn:hover{color:var(--red);background:var(--red-soft)}
 
+/* ── GRUPO HEADER ── */
+.grupo-header{display:flex;align-items:center;justify-content:space-between;padding:10px 18px;background:var(--bg);border-bottom:1px solid var(--border);border-top:2px solid var(--border)}
+.grupo-header:first-child{border-top:none}
+.grupo-name{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);display:flex;align-items:center;gap:8px}
+.grupo-subtotal{font-size:13px;font-weight:800;color:var(--blue);font-variant-numeric:tabular-nums}
+.edit-name-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px;padding:2px 6px;border-radius:6px;line-height:1;transition:all .15s;flex-shrink:0;opacity:.5}
+.edit-name-btn:hover{opacity:1;color:var(--blue);background:#EFF6FF}
+.gasto-name-wrap{display:flex;align-items:center;gap:6px}
+.name-input{font-family:var(--font);font-size:13px;font-weight:600;color:var(--text);background:var(--bg);border:1.5px solid var(--blue);border-radius:8px;padding:4px 8px;outline:none;width:180px}
+
 /* ── CAT SUMMARY ── */
 .cat-summary{background:var(--white);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow);margin-bottom:10px}
 .cat-sum-row{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-bottom:1px solid var(--border)}
@@ -768,7 +778,7 @@ p, td, input, textarea, .sol-meta {
       <!-- ═══ GASTOS FIJOS ═══ -->
       <div id="pane-fijos">
         <div style="background:#FFF7ED;border:1px solid #FED7AA;border-radius:var(--r);padding:12px 16px;margin-bottom:14px;font-size:12px;color:var(--amber);line-height:1.6">
-          <strong>Gastos fijos del mes</strong> — estos se cargan automáticamente cada mes. Los marcados en amarillo requieren que ingreses el valor manualmente (ej: ENEE varía cada mes). Edita el monto y presiona Enter o toca otro campo para guardar.
+          <strong>Gastos fijos del mes</strong> — organizados por categoría. Puedes <strong>editar el nombre</strong> con el ícono ✏ y <strong>cambiar el monto</strong> directamente. Los marcados en amarillo requieren que ingreses el valor manualmente (ej: ENEE varía cada mes). Los subtotales y el Estado de Resultados se actualizan automáticamente.
         </div>
         <div class="fixed-card">
           <div class="fixed-head">
@@ -913,23 +923,50 @@ p, td, input, textarea, .sol-meta {
 // ══════════════════════════════
 //  GASTOS FIJOS (pre-cargados del Excel)
 // ══════════════════════════════
-const GASTOS_FIJOS = [
-  {id:'f01', nombre:'Internet Comercial',       desc:'Multicable S.A · 730205481',          montoBase:1500,    pending:false, cuenta:'Otros Gastos Administrativos', isv:'15',    pago:'Transferencia'},
-  {id:'f02', nombre:'ENEE',                     desc:'Código 5269353',                       montoBase:null,    pending:true,  cuenta:'Servicios públicos',           isv:'exento', pago:'Transferencia'},
-  {id:'f03', nombre:'Arriendo del Local',        desc:'Local Renta y Energía',                montoBase:6500,    pending:false, cuenta:'Alquiler',                     isv:'exento', pago:'Transferencia'},
-  {id:'f04', nombre:'PC de Edición',             desc:'Minicuota 6/12',                       montoBase:1125.31, pending:false, cuenta:'Otros Gastos Administrativos', isv:'exento', pago:'TC Gold'},
-  {id:'f05', nombre:'Hermez Seguridad',          desc:'Mensualidad de Seguridad',             montoBase:10000,   pending:false, cuenta:'Otros gastos operativos',      isv:'15',    pago:'Transferencia'},
-  {id:'f06', nombre:'Hondutel',                  desc:'Línea 27734798',                       montoBase:63.91,   pending:false, cuenta:'Servicios públicos',           isv:'exento', pago:'Transferencia'},
-  {id:'f07', nombre:'JC Consultores',            desc:'Juan Carlos · Pago de Impuestos',      montoBase:2508.33, pending:false, cuenta:'Otros Gastos Administrativos', isv:'exento', pago:'Transferencia'},
-  {id:'f08', nombre:'Aguas de Siguatepeque',     desc:'Agua potable · Negocio',               montoBase:455.34,  pending:false, cuenta:'Servicios públicos',           isv:'exento', pago:'Transferencia'},
-  {id:'f09', nombre:'Banco Occidente',           desc:'Pago de Préstamo',                     montoBase:10000,   pending:false, cuenta:'Gastos financieros',           isv:'exento', pago:'Transferencia'},
-  {id:'f10', nombre:'BAC',                       desc:'Seguro HRE Mensual',                   montoBase:47.52,   pending:false, cuenta:'Gastos financieros',           isv:'exento', pago:'Débito'},
-  {id:'f11', nombre:'Swap WolfSA',               desc:'Extra Teléfono',                       montoBase:494.80,  pending:false, cuenta:'Gastos financieros',           isv:'15',    pago:'TC PS'},
-  {id:'f12', nombre:'BAC',                       desc:'Seguro de Saldo de Deuda Anual',       montoBase:94.12,   pending:false, cuenta:'Otros gastos operativos',      isv:'exento', pago:'Débito'},
-  {id:'f13', nombre:'Reserva Planilla',          desc:'Liquidaciones y Aguinaldos',           montoBase:3000,    pending:false, cuenta:'Gastos financieros',           isv:'exento', pago:'Efectivo'},
-  {id:'f14', nombre:'Aguas de Siguatepeque',     desc:'Agua potable · Administrador',         montoBase:306.82,  pending:false, cuenta:'Otros Gastos Administrativos', isv:'exento', pago:'Transferencia'},
-  {id:'f15', nombre:'The Classified Hn',         desc:'Manejo de Redes Sociales',             montoBase:3000,    pending:false, cuenta:'Publicidad y marketing',       isv:'15',    pago:'Transferencia'},
+// ── GRUPOS DE GASTOS FIJOS ──
+// Cada grupo tiene un label y una lista de gastos fijos.
+// Los nombres y montos son editables por el usuario (se guardan en localStorage/Supabase).
+const GRUPOS_GASTOS = [
+  {
+    id: 'grp-operativos',
+    label: 'Gastos Operativos',
+    color: '#F97316',
+    items: [
+      {id:'f05', nombre:'Hermez Seguridad',     desc:'Seguridad del local',              montoBase:10000,   cuenta:'Otros gastos operativos',      isv:'15',    pago:'Transferencia'},
+      {id:'f03', nombre:'Arriendo del Local',   desc:'Renta mensual del local',          montoBase:6500,    cuenta:'Alquiler',                     isv:'exento', pago:'Transferencia'},
+      {id:'f02', nombre:'ENEE',                 desc:'Energía eléctrica (varía)',         montoBase:null,    cuenta:'Servicios públicos',           isv:'exento', pago:'Transferencia'},
+      {id:'f06', nombre:'Hondutel',             desc:'Línea telefónica 27734798',        montoBase:63.91,   cuenta:'Servicios públicos',           isv:'exento', pago:'Transferencia'},
+      {id:'f08', nombre:'Aguas de Siguatepeque',desc:'Agua potable · Negocio',           montoBase:455.34,  cuenta:'Servicios públicos',           isv:'exento', pago:'Transferencia'},
+      {id:'f15', nombre:'The Classified Hn',    desc:'Manejo de Redes Sociales',         montoBase:3000,    cuenta:'Publicidad y marketing',       isv:'15',    pago:'Transferencia'},
+    ]
+  },
+  {
+    id: 'grp-administrativos',
+    label: 'Gastos Administrativos',
+    color: '#2563EB',
+    items: [
+      {id:'f01', nombre:'Internet Comercial',   desc:'Multicable S.A · 730205481',       montoBase:1500,    cuenta:'Otros Gastos Administrativos', isv:'15',    pago:'Transferencia'},
+      {id:'f04', nombre:'PC de Edición',        desc:'Minicuota mensual equipo',          montoBase:1125.31, cuenta:'Otros Gastos Administrativos', isv:'exento', pago:'TC Gold'},
+      {id:'f07', nombre:'JC Consultores',       desc:'Pago de impuestos / contabilidad', montoBase:2508.33, cuenta:'Otros Gastos Administrativos', isv:'exento', pago:'Transferencia'},
+      {id:'f14', nombre:'Aguas (Administrador)',desc:'Agua potable · Administrador',      montoBase:306.82,  cuenta:'Otros Gastos Administrativos', isv:'exento', pago:'Transferencia'},
+    ]
+  },
+  {
+    id: 'grp-financieros',
+    label: 'Gastos Financieros',
+    color: '#DC2626',
+    items: [
+      {id:'f09', nombre:'Banco Occidente',      desc:'Pago de préstamo mensual',         montoBase:10000,   cuenta:'Gastos financieros',           isv:'exento', pago:'Transferencia'},
+      {id:'f10', nombre:'BAC – Seguro HRE',     desc:'Seguro mensual de inmueble',       montoBase:47.52,   cuenta:'Gastos financieros',           isv:'exento', pago:'Débito'},
+      {id:'f11', nombre:'Swap WolfSA',          desc:'Extra teléfono',                   montoBase:494.80,  cuenta:'Gastos financieros',           isv:'15',    pago:'TC PS'},
+      {id:'f12', nombre:'BAC – Seguro Deuda',   desc:'Seguro de saldo de deuda anual',   montoBase:94.12,   cuenta:'Otros gastos operativos',      isv:'exento', pago:'Débito'},
+      {id:'f13', nombre:'Reserva Planilla',     desc:'Liquidaciones y aguinaldos',       montoBase:3000,    cuenta:'Gastos financieros',           isv:'exento', pago:'Efectivo'},
+    ]
+  },
 ];
+
+// Lista plana para compatibilidad con funciones existentes
+const GASTOS_FIJOS = GRUPOS_GASTOS.flatMap(g => g.items);
 
 const CUENTAS = [
   'Nómina','Alquiler','Servicios públicos','Mantenimiento y reparaciones',
@@ -976,7 +1013,7 @@ async function loadFixedData() {
     return JSON.parse(localStorage.getItem(fixedKey()) || '{}');
   }
 }
-async function await saveFixedData(data) {
+async function saveFixedData(data) {
   localStorage.setItem(fixedKey(), JSON.stringify(data));
   const periodo = monthKey();
   for (const [gastoId, val] of Object.entries(data)) {
@@ -994,7 +1031,7 @@ async function loadVarData() {
   } catch(e) {}
   return JSON.parse(localStorage.getItem(varKey()) || '[]');
 }
-async function await saveVarData(data) {
+async function saveVarData(data) {
   localStorage.setItem(varKey(), JSON.stringify(data));
 }
 
@@ -1028,83 +1065,169 @@ async function switchTab(t) {
 }
 
 // ══════════════════════════════
-//  FIXED EXPENSES
+//  FIXED EXPENSES (por grupo)
 // ══════════════════════════════
 async function renderFixed() {
   const saved = await loadFixedData();
   const container = el('fixed-rows');
   container.innerHTML = '';
-  let total = 0;
+  let grandTotal = 0;
   let pending = 0;
 
-  GASTOS_FIJOS.forEach((g, idx) => {
-    // Get saved override or base value
-    const saved_val = saved[g.id];
-    const monto = saved_val !== undefined ? saved_val.monto : g.montoBase;
-    const isv = saved_val !== undefined ? saved_val.isv : g.isv;
-    const pago = saved_val !== undefined ? saved_val.pago : g.pago;
-    const isPending = monto === null || monto === undefined;
-    if(!isPending) total += parseFloat(monto)||0;
-    if(isPending) pending++;
+  GRUPOS_GASTOS.forEach(grupo => {
+    let grupoTotal = 0;
 
-    const row = document.createElement('div');
-    row.className = 'gasto-row' + (isPending ? ' pending' : '');
-    row.id = 'frow-'+g.id;
+    // Calcular subtotal del grupo
+    grupo.items.forEach(g => {
+      const sv = saved[g.id];
+      const nombre = sv?.nombre || g.nombre;
+      const monto = sv !== undefined ? sv.monto : g.montoBase;
+      const isPending = monto === null || monto === undefined;
+      if(!isPending) grupoTotal += parseFloat(monto)||0;
+      else pending++;
+    });
+    grandTotal += grupoTotal;
 
-    const cuentaOpts = CUENTAS.map(c =>
-      `<option value="${c}" ${(saved_val?.cuenta||g.cuenta)===c?'selected':''}>${c}</option>`
-    ).join('');
-    const pagoOpts = Object.keys(PAGO_ICONS).map(p =>
-      `<option value="${p}" ${pago===p?'selected':''}>${PAGO_ICONS[p]} ${p}</option>`
-    ).join('');
-    const isvClass = isv==='exento'?'isv-0':isv==='15'?'isv-15':'isv-18';
-    const isvLabel = isv==='exento'?'Exento':'Grav. '+isv+'%';
-
-    row.innerHTML = `
-      <span class="gasto-num">${idx+1}</span>
-      <div class="gasto-info">
-        <div class="gasto-name">${g.nombre}</div>
-        <div class="gasto-desc">${g.desc}</div>
+    // Header del grupo
+    const grpHead = document.createElement('div');
+    grpHead.className = 'grupo-header';
+    grpHead.id = 'grp-head-' + grupo.id;
+    grpHead.innerHTML = `
+      <div class="grupo-name">
+        <div style="width:8px;height:8px;border-radius:50%;background:${grupo.color};flex-shrink:0"></div>
+        ${grupo.label}
       </div>
-      <div class="gasto-amount-wrap">
-        <input class="gasto-amount ${isPending?'pending-input':''}"
-          type="number" id="famount-${g.id}"
-          value="${isPending?'':monto}" placeholder="${isPending?'Ingresar valor':'0.00'}"
-          min="0" step="0.01" inputmode="decimal"
-          onchange="onFixedChange('${g.id}',this)"
-          onblur="onFixedChange('${g.id}',this)">
-        ${isPending?'<div style="font-size:9px;color:var(--amber);text-align:right;margin-top:3px">⚠ Requiere valor</div>':''}
-      </div>
-      <select class="gasto-cat-sel" onchange="onFixedMetaChange('${g.id}','cuenta',this.value)">${cuentaOpts}</select>
-      <select class="isv-sel ${isvClass}" onchange="onFixedMetaChange('${g.id}','isv',this.value);updateISVSelStyle(this)">
-        <option value="exento" ${isv==='exento'?'selected':''}>Exento 0%</option>
-        <option value="15" ${isv==='15'?'selected':''}>Gravado 15%</option>
-        <option value="18" ${isv==='18'?'selected':''}>Gravado 18%</option>
-      </select>
-      <select class="gasto-cat-sel" onchange="onFixedMetaChange('${g.id}','pago',this.value)">${pagoOpts}</select>
-      <button class="del-btn" onclick="resetFixed('${g.id}')" title="Limpiar valor">↺</button>
+      <div class="grupo-subtotal" id="grp-total-${grupo.id}">${Lf(grupoTotal)}</div>
     `;
-    container.appendChild(row);
+    container.appendChild(grpHead);
+
+    // Filas del grupo
+    grupo.items.forEach((g, idx) => {
+      const sv = saved[g.id];
+      const monto = sv !== undefined ? sv.monto : g.montoBase;
+      const isv = sv?.isv || g.isv;
+      const pago = sv?.pago || g.pago;
+      const nombre = sv?.nombre || g.nombre;
+      const isPending = monto === null || monto === undefined;
+
+      const row = document.createElement('div');
+      row.className = 'gasto-row' + (isPending ? ' pending' : '');
+      row.id = 'frow-'+g.id;
+
+      const cuentaOpts = CUENTAS.map(c =>
+        `<option value="${c}" ${(sv?.cuenta||g.cuenta)===c?'selected':''}>${c}</option>`
+      ).join('');
+      const pagoOpts = Object.keys(PAGO_ICONS).map(p =>
+        `<option value="${p}" ${pago===p?'selected':''}>${PAGO_ICONS[p]} ${p}</option>`
+      ).join('');
+      const isvClass = isv==='exento'?'isv-0':isv==='15'?'isv-15':'isv-18';
+
+      row.innerHTML = `
+        <span class="gasto-num">${idx+1}</span>
+        <div class="gasto-info">
+          <div class="gasto-name-wrap">
+            <span class="gasto-name" id="fname-lbl-${g.id}">${nombre}</span>
+            <button class="edit-name-btn" onclick="startEditName('${g.id}')" title="Editar nombre">✏</button>
+          </div>
+          <div class="gasto-desc" id="fdesc-${g.id}">${sv?.desc||g.desc}</div>
+        </div>
+        <div class="gasto-amount-wrap">
+          <input class="gasto-amount ${isPending?'pending-input':''}"
+            type="number" id="famount-${g.id}"
+            value="${isPending?'':monto}" placeholder="${isPending?'Ingresar valor':'0.00'}"
+            min="0" step="0.01" inputmode="decimal"
+            onchange="onFixedChange('${g.id}','${grupo.id}',this)"
+            onblur="onFixedChange('${g.id}','${grupo.id}',this)">
+          ${isPending?'<div style="font-size:9px;color:var(--amber);text-align:right;margin-top:3px">⚠ Requiere valor</div>':''}
+        </div>
+        <select class="gasto-cat-sel" onchange="onFixedMetaChange('${g.id}','cuenta',this.value)">${cuentaOpts}</select>
+        <select class="isv-sel ${isvClass}" onchange="onFixedMetaChange('${g.id}','isv',this.value);updateISVSelStyle(this)">
+          <option value="exento" ${isv==='exento'?'selected':''}>Exento 0%</option>
+          <option value="15" ${isv==='15'?'selected':''}>Gravado 15%</option>
+          <option value="18" ${isv==='18'?'selected':''}>Gravado 18%</option>
+        </select>
+        <select class="gasto-cat-sel" onchange="onFixedMetaChange('${g.id}','pago',this.value)">${pagoOpts}</select>
+        <button class="del-btn" onclick="resetFixed('${g.id}')" title="Restaurar valores originales">↺</button>
+      `;
+      container.appendChild(row);
+    });
   });
 
-  el('fixed-total').textContent = Lf(total);
+  el('fixed-total').textContent = Lf(grandTotal);
   updateKPIs();
 }
 
-async function onFixedChange(id, input) {
+// Edición inline de nombre
+function startEditName(id) {
+  const lbl = el('fname-lbl-' + id);
+  const curName = lbl.textContent;
+  const wrap = lbl.parentElement;
+  wrap.innerHTML = `
+    <input class="name-input" id="nedit-${id}" value="${curName}" maxlength="40"
+      onblur="commitEditName('${id}', this)"
+      onkeydown="if(event.key==='Enter')this.blur();if(event.key==='Escape')cancelEditName('${id}','${curName}',this)">
+    <button class="edit-name-btn" onclick="document.getElementById('nedit-${id}').blur()" title="Guardar">✓</button>
+  `;
+  const input = el('nedit-' + id);
+  input.focus();
+  input.select();
+}
+
+async function commitEditName(id, input) {
+  const newName = input.value.trim() || GASTOS_FIJOS.find(x=>x.id===id)?.nombre;
+  const saved = await loadFixedData();
+  if(!saved[id]) saved[id] = getFixedDefaults(id);
+  saved[id].nombre = newName;
+  await saveFixedData(saved);
+  // Restore label
+  const wrap = input.parentElement;
+  wrap.innerHTML = `
+    <span class="gasto-name" id="fname-lbl-${id}">${newName}</span>
+    <button class="edit-name-btn" onclick="startEditName('${id}')" title="Editar nombre">✏</button>
+  `;
+  showToast('Nombre actualizado', 'ok');
+}
+
+function cancelEditName(id, original, input) {
+  const wrap = input.parentElement;
+  wrap.innerHTML = `
+    <span class="gasto-name" id="fname-lbl-${id}">${original}</span>
+    <button class="edit-name-btn" onclick="startEditName('${id}')" title="Editar nombre">✏</button>
+  `;
+}
+
+// Recalcular subtotal de un grupo
+async function recalcGrupoTotal(grupoId) {
+  const saved = await loadFixedData();
+  const grupo = GRUPOS_GASTOS.find(g => g.id === grupoId);
+  if(!grupo) return;
+  let total = 0;
+  grupo.items.forEach(g => {
+    const sv = saved[g.id];
+    const m = sv !== undefined ? sv.monto : g.montoBase;
+    if(m !== null && m !== undefined) total += parseFloat(m)||0;
+  });
+  const el2 = el('grp-total-' + grupoId);
+  if(el2) el2.textContent = Lf(total);
+  // Recalcular total general
+  let grand = 0;
+  GRUPOS_GASTOS.forEach(grp => {
+    grp.items.forEach(g => {
+      const sv = saved[g.id];
+      const m = sv !== undefined ? sv.monto : g.montoBase;
+      if(m !== null && m !== undefined) grand += parseFloat(m)||0;
+    });
+  });
+  el('fixed-total').textContent = Lf(grand);
+}
+
+async function onFixedChange(id, grupoId, input) {
   const val = parseFloat(input.value);
   const saved = await loadFixedData();
   if(!saved[id]) saved[id] = getFixedDefaults(id);
   saved[id].monto = isNaN(val) ? null : val;
   await saveFixedData(saved);
-  // Re-render total
-  let total = 0;
-  GASTOS_FIJOS.forEach(g => {
-    const sv = saved[g.id];
-    const m = sv !== undefined ? sv.monto : g.montoBase;
-    if(m !== null && m !== undefined) total += parseFloat(m)||0;
-  });
-  el('fixed-total').textContent = Lf(total);
+  await recalcGrupoTotal(grupoId);
   updateKPIs();
   // Remove pending styling if value entered
   if(!isNaN(val) && val > 0) {
@@ -1114,11 +1237,12 @@ async function onFixedChange(id, input) {
   }
 }
 
-function onFixedMetaChange(id, field, value) {
+async function onFixedMetaChange(id, field, value) {
   const saved = await loadFixedData();
   if(!saved[id]) saved[id] = getFixedDefaults(id);
   saved[id][field] = value;
   await saveFixedData(saved);
+  updateKPIs();
 }
 
 function getFixedDefaults(id) {
@@ -1197,8 +1321,9 @@ async function saveVariable() {
 
 async function deleteVar(id) {
   if(!confirm('¿Eliminar este gasto?')) return;
-  const vars = await loadVarData().filter(v => v.id !== id);
-  await saveVarData(vars);
+  const vars = await loadVarData();
+  const newVars = vars.filter(v => v.id !== id);
+  await saveVarData(newVars);
   renderVariables();
   updateKPIs();
   showToast('Eliminado');
@@ -1207,7 +1332,7 @@ async function deleteVar(id) {
 // ══════════════════════════════
 //  RESUMEN POR CUENTA
 // ══════════════════════════════
-function renderResumen() {
+async function renderResumen() {
   const saved = await loadFixedData();
   const vars = await loadVarData();
 
@@ -1336,13 +1461,25 @@ function saveMonthlyTotals(fixedTotal, varTotal, saved, vars) {
   });
   vars.forEach(v => { bycat[v.cuenta] = (bycat[v.cuenta]||0) + (v.monto||0); });
 
+  // Subtotales por grupo para el dashboard
+  const bygrupo = {};
+  GRUPOS_GASTOS.forEach(grupo => {
+    let gTotal = 0;
+    grupo.items.forEach(g => {
+      const sv = saved[g.id];
+      const m = sv !== undefined ? (sv.monto||0) : (g.montoBase||0);
+      gTotal += parseFloat(m)||0;
+    });
+    bygrupo[grupo.label] = parseFloat(gTotal.toFixed(2));
+  });
+
   // Separate Otros Ingresos from expense total
   const otrosIngresos = parseFloat((bycat['Otros Ingresos']||0).toFixed(2));
   const expenseTotal = parseFloat((fixedTotal + varTotal - otrosIngresos).toFixed(2));
 
   const totalesObj = {
     total: parseFloat((fixedTotal+varTotal).toFixed(2)),
-    expenseTotal, otrosIngresos, bycat,
+    expenseTotal, otrosIngresos, bycat, bygrupo,
     periodo: monthKey(), updatedAt: new Date().toISOString()
   };
   localStorage.setItem('cayena_gastos_totales', JSON.stringify(totalesObj));
@@ -1360,7 +1497,7 @@ function updateISVSelStyle(sel) {
 // ── EXPORT PDF ──
 var CSS_BLOCK = '<style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;font-size:11px;color:#0F172A;background:#fff;padding:24px}.header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;padding-bottom:14px;border-bottom:2px solid #2563EB}.header h1{font-size:20px;font-weight:800;color:#1E3A8A}.header .meta{text-align:right;font-size:10px;color:#64748B;line-height:1.8}.kpi-row{display:grid;gap:10px;margin-bottom:18px}.kpi{background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:12px 14px}.kpi-lbl{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:#64748B;margin-bottom:4px}.kpi-val{font-size:18px;font-weight:800;color:#2563EB}table{width:100%;border-collapse:collapse;margin-bottom:16px}thead th{background:#1E3A8A;color:#fff;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:8px 10px;text-align:left}thead th:not(:first-child){text-align:right}tbody tr:nth-child(even){background:#F8FAFC}tbody td{padding:7px 10px;font-size:10px;color:#334155;border-bottom:1px solid #E2E8F0}tbody td:not(:first-child){text-align:right}tfoot td{background:#EFF6FF;font-weight:700;font-size:11px;padding:9px 10px;border-top:2px solid #2563EB;color:#1E3A8A}tfoot td:not(:first-child){text-align:right}.section{margin-bottom:20px}.section-title{font-size:12px;font-weight:700;color:#1E3A8A;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid #E2E8F0;text-transform:uppercase;letter-spacing:.5px}.footer{margin-top:20px;padding-top:10px;border-top:1px solid #E2E8F0;font-size:9px;color:#94A3B8;display:flex;justify-content:space-between}@media print{body{padding:0}@page{margin:15mm;size:A4}}</style>';
 
-function exportPDF() {
+async function exportPDF() {
   var now = new Date();
   var fecha = now.toLocaleDateString('es-HN',{day:'2-digit',month:'long',year:'numeric'});
   var hora = now.toLocaleTimeString('es-HN',{hour:'2-digit',minute:'2-digit'});
@@ -1368,17 +1505,25 @@ function exportPDF() {
   var Lf2 = function(n){return 'L ' + parseFloat(n||0).toLocaleString('es-HN',{minimumFractionDigits:2,maximumFractionDigits:2});};
   var saved = await loadFixedData();
   var vars = await loadVarData();
-  var fixedTotal=0, varTotal=0;
+  var fixedTotal = 0, varTotal = 0;
 
-  var fixedRows = GASTOS_FIJOS.map(function(g,i){
-    var sv=saved[g.id];
-    var m=sv!==undefined?(sv.monto||0):(g.montoBase||0);
-    var c=sv&&sv.cuenta?sv.cuenta:g.cuenta;
-    var isv=sv&&sv.isv?sv.isv:g.isv;
-    fixedTotal+=parseFloat(m)||0;
-    var isvLbl=isv==='exento'?'Exento':'Grav. '+isv+'%';
-    return '<tr><td>'+(i+1)+'</td><td>'+g.nombre+'</td><td style="font-size:9px">'+g.desc+'</td><td>'+c+'</td><td>'+isvLbl+'</td><td><b>'+Lf2(m)+'</b></td></tr>';
-  }).join('');
+  var fixedRows = '';
+  var fixedTotal = 0;
+  GRUPOS_GASTOS.forEach(function(grupo) {
+    var grupoTotal = 0;
+    var grupoRows = grupo.items.map(function(g, i) {
+      var sv = saved[g.id];
+      var m = sv !== undefined ? (sv.monto||0) : (g.montoBase||0);
+      var nombre = sv && sv.nombre ? sv.nombre : g.nombre;
+      var c = sv && sv.cuenta ? sv.cuenta : g.cuenta;
+      var isv = sv && sv.isv ? sv.isv : g.isv;
+      fixedTotal += parseFloat(m)||0;
+      grupoTotal += parseFloat(m)||0;
+      var isvLbl = isv === 'exento' ? 'Exento' : 'Grav. ' + isv + '%';
+      return '<tr><td>' + nombre + '</td><td style="font-size:9px">' + g.desc + '</td><td>' + c + '</td><td>' + isvLbl + '</td><td><b>' + Lf2(m) + '</b></td></tr>';
+    }).join('');
+    fixedRows += '<tr style="background:#EFF6FF"><td colspan="4" style="font-weight:700;color:#1E3A8A;font-size:10px;text-transform:uppercase;letter-spacing:.5px">' + grupo.label + '</td><td style="font-weight:800;color:#1E3A8A">' + Lf2(grupoTotal) + '</td></tr>' + grupoRows;
+  });
 
   var varRows = vars.map(function(v){
     varTotal+=v.monto||0;
@@ -1393,10 +1538,10 @@ function exportPDF() {
     + '<div class="kpi"><div class="kpi-lbl">Total gastos</div><div class="kpi-val" style="color:#EF4444">'+Lf2(fixedTotal+varTotal)+'</div></div>'
     + '<div class="kpi"><div class="kpi-lbl">Gastos fijos</div><div class="kpi-val" style="color:#F97316">'+Lf2(fixedTotal)+'</div></div>'
     + '<div class="kpi"><div class="kpi-lbl">Gastos variables</div><div class="kpi-val" style="color:#7C3AED">'+Lf2(varTotal)+'</div></div></div>'
-    + '<div class="section"><div class="section-title">Gastos Fijos</div>'
-    + '<table><thead><tr><th>#</th><th>Servicio</th><th>Descripci\u00F3n</th><th>Cuenta</th><th>ISV</th><th>Monto</th></tr></thead>'
+    + '<div class="section"><div class="section-title">Gastos Fijos por Grupo</div>'
+    + '<table><thead><tr><th>Servicio</th><th>Descripci\u00F3n</th><th>Cuenta</th><th>ISV</th><th>Monto</th></tr></thead>'
     + '<tbody>'+fixedRows+'</tbody>'
-    + '<tfoot><tr><td colspan="5">Total gastos fijos</td><td>'+Lf2(fixedTotal)+'</td></tr></tfoot></table></div>'
+    + '<tfoot><tr><td colspan="4">Total gastos fijos</td><td>'+Lf2(fixedTotal)+'</td></tr></tfoot></table></div>'
     + (vars.length ? '<div class="section"><div class="section-title">Gastos Variables / Extras</div>'
     + '<table><thead><tr><th>Fecha</th><th>Descripci\u00F3n</th><th>Cuenta</th><th>ISV</th><th>Monto</th></tr></thead>'
     + '<tbody>'+varRows+'</tbody>'
