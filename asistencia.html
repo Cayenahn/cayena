@@ -192,20 +192,19 @@ tbody tr:hover td{background:var(--bg)}
 <body>
 
 <!-- WIFI BLOCK -->
-<div id="wifiBlock">
-  <div class="wb-icon">📶</div>
-  <div class="wb-title">Red no autorizada</div>
-  <div class="wb-sub">Para registrar asistencia debes estar conectado a la red WiFi de Cayena</div>
-  <div class="wb-ssid">📡 Cayena</div>
-  <div class="wb-sub" style="font-size:12px;margin-top:4px">Conéctate a la red WiFi y vuelve a intentarlo</div>
-  <button class="wb-retry" onclick="checkWifi()">🔄 Verificar conexión</button>
-  <div class="wb-status" id="wbStatus"></div>
+<div id="wifiBlock" style="display:none;position:fixed;inset:0;z-index:500;background:linear-gradient(135deg,#0F172A,#1E3A8A);align-items:center;justify-content:center;flex-direction:column;gap:16px;text-align:center;padding:24px">
+  <div style="font-size:64px;animation:pulse 2s infinite">📶</div>
+  <div style="font-size:24px;font-weight:800;color:#fff">Red no autorizada</div>
+  <div style="font-size:14px;color:rgba(255,255,255,.7);max-width:320px;line-height:1.6">Debes estar conectado al WiFi de Cayena para registrar asistencia</div>
+  <div style="display:inline-block;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;font-size:14px;font-weight:700;padding:6px 16px;border-radius:999px;margin:8px 0">📡 Cayena</div>
+  <button onclick="checkWifi()" style="font-family:var(--font);font-size:13px;font-weight:600;padding:10px 20px;border-radius:12px;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.1);color:#fff;cursor:pointer;margin-top:8px">🔄 Verificar conexión</button>
+  <div id="wbStatus" style="font-size:11px;color:rgba(255,255,255,.5);margin-top:8px"></div>
 </div>
 
 <!-- CHECKING -->
-<div id="checkOverlay">
-  <div class="check-spin"></div>
-  <div class="check-text">Verificando red WiFi...</div>
+<div id="checkOverlay" style="display:none;position:fixed;inset:0;z-index:499;background:rgba(15,23,42,.8);backdrop-filter:blur(6px);align-items:center;justify-content:center;flex-direction:column;gap:12px">
+  <div style="width:40px;height:40px;border:3px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite"></div>
+  <div style="font-size:13px;color:#fff;font-weight:500">Verificando red WiFi...</div>
 </div>
 
 <div class="ovbg" id="ovbg" onclick="closeSB()"></div>
@@ -250,7 +249,6 @@ tbody tr:hover td{background:var(--bg)}
     </div>
 
     <div class="content">
-      <!-- HERO -->
       <div class="page-hero">
         <div class="ph-left">
           <div class="ph-title" id="heroName">Bienvenido</div>
@@ -262,7 +260,6 @@ tbody tr:hover td{background:var(--bg)}
         </div>
       </div>
 
-      <!-- TABS -->
       <div class="tabs">
         <button class="tab active" id="tab-hoy" onclick="switchTab('hoy')">🕐 Hoy</button>
         <button class="tab" id="tab-historial" onclick="switchTab('historial')">📅 Historial</button>
@@ -270,7 +267,6 @@ tbody tr:hover td{background:var(--bg)}
 
       <!-- HOY -->
       <div id="pane-hoy">
-        <!-- CLOCK CARD -->
         <div class="clock-card">
           <div class="cc-head">
             <div class="cc-av" id="ccAv">—</div>
@@ -280,7 +276,6 @@ tbody tr:hover td{background:var(--bg)}
             </div>
           </div>
           <div class="cc-body">
-            <!-- BOTONES CLOCK IN / OUT -->
             <div class="clock-btns">
               <button class="clock-btn clock-btn-in" id="btnIn" onclick="clockIn()">
                 <span class="clock-btn-icon">🟢</span>
@@ -293,7 +288,6 @@ tbody tr:hover td{background:var(--bg)}
                 <span class="clock-btn-time" id="btnOutTime">—</span>
               </button>
             </div>
-            <!-- STATUS -->
             <div class="status-bar clocked-out" id="statusBar">
               <span class="sb-icon">⏸️</span>
               <div>
@@ -304,22 +298,11 @@ tbody tr:hover td{background:var(--bg)}
             </div>
           </div>
         </div>
-
-        <!-- RESUMEN DE HOY -->
         <div class="sl">Resumen del día</div>
         <div class="summary-grid">
-          <div class="sum-card">
-            <div class="sum-lbl">Entrada</div>
-            <div class="sum-val green" id="sumEntrada">—</div>
-          </div>
-          <div class="sum-card">
-            <div class="sum-lbl">Salida</div>
-            <div class="sum-val orange" id="sumSalida">—</div>
-          </div>
-          <div class="sum-card">
-            <div class="sum-lbl">Horas trabajadas</div>
-            <div class="sum-val blue" id="sumHoras">—</div>
-          </div>
+          <div class="sum-card"><div class="sum-lbl">Entrada</div><div class="sum-val green" id="sumEntrada">—</div></div>
+          <div class="sum-card"><div class="sum-lbl">Salida</div><div class="sum-val orange" id="sumSalida">—</div></div>
+          <div class="sum-card"><div class="sum-lbl">Horas trabajadas</div><div class="sum-val blue" id="sumHoras">—</div></div>
         </div>
       </div>
 
@@ -327,10 +310,7 @@ tbody tr:hover td{background:var(--bg)}
       <div id="pane-historial" style="display:none">
         <div class="hist-card">
           <div class="hist-head">
-            <div>
-              <div class="hist-title">Historial de asistencia</div>
-              <div class="hist-sub" id="histSub">Últimos 30 días</div>
-            </div>
+            <div><div class="hist-title">Historial de asistencia</div><div class="hist-sub" id="histSub">Últimos 30 días</div></div>
           </div>
           <div id="histBody"></div>
         </div>
@@ -342,482 +322,409 @@ tbody tr:hover td{background:var(--bg)}
 <div class="toast" id="toast"></div>
 
 <script>
-// ════════════════════════════════
+// ════════════════════════════════════════
+//  ZONA HORARIA: Honduras GMT-6
+// ════════════════════════════════════════
+function ahoraHN() {
+  // Hora actual en Honduras (America/Tegucigalpa = UTC-6, sin DST)
+  const now = new Date();
+  const hnOffset = -6 * 60; // minutos
+  const utc = now.getTime() + now.getTimezoneOffset() * 60000;
+  return new Date(utc + hnOffset * 60000);
+}
+
+function horaStr(d) {
+  return String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+}
+
+function fechaStr(d) {
+  return d.getFullYear() + '-' +
+    String(d.getMonth()+1).padStart(2,'0') + '-' +
+    String(d.getDate()).padStart(2,'0');
+}
+
+// ════════════════════════════════════════
 //  CONFIGURACIÓN
-// ════════════════════════════════
-const WIFI_SSID = 'Cayena'; // Nombre exacto de la red WiFi requerida
-const SESSION_KEY = 'cayena_session';
-const ASIST_KEY = uid => 'cayena_asistencia_' + uid;
-const PLANILLA_ASIST_KEY = 'cayena_asistencia_global';
+// ════════════════════════════════════════
+const WIFI_SSID    = 'Cayena';
+const SESSION_KEY  = 'cayena_session';
+const REQUIRE_WIFI = [2,3,4,5]; // empleados que requieren WiFi
+const DIAS  = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+const MESES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 
-// ════════════════════════════════
-//  SESIÓN
-// ════════════════════════════════
-let session = null;
-try{ session = JSON.parse(sessionStorage.getItem(SESSION_KEY)); }catch{}
-if(!session){ window.location.replace('index.html'); }
+// ════════════════════════════════════════
+//  SESIÓN — Variable global
+// ════════════════════════════════════════
+var session = null;
+try { session = JSON.parse(sessionStorage.getItem(SESSION_KEY)); } catch(e) {}
 
-const el = id => document.getElementById(id);
-const fmt2 = n => String(n).padStart(2,'0');
+var wifiOk = false;
 
-function logout(){
-  sessionStorage.removeItem(SESSION_KEY);
-  window.location.replace('index.html');
-}
+// ════════════════════════════════════════
+//  HELPERS
+// ════════════════════════════════════════
+function el(id) { return document.getElementById(id); }
 
-// ════════════════════════════════
-//  VERIFICACIÓN WIFI
-// ════════════════════════════════
-let wifiOk = false;
+function fmt2(n) { return String(n).padStart(2,'0'); }
 
-async function checkWifi(){
-  el('checkOverlay').classList.add('show');
-  el('wbStatus').textContent = 'Buscando red Cayena...';
-
-  // Paso 1: Verificar que hay conexión activa
-  if(!navigator.onLine){
-    el('checkOverlay').classList.remove('show');
-    showWifiBlock('Sin conexión · Activa el WiFi e intenta de nuevo');
-    return;
-  }
-
-  // Paso 2: Verificar tipo de conexión — rechazar datos móviles
-  const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-  if(conn && conn.type && conn.type === 'cellular'){
-    el('checkOverlay').classList.remove('show');
-    showWifiBlock('Estás usando datos móviles · Conéctate al WiFi "Cayena"');
-    return;
-  }
-
-  // Paso 3: VERIFICACIÓN REAL — intentar acceder a cayena-ping.txt
-  // Este archivo solo existe si estás en la misma red donde está alojada la app.
-  // Si la app está en GitHub Pages, el ping también es accesible desde esa red.
-  // Si la app está en un servidor local, el ping solo responde dentro de la red Cayena.
-  el('wbStatus').textContent = 'Verificando archivo de red...';
-
-  const pingOk = await tryPing();
-
-  if(pingOk){
-    wifiOk = true;
-    el('wifiBlock').classList.remove('show');
-    el('checkOverlay').classList.remove('show');
-    updateWifiPill(true);
-    initApp();
-  } else {
-    el('checkOverlay').classList.remove('show');
-    showWifiBlock('No se detectó la red "Cayena" · Verifica tu conexión WiFi');
-  }
-}
-
-async function tryPing(){
-  // Intentar cargar cayena-ping.txt desde la misma ubicación que la app
-  // Probamos 3 métodos en cascada
-
-  // Método 1: fetch del archivo ping en la misma carpeta
-  try{
-    const ctrl = new AbortController();
-    const tid = setTimeout(()=>ctrl.abort(), 3000);
-    const res = await fetch('cayena-ping.txt?_=' + Date.now(), {
-      signal: ctrl.signal,
-      cache: 'no-store',
-      method: 'GET'
-    });
-    clearTimeout(tid);
-    if(res.ok){
-      const txt = await res.text();
-      if(txt.trim() === 'CAYENA_NETWORK_OK'){
-        return true;
-      }
-    }
-  } catch(e){}
-
-  // Método 2: fetch con ruta relativa explícita
-  try{
-    const base = window.location.href.split('/').slice(0,-1).join('/') + '/';
-    const ctrl2 = new AbortController();
-    const tid2 = setTimeout(()=>ctrl2.abort(), 3000);
-    const res2 = await fetch(base + 'cayena-ping.txt?_=' + Date.now(), {
-      signal: ctrl2.signal,
-      cache: 'no-store'
-    });
-    clearTimeout(tid2);
-    if(res2.ok){
-      const txt2 = await res2.text();
-      if(txt2.trim() === 'CAYENA_NETWORK_OK') return true;
-    }
-  } catch(e){}
-
-  // Método 3: XMLHttpRequest sincrónico como último recurso
-  try{
-    return await new Promise(resolve=>{
-      const xhr = new XMLHttpRequest();
-      xhr.open('GET', 'cayena-ping.txt?_=' + Date.now(), true);
-      xhr.timeout = 3000;
-      xhr.onload = ()=>{
-        resolve(xhr.status === 200 && xhr.responseText.trim() === 'CAYENA_NETWORK_OK');
-      };
-      xhr.onerror = ()=>resolve(false);
-      xhr.ontimeout = ()=>resolve(false);
-      xhr.send();
-    });
-  } catch(e){ return false; }
-}
-
-function showWifiBlock(msg){
-  el('wifiBlock').classList.add('show');
-  el('wbStatus').textContent = msg || '';
-  updateWifiPill(false);
-}
-
-function updateWifiPill(ok, isGerencia){
-  if(isGerencia){
-    el('wifiPillWrap').innerHTML = `<div class="wifi-pill ok"><div class="wifi-dot"></div>Acceso gerencial</div>`;
-    return;
-  }
-  el('wifiPillWrap').innerHTML = ok
-    ? `<div class="wifi-pill ok"><div class="wifi-dot"></div>WiFi Cayena ✓</div>`
-    : `<div class="wifi-pill err"><div class="wifi-dot"></div>WiFi no verificado</div>`;
-}
-
-// ════════════════════════════════
-//  INIT APP
-// ════════════════════════════════
-function initApp(){
-  if(!session) return;
-
-  // Sidebar
-  const av = el('sideAv'), un = el('sideNombre'), ur = el('sideCargo');
-  const ini = session.initials || session.name.slice(0,2).toUpperCase();
-  if(av){ av.textContent = ini; if(session.bg) av.style.background = session.bg; }
-  if(un) un.textContent = session.name;
-  if(ur) ur.textContent = session.cargo || '';
-
-  // Hero
-  el('heroName').textContent = 'Hola, ' + session.name.split(' ')[0];
-  el('heroCargo').textContent = session.cargo || 'Asistencia';
-
-  // Clock card
-  el('ccAv').textContent = ini;
-  if(session.bg) el('ccAv').style.background = session.bg;
-  el('ccName').textContent = session.name;
-  el('ccCargo').textContent = session.cargo || '';
-
-  // Reloj en vivo
-  updateClock();
-  setInterval(updateClock, 1000);
-
-  // Render estado actual
-  await renderHoy();
-}
-
-// ════════════════════════════════
-//  RELOJ EN VIVO
-// ════════════════════════════════
-const DIAS = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
-const MESES_CORTOS = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
-
-function updateClock(){
-  const now = new Date();
-  el('liveClock').textContent =
-    fmt2(now.getHours()) + ':' + fmt2(now.getMinutes()) + ':' + fmt2(now.getSeconds());
-  el('liveDate').textContent =
-    DIAS[now.getDay()] + ' ' + now.getDate() + ' de ' +
-    MESES_CORTOS[now.getMonth()] + ' ' + now.getFullYear();
-
-  // Actualizar tiempo transcurrido si está marcado
-  updateElapsed();
-}
-
-// ════════════════════════════════
-//  STORAGE
-// ════════════════════════════════
-function todayKey(){
-  const n = new Date();
-  return `${n.getFullYear()}-${fmt2(n.getMonth()+1)}-${fmt2(n.getDate())}`;
-}
-
-async function loadRegistros(uid){
-  try{
-    const rows = await DB_Asist.getByUser(Number(uid));
-    // cache local para offline
-    localStorage.setItem(ASIST_KEY(uid), JSON.stringify(rows));
-    return rows;
-  }catch(e){
-    try{ return JSON.parse(localStorage.getItem(ASIST_KEY(uid))||'[]'); }catch{ return []; }
-  }
-}
-async function saveRegistros(uid, data){
-  // solo usado por setHoyRecord
-}
-
-async function getHoyRecord(uid){
-  const key = todayKey();
-  const registros = await loadRegistros(uid);
-  return registros.find(r => r.fecha === key) || null;
-}
-
-async function setHoyRecord(uid, record){
-  const key = todayKey();
-  // Guardar localmente como backup
-  const registros = await loadRegistros(uid);
-  const idx = registros.findIndex(r => r.fecha === key);
-  if(idx >= 0) registros[idx] = record;
-  else registros.push(record);
-  saveRegistros(uid, registros);
-  // Guardar en Supabase
-  try{
-    await DB_Asist.upsert(record);
-  }catch(e){ console.warn('Asistencia offline:',e); }
-}
-
-// Sincronizar al objeto global de planilla
-
-
-// ════════════════════════════════
-//  CLOCK IN / OUT
-// ════════════════════════════════
-async function clockIn(){
-  if(!session) return;
-  const hoy = await getHoyRecord(session.id);
-
-  if(hoy && hoy.entrada){
-    toast('Ya registraste tu entrada hoy a las ' + hoy.entrada, 'err');
-    return;
-  }
-
-  const now = new Date();
-  const hora = fmt2(now.getHours()) + ':' + fmt2(now.getMinutes());
-  const ts = now.getTime();
-
-  const record = {
-    id: String(session.id) + '_' + todayKey(),
-    fecha: todayKey(),
-    entrada: hora,
-    entradaTs: ts,
-    salida: null,
-    salidaTs: null,
-    horasTrabajadas: null,
-    userId: session.id,
-    userName: session.name,
-    wifiOk: true
-  };
-
-  await setHoyRecord(session.id, record);
-  toast('✓ Entrada registrada · ' + hora, 'ok');
-  await renderHoy();
-}
-
-async function clockOut(){
-  if(!session) return;
-  const hoy = await getHoyRecord(session.id);
-
-  if(!hoy || !hoy.entrada){
-    toast('Primero debes registrar tu entrada', 'err');
-    return;
-  }
-  if(hoy.salida){
-    toast('Ya registraste tu salida hoy a las ' + hoy.salida, 'err');
-    return;
-  }
-
-  const now = new Date();
-  const hora = fmt2(now.getHours()) + ':' + fmt2(now.getMinutes());
-  const ts = now.getTime();
-
-  // Calcular horas trabajadas
-  const diffMs = ts - hoy.entradaTs;
-  const diffH = diffMs / (1000 * 60 * 60);
-  const horasTrabajadas = parseFloat(diffH.toFixed(2));
-
-  const updated = {
-    ...hoy,
-    salida: hora,
-    salidaTs: ts,
-    horasTrabajadas
-  };
-
-  await setHoyRecord(session.id, updated);
-  toast('✓ Salida registrada · ' + hora + ' · ' + formatHoras(horasTrabajadas) + ' trabajadas', 'ok');
-  await renderHoy();
-}
-
-function formatHoras(h){
-  if(h === null || h === undefined) return '—';
-  const hrs = Math.floor(h);
+function formatHoras(h) {
+  if(h === null || h === undefined || isNaN(h)) return '—';
+  const hrs  = Math.floor(h);
   const mins = Math.round((h - hrs) * 60);
   return hrs + 'h ' + fmt2(mins) + 'm';
 }
 
-// ════════════════════════════════
-//  RENDER HOY
-// ════════════════════════════════
-async function renderHoy(){
-  if(!session) return;
-  const hoy = await getHoyRecord(session.id);
+function toast(msg, type) {
+  var t = el('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + (type||'');
+  void t.offsetWidth;
+  t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 3000);
+}
 
-  const btnIn  = el('btnIn');
-  const btnOut = el('btnOut');
+function logout() {
+  sessionStorage.removeItem(SESSION_KEY);
+  window.location.replace('index.html');
+}
 
-  if(!hoy || !hoy.entrada){
-    // Sin registro
-    btnIn.disabled = false;
-    btnOut.disabled = true;
-    el('btnInTime').textContent = 'Toca para registrar';
-    el('btnOutTime').textContent = '—';
-    el('statusBar').className = 'status-bar clocked-out';
-    el('sbIcon') && (el('sbIcon').textContent = '⏸️');
-    el('sbText').textContent = 'Sin registros hoy';
-    el('sbDetail').textContent = 'Presiona "Registrar entrada" para comenzar';
-    el('sbElapsed').textContent = '';
-    el('sumEntrada').textContent = '—';
-    el('sumSalida').textContent = '—';
-    el('sumHoras').textContent = '—';
-  } else if(hoy.entrada && !hoy.salida){
-    // Marcado, sin salida
-    btnIn.disabled = true;
-    btnOut.disabled = false;
-    el('btnInTime').textContent = '✓ ' + hoy.entrada;
-    el('btnOutTime').textContent = 'Toca para registrar';
-    el('statusBar').className = 'status-bar clocked-in';
-    el('sbText').textContent = 'Trabajando desde las ' + hoy.entrada;
-    el('sbDetail').textContent = 'Presiona "Registrar salida" cuando termines';
-    el('sumEntrada').textContent = hoy.entrada;
-    el('sumSalida').textContent = '—';
-    el('sumHoras').textContent = '—';
-  } else {
-    // Completo
-    btnIn.disabled = true;
-    btnOut.disabled = true;
-    el('btnInTime').textContent = '✓ ' + hoy.entrada;
-    el('btnOutTime').textContent = '✓ ' + hoy.salida;
-    el('statusBar').className = 'status-bar complete';
-    el('sbText').textContent = '¡Jornada completa! · ' + formatHoras(hoy.horasTrabajadas);
-    el('sbDetail').textContent = 'Entrada: ' + hoy.entrada + ' · Salida: ' + hoy.salida;
-    el('sbElapsed').textContent = formatHoras(hoy.horasTrabajadas);
-    el('sumEntrada').textContent = hoy.entrada;
-    el('sumSalida').textContent = hoy.salida;
-    el('sumHoras').textContent = formatHoras(hoy.horasTrabajadas);
+function toggleSB() { el('sb').classList.toggle('open'); el('ovbg').classList.toggle('open'); }
+function closeSB()  { el('sb').classList.remove('open'); el('ovbg').classList.remove('open'); }
+
+// ════════════════════════════════════════
+//  RELOJ EN VIVO (hora Honduras)
+// ════════════════════════════════════════
+function updateClock() {
+  var now = ahoraHN();
+  el('liveClock').textContent = fmt2(now.getHours()) + ':' + fmt2(now.getMinutes()) + ':' + fmt2(now.getSeconds());
+  el('liveDate').textContent  = DIAS[now.getDay()] + ' ' + now.getDate() + ' de ' + MESES[now.getMonth()] + ' ' + now.getFullYear();
+  updateElapsed();
+}
+
+// ════════════════════════════════════════
+//  STORAGE
+// ════════════════════════════════════════
+function localKey(uid) { return 'cayena_asistencia_' + uid; }
+
+function loadLocal(uid) {
+  try { return JSON.parse(localStorage.getItem(localKey(uid)) || '[]'); }
+  catch(e) { return []; }
+}
+
+function saveLocal(uid, data) {
+  localStorage.setItem(localKey(uid), JSON.stringify(data));
+}
+
+function getRecordHoy(uid) {
+  var hoy = fechaStr(ahoraHN());
+  var regs = loadLocal(uid);
+  return regs.find(function(r) { return r.fecha === hoy; }) || null;
+}
+
+// ════════════════════════════════════════
+//  SUPABASE — Guardar/Leer asistencia
+// ════════════════════════════════════════
+async function guardarRegistro(rec) {
+  // Guardar local siempre
+  var regs = loadLocal(rec.userId);
+  var idx  = regs.findIndex(function(r) { return r.fecha === rec.fecha; });
+  if(idx >= 0) regs[idx] = rec;
+  else regs.push(rec);
+  saveLocal(rec.userId, regs);
+
+  // Guardar en Supabase
+  try {
+    await DB_Asist.upsert(rec);
+  } catch(e) {
+    console.warn('Asistencia offline:', e.message);
   }
 }
 
-async function updateElapsed(){
-  if(!session) return;
-  const hoy = await getHoyRecord(session.id);
-  if(!hoy || !hoy.entrada || hoy.salida) return;
-
-  const now = Date.now();
-  const diffMs = now - hoy.entradaTs;
-  const diffH = diffMs / (1000 * 60 * 60);
-  el('sbElapsed').textContent = formatHoras(diffH);
+async function cargarHistorial(uid) {
+  try {
+    var rows = await DB_Asist.getByUser(Number(uid));
+    if(rows && rows.length > 0) {
+      saveLocal(uid, rows);
+      return rows;
+    }
+  } catch(e) {
+    console.warn('Historial offline:', e.message);
+  }
+  return loadLocal(uid);
 }
 
-// ════════════════════════════════
-//  HISTORIAL
-// ════════════════════════════════
-async function renderHistorial(){
-  if(!session) return;
-  let registros = [];
-  try{ registros = await loadRegistros(session.id); }catch(e){}
-  try{
-    const sbRows = await DB_Asist.getByUser(Number(session.id));
-    if(sbRows.length>0){
-      registros=sbRows;
-      // Sync local
-      localStorage.setItem('cayena_asistencia_'+session.id,JSON.stringify(sbRows));
-    }
-  }catch(e){}
-  const registros_sorted = registros
-    .sort((a,b) => b.fecha.localeCompare(a.fecha))
-    .slice(0, 30);
+// ════════════════════════════════════════
+//  CLOCK IN
+// ════════════════════════════════════════
+async function clockIn() {
+  if(!session) { toast('Sin sesión', 'err'); return; }
 
-  el('histSub').textContent = session.name + ' · ' + registros.length + ' día(s) registrados';
-
-  if(!registros.length){
-    el('histBody').innerHTML = '<div class="empty">Sin registros de asistencia aún.</div>';
+  var hoy = getRecordHoy(session.id);
+  if(hoy && hoy.entrada) {
+    toast('Ya registraste tu entrada hoy a las ' + hoy.entrada, 'err');
     return;
   }
 
-  const rows = registros.map(r => {
-    const fecha = new Date(r.fecha + 'T12:00:00').toLocaleDateString('es-HN',{weekday:'short',day:'2-digit',month:'short',year:'numeric'});
-    const status = r.salida ? 'complete' : (r.entrada ? 'partial' : 'absent');
-    const statusLabel = r.salida ? 'Completo' : (r.entrada ? 'Sin salida' : 'Ausente');
-    const statusCls = r.salida ? 'badge-complete' : (r.entrada ? 'badge-partial' : 'badge-absent');
-    return `<tr>
-      <td style="font-weight:600">${fecha}</td>
-      <td style="color:var(--green-ui);font-weight:600">${r.entrada || '—'}</td>
-      <td style="color:var(--orange);font-weight:600">${r.salida || '—'}</td>
-      <td style="font-weight:700;color:var(--blue)">${r.horasTrabajadas ? formatHoras(r.horasTrabajadas) : '—'}</td>
-      <td><span class="badge ${statusCls}">${statusLabel}</span></td>
-    </tr>`;
-  }).join('');
+  var now  = ahoraHN();
+  var hora = horaStr(now);
+  var rec  = {
+    id:              String(session.id) + '_' + fechaStr(now),
+    fecha:           fechaStr(now),
+    entrada:         hora,
+    entradaTs:       now.getTime(),
+    salida:          null,
+    salidaTs:        null,
+    horasTrabajadas: null,
+    userId:          session.id,
+    userName:        session.name,
+    wifiOk:          true
+  };
 
-  el('histBody').innerHTML = `<table>
-    <thead><tr>
-      <th>Fecha</th><th>Entrada</th><th>Salida</th><th>Horas</th><th>Estado</th>
-    </tr></thead>
-    <tbody>${rows}</tbody>
-  </table>`;
+  await guardarRegistro(rec);
+  toast('✓ Entrada registrada · ' + hora, 'ok');
+  renderHoy();
 }
 
-// ════════════════════════════════
+// ════════════════════════════════════════
+//  CLOCK OUT
+// ════════════════════════════════════════
+async function clockOut() {
+  if(!session) { toast('Sin sesión', 'err'); return; }
+
+  var hoy = getRecordHoy(session.id);
+  if(!hoy || !hoy.entrada) {
+    toast('Primero debes registrar tu entrada', 'err');
+    return;
+  }
+  if(hoy.salida) {
+    toast('Ya registraste tu salida hoy a las ' + hoy.salida, 'err');
+    return;
+  }
+
+  var now  = ahoraHN();
+  var hora = horaStr(now);
+  var diffH = (now.getTime() - hoy.entradaTs) / 3600000;
+
+  var updated = Object.assign({}, hoy, {
+    salida:          hora,
+    salidaTs:        now.getTime(),
+    horasTrabajadas: parseFloat(diffH.toFixed(2))
+  });
+
+  await guardarRegistro(updated);
+  toast('✓ Salida · ' + hora + ' · ' + formatHoras(diffH), 'ok');
+  renderHoy();
+}
+
+// ════════════════════════════════════════
+//  RENDER HOY
+// ════════════════════════════════════════
+function renderHoy() {
+  if(!session) return;
+  var hoy = getRecordHoy(session.id);
+  var btnIn  = el('btnIn');
+  var btnOut = el('btnOut');
+
+  if(!hoy || !hoy.entrada) {
+    btnIn.disabled  = false;
+    btnOut.disabled = true;
+    el('btnInTime').textContent  = 'Toca para registrar';
+    el('btnOutTime').textContent = '—';
+    el('statusBar').className = 'status-bar clocked-out';
+    el('sbText').textContent   = 'Sin registros hoy';
+    el('sbDetail').textContent = 'Presiona "Registrar entrada" para comenzar';
+    el('sbElapsed').textContent = '';
+    el('sumEntrada').textContent = '—';
+    el('sumSalida').textContent  = '—';
+    el('sumHoras').textContent   = '—';
+  } else if(hoy.entrada && !hoy.salida) {
+    btnIn.disabled  = true;
+    btnOut.disabled = false;
+    el('btnInTime').textContent  = '✓ ' + hoy.entrada;
+    el('btnOutTime').textContent = 'Toca para registrar';
+    el('statusBar').className = 'status-bar clocked-in';
+    el('sbText').textContent   = 'Trabajando desde las ' + hoy.entrada;
+    el('sbDetail').textContent = 'Presiona "Registrar salida" cuando termines';
+    el('sumEntrada').textContent = hoy.entrada;
+    el('sumSalida').textContent  = '—';
+    el('sumHoras').textContent   = '—';
+  } else {
+    btnIn.disabled  = true;
+    btnOut.disabled = true;
+    el('btnInTime').textContent  = '✓ ' + hoy.entrada;
+    el('btnOutTime').textContent = '✓ ' + hoy.salida;
+    el('statusBar').className = 'status-bar complete';
+    el('sbText').textContent   = '¡Jornada completa! · ' + formatHoras(hoy.horasTrabajadas);
+    el('sbDetail').textContent = 'Entrada: ' + hoy.entrada + ' · Salida: ' + hoy.salida;
+    el('sbElapsed').textContent = formatHoras(hoy.horasTrabajadas);
+    el('sumEntrada').textContent = hoy.entrada;
+    el('sumSalida').textContent  = hoy.salida;
+    el('sumHoras').textContent   = formatHoras(hoy.horasTrabajadas);
+  }
+}
+
+function updateElapsed() {
+  if(!session) return;
+  var hoy = getRecordHoy(session.id);
+  if(!hoy || !hoy.entrada || hoy.salida) return;
+  var diffH = (ahoraHN().getTime() - hoy.entradaTs) / 3600000;
+  el('sbElapsed').textContent = formatHoras(diffH);
+}
+
+// ════════════════════════════════════════
+//  HISTORIAL
+// ════════════════════════════════════════
+async function renderHistorial() {
+  if(!session) return;
+  var registros = await cargarHistorial(session.id);
+  registros = registros
+    .sort(function(a,b) { return b.fecha.localeCompare(a.fecha); })
+    .slice(0,30);
+
+  el('histSub').textContent = session.name + ' · ' + registros.length + ' día(s)';
+
+  if(!registros.length) {
+    el('histBody').innerHTML = '<div class="empty">Sin registros aún.</div>';
+    return;
+  }
+
+  var rows = registros.map(function(r) {
+    var fecha = new Date(r.fecha + 'T12:00:00').toLocaleDateString('es-HN',{weekday:'short',day:'2-digit',month:'short',year:'numeric'});
+    var cls   = r.salida ? 'badge-complete' : (r.entrada ? 'badge-partial' : 'badge-absent');
+    var lbl   = r.salida ? 'Completo' : (r.entrada ? 'Sin salida' : 'Ausente');
+    return '<tr>' +
+      '<td style="font-weight:600">' + fecha + '</td>' +
+      '<td style="color:var(--green-ui);font-weight:600">' + (r.entrada||'—') + '</td>' +
+      '<td style="color:var(--orange);font-weight:600">' + (r.salida||'—') + '</td>' +
+      '<td style="font-weight:700;color:var(--blue)">' + (r.horasTrabajadas ? formatHoras(r.horasTrabajadas) : '—') + '</td>' +
+      '<td><span class="badge ' + cls + '">' + lbl + '</span></td>' +
+      '</tr>';
+  }).join('');
+
+  el('histBody').innerHTML = '<table><thead><tr><th>Fecha</th><th>Entrada</th><th>Salida</th><th>Horas</th><th>Estado</th></tr></thead><tbody>' + rows + '</tbody></table>';
+}
+
+// ════════════════════════════════════════
 //  TABS
-// ════════════════════════════════
-async function switchTab(t){
-  ['hoy','historial'].forEach(id=>{
+// ════════════════════════════════════════
+function switchTab(t) {
+  ['hoy','historial'].forEach(function(id) {
     el('tab-'+id).classList.toggle('active', id===t);
     el('pane-'+id).style.display = id===t ? 'block' : 'none';
   });
-  if(t==='historial') await renderHistorial();
+  if(t === 'historial') renderHistorial();
 }
 
-// ════════════════════════════════
-//  UTILS
-// ════════════════════════════════
-function toggleSB(){ el('sb').classList.toggle('open'); el('ovbg').classList.toggle('open'); }
-function closeSB()  { el('sb').classList.remove('open'); el('ovbg').classList.remove('open'); }
-
-function toast(msg, type=''){
-  const t = el('toast'); t.textContent = msg;
-  t.className = 'toast ' + (type||'');
-  void t.offsetWidth; t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'), 3000);
+// ════════════════════════════════════════
+//  WIFI
+// ════════════════════════════════════════
+async function tryPing() {
+  try {
+    var ctrl = new AbortController();
+    setTimeout(function(){ ctrl.abort(); }, 3000);
+    var res = await fetch('cayena-ping.txt?_=' + Date.now(), { signal: ctrl.signal, cache: 'no-store' });
+    if(res.ok) {
+      var txt = await res.text();
+      return txt.trim() === 'CAYENA_NETWORK_OK';
+    }
+  } catch(e) {}
+  return false;
 }
 
-// ════════════════════════════════
-//  SIDEBAR SCRIPT
-// ════════════════════════════════
-(function(){
-  var s = null;
-  try{ s = JSON.parse(sessionStorage.getItem('cayena_session')); }catch{}
-  if(!s) return;
-  var av = document.querySelector('.av,.sav');
-  var un = document.querySelector('.un,.sun');
-  var ur = document.querySelector('.ur,.sur');
-  if(av){ av.textContent = s.initials||(s.name||'').slice(0,2).toUpperCase(); if(s.bg) av.style.background=s.bg; }
-  if(un) un.textContent = s.name||'';
-  if(ur) ur.textContent = s.cargo||'';
-})();
+async function checkWifi() {
+  el('checkOverlay').style.display = 'flex';
+  el('wbStatus').textContent = 'Verificando red...';
 
-// ════════════════════════════════
-//  INICIO — VERIFICAR WIFI
-// ════════════════════════════════
-window.addEventListener('load', ()=>{
-  // IDs de empleados que requieren verificación WiFi
-  // Gerencia (id 0 y 1) tiene acceso libre
-  const REQUIRE_WIFI = [2, 3, 4, 5];
+  if(!navigator.onLine) {
+    el('checkOverlay').style.display = 'none';
+    el('wifiBlock').style.display = 'flex';
+    el('wbStatus').textContent = 'Sin conexión a internet';
+    return;
+  }
 
-  if(!session){
+  var conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+  if(conn && conn.type && conn.type === 'cellular') {
+    el('checkOverlay').style.display = 'none';
+    el('wifiBlock').style.display = 'flex';
+    el('wbStatus').textContent = 'Conectado por datos móviles · Usa el WiFi Cayena';
+    return;
+  }
+
+  var ok = await tryPing();
+  el('checkOverlay').style.display = 'none';
+  if(ok) {
+    wifiOk = true;
+    el('wifiBlock').style.display = 'none';
+    updateWifiPill(true, false);
+    initApp();
+  } else {
+    el('wifiBlock').style.display = 'flex';
+    el('wbStatus').textContent = 'No se detectó la red Cayena · Verifica tu WiFi';
+  }
+}
+
+function updateWifiPill(ok, isGerencia) {
+  var lbl = isGerencia ? 'Acceso gerencial' : (ok ? 'WiFi Cayena ✓' : 'WiFi no verificado');
+  var cls = (ok || isGerencia) ? 'wifi-pill ok' : 'wifi-pill err';
+  el('wifiPillWrap').innerHTML = '<div class="' + cls + '"><div class="wifi-dot"></div>' + lbl + '</div>';
+}
+
+// ════════════════════════════════════════
+//  INIT APP
+// ════════════════════════════════════════
+function initApp() {
+  if(!session) return;
+
+  // Sidebar
+  var av = el('sideAv');
+  var un = el('sideNombre');
+  var ur = el('sideCargo');
+  var ini = session.initials || session.name.slice(0,2).toUpperCase();
+  if(av) { av.textContent = ini; if(session.bg) av.style.background = session.bg; }
+  if(un) un.textContent = session.name;
+  if(ur) ur.textContent = session.cargo || '';
+
+  // Hero
+  el('heroName').textContent  = 'Hola, ' + session.name.split(' ')[0];
+  el('heroCargo').textContent = session.cargo || 'Asistencia';
+
+  // Clock card
+  el('ccAv').textContent   = ini;
+  el('ccName').textContent  = session.name;
+  el('ccCargo').textContent = session.cargo || '';
+  if(session.bg) el('ccAv').style.background = session.bg;
+
+  // Reloj
+  updateClock();
+  setInterval(updateClock, 1000);
+
+  // Render
+  renderHoy();
+}
+
+// ════════════════════════════════════════
+//  INICIO
+// ════════════════════════════════════════
+window.addEventListener('load', function() {
+  if(!session) {
     window.location.replace('index.html');
     return;
   }
 
-  if(REQUIRE_WIFI.includes(Number(session.id))){
-    // Empleado — requiere estar en red Cayena
+  // Sidebar nombre/avatar
+  var av = el('sideAv');
+  var un = el('sideNombre');
+  var ur = el('sideCargo');
+  var ini = session.initials || session.name.slice(0,2).toUpperCase();
+  if(av) { av.textContent = ini; if(session.bg) av.style.background = session.bg; }
+  if(un) un.textContent = session.name;
+  if(ur) ur.textContent = session.cargo || '';
+
+  if(REQUIRE_WIFI.includes(Number(session.id))) {
     checkWifi();
   } else {
-    // Gerencia — acceso directo sin verificación de red
     wifiOk = true;
-    updateWifiPill(true, true); // true = gerencia (pill diferente)
+    updateWifiPill(true, true);
     initApp();
   }
 });
