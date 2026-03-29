@@ -26,8 +26,8 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 body{overflow-x:hidden}
 
 /* LAYOUT */
-.app{display:flex;height:100vh}
-.sidebar{width:240px;min-width:240px;background:var(--white);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;z-index:90;box-shadow:var(--shadow);transition:transform .28s cubic-bezier(.4,0,.2,1)}
+.app{display:flex;height:100vh;overflow:hidden}
+.sidebar{width:240px;min-width:240px;background:var(--white);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;z-index:90;box-shadow:var(--shadow);transition:transform .28s cubic-bezier(.4,0,.2,1);transform:translateX(-100%)}
 .main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 .logo-wrap{padding:24px 20px 20px;border-bottom:1px solid var(--border)}
 .logo{font-size:22px;font-weight:800;letter-spacing:-0.5px;color:var(--text);display:flex;align-items:center;gap:8px}
@@ -652,6 +652,7 @@ p, td, input, textarea, .sol-meta {
 }
 
 /* iOS_SAFARI_OPTIMIZED */
+@media(min-width:901px){.sidebar{transform:translateX(0) !important}}
 
 /* ANDROID_OPTIMIZED */
 
@@ -685,20 +686,20 @@ p, td, input, textarea, .sol-meta {
     </div>
     <nav class="nav">
       <div class="ng">Principal</div>
-      <a class="ni" href="dashboard.html"><svg viewBox="0 0 16 16" fill="none"><rect x="1.5" y="1.5" width="5.5" height="5.5" rx="1.5" stroke="currentColor" stroke-width="1.4"/><rect x="9" y="1.5" width="5.5" height="5.5" rx="1.5" stroke="currentColor" stroke-width="1.4" opacity=".5"/><rect x="1.5" y="9" width="5.5" height="5.5" rx="1.5" stroke="currentColor" stroke-width="1.4" opacity=".5"/><rect x="9" y="9" width="5.5" height="5.5" rx="1.5" stroke="currentColor" stroke-width="1.4" opacity=".5"/></svg>Dashboard</a>
+      <a class="ni" href="dashboard.html" onclick="closeSB()"><svg viewBox="0 0 16 16" fill="none"><rect x="1.5" y="1.5" width="5.5" height="5.5" rx="1.5" stroke="currentColor" stroke-width="1.4"/><rect x="9" y="1.5" width="5.5" height="5.5" rx="1.5" stroke="currentColor" stroke-width="1.4" opacity=".5"/><rect x="1.5" y="9" width="5.5" height="5.5" rx="1.5" stroke="currentColor" stroke-width="1.4" opacity=".5"/><rect x="9" y="9" width="5.5" height="5.5" rx="1.5" stroke="currentColor" stroke-width="1.4" opacity=".5"/></svg>Dashboard</a>
       <div class="ng">Operaciones</div>
-      <a class="ni" href="ingresos.html"><svg viewBox="0 0 16 16" fill="none"><path d="M2 12L5.5 7.5L8.5 10L11 5.5L14 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Ingresos</a>
-      <a class="ni" href="isv.html"><svg viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="M5 8h6M8 5v6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Resumen ISV</a>
-      <a class="ni" href="compras.html"><svg viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="11" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M5 3V2M11 3V2M2 7h12" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Compras</a>
-      <a class="ni" href="proveedores.html"><svg viewBox="0 0 16 16" fill="none"><circle cx="6" cy="5" r="2.5" stroke="currentColor" stroke-width="1.4"/><path d="M2 13c0-2.21 1.79-4 4-4s4 1.79 4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M11 7l1.5 1.5L15 6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Proveedores</a>
-      <a class="ni" href="inventario.html"><svg viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="5.5" height="5.5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="8.5" y="2" width="5.5" height="5.5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="2" y="8.5" width="5.5" height="5.5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="8.5" y="8.5" width="5.5" height="5.5" rx="1" stroke="currentColor" stroke-width="1.4"/></svg>Inventario</a>
-      <a class="ni" href="gastos.html"><svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.4"/><path d="M8 5v3.5l2.5 1.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Gastos</a>
+      <a class="ni" href="ingresos.html" onclick="closeSB()"><svg viewBox="0 0 16 16" fill="none"><path d="M2 12L5.5 7.5L8.5 10L11 5.5L14 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Ingresos</a>
+      <a class="ni" href="isv.html" onclick="closeSB()"><svg viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="M5 8h6M8 5v6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Resumen ISV</a>
+      <a class="ni" href="compras.html" onclick="closeSB()"><svg viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="11" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M5 3V2M11 3V2M2 7h12" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Compras</a>
+      <a class="ni" href="proveedores.html" onclick="closeSB()"><svg viewBox="0 0 16 16" fill="none"><circle cx="6" cy="5" r="2.5" stroke="currentColor" stroke-width="1.4"/><path d="M2 13c0-2.21 1.79-4 4-4s4 1.79 4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M11 7l1.5 1.5L15 6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Proveedores</a>
+      <a class="ni" href="inventario.html" onclick="closeSB()"><svg viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="5.5" height="5.5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="8.5" y="2" width="5.5" height="5.5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="2" y="8.5" width="5.5" height="5.5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="8.5" y="8.5" width="5.5" height="5.5" rx="1" stroke="currentColor" stroke-width="1.4"/></svg>Inventario</a>
+      <a class="ni" href="gastos.html" onclick="closeSB()"><svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.4"/><path d="M8 5v3.5l2.5 1.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Gastos</a>
       <div class="ng">Personas</div>
-      <a class="ni" href="planilla.html"><svg viewBox="0 0 16 16" fill="none"><circle cx="6" cy="5" r="2.5" stroke="currentColor" stroke-width="1.4"/><path d="M1 13c0-2.76 2.24-5 5-5s5 2.24 5 5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M11 8h4M13 6v4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Planilla</a>
-      <a class="ni" href="cuenta-corriente.html"><svg viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M2 7h12M5 10h3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Cuenta Corriente</a>
-      <a class="ni active" href="asistencia.html"><svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.4"/><path d="M8 5v3l2 2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Asistencia</a>
+      <a class="ni" href="planilla.html" onclick="closeSB()"><svg viewBox="0 0 16 16" fill="none"><circle cx="6" cy="5" r="2.5" stroke="currentColor" stroke-width="1.4"/><path d="M1 13c0-2.76 2.24-5 5-5s5 2.24 5 5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M11 8h4M13 6v4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Planilla</a>
+      <a class="ni" href="cuenta-corriente.html" onclick="closeSB()"><svg viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M2 7h12M5 10h3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Cuenta Corriente</a>
+      <a class="ni active" href="asistencia.html" onclick="closeSB()"><svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.4"/><path d="M8 5v3l2 2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Asistencia</a>
       <div class="ng">Análisis</div>
-      <a class="ni" href="#"><svg viewBox="0 0 16 16" fill="none"><path d="M2 13L5 9l3 2.5L11 5l3 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Costo de Ventas</a>
+      <a class="ni" href="#" onclick="closeSB()"><svg viewBox="0 0 16 16" fill="none"><path d="M2 13L5 9l3 2.5L11 5l3 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Costo de Ventas</a>
     </nav>
     <div class="su">
       <div class="av" id="sideAv">—</div>
