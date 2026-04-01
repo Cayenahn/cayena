@@ -1200,65 +1200,86 @@ importFromGastos();
 importFromPlanilla(); // debe ir ÚLTIMO — tiene prioridad sobre gastos para Nómina
 
 function importFromPlanilla(){
-  const raw = localStorage.getItem('cayena_planilla_neta');
+  let raw = localStorage.getItem('cayena_planilla_neta');
+
+  // ── Fallback: calcular directo desde cayena_planilla_cfg si no hay neta guardada ──
+  if(!raw){
+    try {
+      const cfg  = JSON.parse(localStorage.getItem('cayena_planilla_cfg') || '{}');
+      const sols = JSON.parse(localStorage.getItem('cayena_solicitudes_global') || '[]');
+      const per  = getMesGlobal ? getMesGlobal() : '';
+      let bruto  = 0;
+      Object.values(cfg).forEach(function(c){
+        bruto += (parseFloat(c.sueldo)||0) + (parseFloat(c.bono)||0);
+      });
+      if(bruto > 0){
+        let adelantos=0, prestamos=0, consumoEmpleados=0, cobrosHerram=0;
+        sols.filter(s => s.estado==='approved' && (s.fecha||'').substring(0,7) === per.substring(0,7))
+            .forEach(s => {
+              const m = parseFloat(s.montoDescuento || s.monto) || 0;
+              if(s.tipo==='adelanto')    adelantos        += m;
+              else if(s.tipo==='prestamo')  prestamos        += m;
+              else if(s.tipo==='comida')    consumoEmpleados += m;
+              else if(s.tipo==='herramienta') cobrosHerram   += m;
+            });
+        raw = JSON.stringify({
+          periodo: per.substring(0,7),
+          planillaBruta: parseFloat(bruto.toFixed(2)),
+          adelantos: parseFloat(adelantos.toFixed(2)),
+          prestamos: parseFloat(prestamos.toFixed(2)),
+          consumoEmpleados: parseFloat(consumoEmpleados.toFixed(2)),
+          cobrosHerramientas: parseFloat(cobrosHerram.toFixed(2)),
+          planillaNeta: parseFloat((bruto - adelantos - prestamos - consumoEmpleados + cobrosHerram).toFixed(2))
+        });
+      }
+    } catch(e2) { /* fallback falló también, no hay datos */ }
+  }
+
   if(!raw) return;
   try {
     const pn = JSON.parse(raw);
     if(!pn || !pn.planillaBruta || pn.planillaBruta <= 0) return;
 
-    const nom              = pn.planillaBruta;
-    const adelantos        = pn.adelantos        || 0;
-    const prestamos        = pn.prestamos        || 0;
-    const subsidioComida   = pn.consumoEmpleados || 0; // 20% que paga el empleado → el 80% lo asume empresa
-    const cobrosHerram     = pn.cobrosHerramientas || 0;
-    // Subsidio real empresa = consumo total × 80%
-    // consumoEmpleados ya es el 20% del empleado, así que consumo total = consumoEmpleados / 0.20
-    const consumoTotal     = subsidioComida > 0 ? parseFloat((subsidioComida / 0.20).toFixed(2)) : 0;
-    const subsidioEmpresa  = parseFloat((consumoTotal * 0.80).toFixed(2));
+    const nom             = pn.planillaBruta;
+    const adelantos       = pn.adelantos        || 0;
+    const prestamos       = pn.prestamos        || 0;
+    const subsidioComida  = pn.consumoEmpleados || 0;
+    const cobrosHerram    = pn.cobrosHerramientas || 0;
+    const consumoTotal    = subsidioComida > 0 ? parseFloat((subsidioComida / 0.20).toFixed(2)) : 0;
+    const subsidioEmpresa = parseFloat((consumoTotal * 0.80).toFixed(2));
+    const planillaNeta    = pn.planillaNeta;
 
-    // Nómina neta = bruta - adelantos - préstamos + subsidio empresa comida - cobros herramientas
-    // (adelantos y préstamos ya están dentro del bruto como salida de caja)
-    const planillaNeta = pn.planillaNeta;
-
-    // ── 1. Nómina bruta ───────────────────────────────────────────────────
+    // ── Nómina bruta ──────────────────────────────────────────────────────
     el('f-nom').value = nom.toFixed(2);
     const gNom = el('g-nom');
     if(gNom){ gNom.textContent = Lf(nom); gNom.className = 'da'; }
     el('b-gop').textContent = 'Con datos';
     el('b-gop').className   = 'sc-chip sc-ok';
 
-    // ── 2. Adelantos ──────────────────────────────────────────────────────
+    // ── Desglose planilla ─────────────────────────────────────────────────
     if(adelantos > 0){
       el('dr-adelantos').style.display = '';
       el('g-adelantos').textContent = Lf(adelantos);
     }
-
-    // ── 3. Préstamos ──────────────────────────────────────────────────────
     if(prestamos > 0){
       el('dr-prestamos').style.display = '';
       el('g-prestamos').textContent = Lf(prestamos);
     }
-
-    // ── 4. Subsidio comida (el 80% que asume la empresa) ─────────────────
     if(subsidioEmpresa > 0){
       el('dr-comida').style.display = '';
       el('g-comida').textContent = Lf(subsidioEmpresa);
     }
-
-    // ── 5. Cobros herramientas ────────────────────────────────────────────
     if(cobrosHerram > 0){
       el('dr-herramientas').style.display = '';
       el('g-herramientas').textContent = '+ ' + Lf(cobrosHerram);
     }
-
-    // ── 6. Nómina neta (salida real de caja) ─────────────────────────────
     if(adelantos > 0 || prestamos > 0 || subsidioEmpresa > 0 || cobrosHerram > 0){
       el('dr-nom-neta').style.display = '';
       el('g-nom-neta').textContent = Lf(planillaNeta);
       el('g-nom-neta').style.color = planillaNeta >= 0 ? 'var(--text)' : 'var(--red)';
     }
 
-    // ── 7. Recalcular toda la cascada del P&L ─────────────────────────────
+    // ── Recalcular cascada P&L ─────────────────────────────────────────────
     const ibv  = v('f-ibv');
     const oi   = v('f-oi');
     const ini  = v('f-ini');
@@ -1273,28 +1294,27 @@ function importFromPlanilla(){
     const oadm = v('f-oadm') || 5440.463;
     const gfin = v('f-gfin') || 13542.32;
 
-    const ti  = ibv + oi;
-    const mp  = ini + comp - fin;
-    const rb  = ti - mp;
-    // Para el P&L usamos nómina bruta (gasto contable real)
-    const tg  = nom + alq + srv + mnt + pub + oop;
-    const ro  = rb - tg;
-    const ta  = ofi + oadm + gfin;
-    const ai  = ro - ta;
-    const isr = ai > 0 ? ai * 0.15 : 0;
+    const ti   = ibv + oi;
+    const mp   = ini + comp - fin;
+    const rb   = ti - mp;
+    const tg   = nom + alq + srv + mnt + pub + oop;
+    const ro   = rb - tg;
+    const ta   = ofi + oadm + gfin;
+    const ai   = ro - ta;
+    const isr  = ai > 0 ? ai * 0.15 : 0;
     const neto = ai - isr;
 
-    el('p-nom').textContent    = ti > 0 && nom > 0 ? pct(nom, ti) : '—';
-    el('gt-gop').textContent   = tg > 0 ? Lf(tg) : '—';
+    el('p-nom').textContent  = ti > 0 && nom > 0 ? pct(nom, ti) : '—';
+    el('gt-gop').textContent = tg > 0 ? Lf(tg) : '—';
     sr('r-op', ro);
     ss('r-ai', ai);
-    el('g-isr').textContent    = isr > 0 ? Lf(isr) : '—';
-    el('f-isr').textContent    = isr > 0 ? Lf(isr) : 'L 0.00';
+    el('g-isr').textContent = isr > 0 ? Lf(isr) : '—';
+    el('f-isr').textContent = isr > 0 ? Lf(isr) : 'L 0.00';
     const fn = el('r-neto');
     fn.textContent = Lf(Math.abs(neto));
     fn.className   = 'fv ' + (neto > 0 ? 'p' : neto < 0 ? 'n' : 'mt');
 
-    // ── 8. Banner ─────────────────────────────────────────────────────────
+    // ── Banner ────────────────────────────────────────────────────────────
     const banner = document.getElementById('planilla-neta-banner');
     if(banner){
       banner.style.display = 'flex';
@@ -1311,19 +1331,17 @@ function importFromPlanilla(){
         '<button onclick="this.parentNode.style.display=\'none\'" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;padding:0 4px;min-height:auto;line-height:1">×</button>';
     }
 
-    // ── 9. Hint modal ────────────────────────────────────────────────────
+    // ── Hint modal ────────────────────────────────────────────────────────
     const hint   = document.getElementById('nom-planilla-hint');
     const detail = document.getElementById('nom-planilla-detail');
-    if(hint)   hint.textContent = '· Planilla ' + (pn.periodo||'') + ' ✓';
+    if(hint) hint.textContent = '· Planilla ' + (pn.periodo||'') + ' ✓';
     if(detail){
       detail.style.display = 'block';
       detail.innerHTML =
         '📊 Bruta: <strong>' + Lf(nom) + '</strong> &nbsp;·&nbsp; ' +
         '💰 Neta caja: <strong style="color:var(--blue)">' + Lf(planillaNeta) + '</strong><br>' +
-        'Adelantos: '  + Lf(adelantos)      + ' &nbsp;·&nbsp; ' +
-        'Préstamos: '  + Lf(prestamos)      + ' &nbsp;·&nbsp; ' +
-        'Subsidio 80%: ' + Lf(subsidioEmpresa) + ' &nbsp;·&nbsp; ' +
-        'Cobros: '     + Lf(cobrosHerram);
+        'Adelantos: ' + Lf(adelantos) + ' &nbsp;·&nbsp; Préstamos: ' + Lf(prestamos) +
+        ' &nbsp;·&nbsp; Subsidio 80%: ' + Lf(subsidioEmpresa) + ' &nbsp;·&nbsp; Cobros: ' + Lf(cobrosHerram);
     }
 
   } catch(e) { console.warn('[importFromPlanilla]', e); }
