@@ -928,36 +928,66 @@ body.mobile .logo-wrap{display:none}
 <div class="overlay" id="formOverlay">
   <div class="form-modal">
     <div class="fm-head">
-      <span class="fm-title">Nueva solicitud</span>
-      <button class="fm-close" onclick="closeForm()">x</button>
+      <span class="fm-title" id="fmTitle">Nueva solicitud</span>
+      <button class="fm-close" onclick="closeForm()">×</button>
     </div>
     <div class="fm-body">
-      <div class="fm-note">Una vez enviada no podras editar ni cancelar esta solicitud. Gerencia la aprobara o rechazara.</div>
+      <div class="fm-note" id="fmNote">Una vez enviada no podrás editar ni cancelar esta solicitud. Gerencia la aprobará o rechazará.</div>
+
+      <!-- Tipo -->
       <div class="field">
         <label>Tipo de solicitud</label>
         <select id="fTipo" onchange="onTipoChange()">
-          <option value="adelanto">Adelanto de sueldo</option>
-          <option value="prestamo">Prestamo</option>
-          <option value="comida">Pedido de comida</option>
+          <option value="adelanto">💵 Adelanto de sueldo</option>
+          <option value="prestamo">🏦 Préstamo sin interés</option>
+          <option value="comida">🍽️ Consumo de comida</option>
+          <option value="herramienta">🔧 Daño a herramienta/equipo</option>
         </select>
       </div>
+
+      <!-- Monto + fecha -->
       <div class="field-row">
         <div class="field">
-          <label>Monto (L.)</label>
-          <input type="number" id="fMonto" placeholder="0.00" min="1" step="0.01">
+          <label id="fMontoLabel">Monto (L.)</label>
+          <input type="number" id="fMonto" placeholder="0.00" min="1" step="0.01" oninput="onMontoChange()">
+          <div id="fMontoHint" style="font-size:11px;color:var(--muted);margin-top:4px;display:none"></div>
         </div>
         <div class="field">
           <label>Fecha</label>
           <input type="date" id="fFecha">
         </div>
       </div>
+
+      <!-- Cuotas (solo préstamo) -->
       <div class="field" id="fCuotasField" style="display:none">
-        <label>Numero de cuotas (quincenas)</label>
-        <input type="number" id="fCuotas" placeholder="Ej. 6" min="1" max="36">
+        <label>Número de cuotas quincenales</label>
+        <input type="number" id="fCuotas" placeholder="Ej. 4" min="1" max="36" oninput="onMontoChange()">
+        <div id="fCuotasHint" style="font-size:11px;color:var(--blue);margin-top:4px;display:none"></div>
       </div>
+
+      <!-- Monto descontado (comida — calculado automático) -->
+      <div class="field" id="fComidaField" style="display:none">
+        <label>Descuento a aplicar</label>
+        <div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+            <span style="font-size:12px;color:var(--muted)">Valor del consumo</span>
+            <span style="font-size:12px;font-weight:600" id="fComidaTotal">L 0.00</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+            <span style="font-size:12px;color:var(--muted)">Subsidio empresa (80%)</span>
+            <span style="font-size:12px;color:var(--green-ui);font-weight:600" id="fComidaSubsidio">− L 0.00</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;border-top:1px solid var(--border);padding-top:6px;margin-top:4px">
+            <span style="font-size:13px;font-weight:700;color:var(--text)">Tu descuento (20%)</span>
+            <span style="font-size:14px;font-weight:800;color:var(--red)" id="fComidaDesc">L 0.00</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Descripción -->
       <div class="field">
-        <label>Descripcion / Detalle</label>
-        <textarea id="fDesc" placeholder="Describe el motivo o lo que deseas pedir..."></textarea>
+        <label id="fDescLabel">Descripción / Detalle</label>
+        <textarea id="fDesc" placeholder="Describe el motivo..."></textarea>
       </div>
     </div>
     <div class="fm-footer">
@@ -1149,26 +1179,105 @@ function openForm(){
   el('formOverlay').classList.add('open');
 }
 function closeForm(){ el('formOverlay').classList.remove('open'); }
-function onTipoChange(){ el('fCuotasField').style.display = el('fTipo').value==='prestamo'?'':'none'; }
+
+function onTipoChange(){
+  const tipo = el('fTipo').value;
+
+  // Reset campos especiales
+  el('fCuotasField').style.display  = tipo === 'prestamo'   ? '' : 'none';
+  el('fComidaField').style.display  = tipo === 'comida'     ? '' : 'none';
+  el('fMontoHint').style.display    = 'none';
+
+  // Adaptar etiquetas y notas por tipo
+  const configs = {
+    adelanto:    { title:'Adelanto de sueldo',       montoLabel:'Monto a adelantar (L.)', note:'Se descuenta completo en tu próxima quincena.', descLabel:'Motivo (opcional)' },
+    prestamo:    { title:'Préstamo sin interés',     montoLabel:'Monto total del préstamo (L.)', note:'Sin interés. Se descuenta en cuotas quincenales iguales.', descLabel:'¿Para qué necesitas el préstamo?' },
+    comida:      { title:'Consumo de comida',        montoLabel:'Valor total del consumo (L.)', note:'Solo se te descuenta el 20%. La empresa subsidia el 80%.', descLabel:'¿Qué consumiste?' },
+    herramienta: { title:'Daño a herramienta/equipo', montoLabel:'Costo de reposición (L.)', note:'El monto será descontado según acuerdo con gerencia.', descLabel:'Describe el daño y la herramienta afectada' },
+  };
+  const c = configs[tipo] || configs.adelanto;
+  el('fmTitle').textContent      = c.title;
+  el('fmNote').textContent       = c.note;
+  el('fMontoLabel').textContent  = c.montoLabel;
+  el('fDescLabel').textContent   = c.descLabel;
+
+  onMontoChange();
+}
+
+function onMontoChange(){
+  const tipo  = el('fTipo').value;
+  const monto = parseFloat(el('fMonto').value) || 0;
+
+  if(tipo === 'comida' && monto > 0){
+    const subsidio  = parseFloat((monto * 0.80).toFixed(2));
+    const descuento = parseFloat((monto * 0.20).toFixed(2));
+    el('fComidaTotal').textContent    = Lf(monto);
+    el('fComidaSubsidio').textContent = '− ' + Lf(subsidio);
+    el('fComidaDesc').textContent     = Lf(descuento);
+  }
+
+  if(tipo === 'prestamo' && monto > 0){
+    const cuotas = parseInt(el('fCuotas').value) || 0;
+    if(cuotas > 0){
+      const montoCuota = parseFloat((monto / cuotas).toFixed(2));
+      const hint = el('fCuotasHint');
+      hint.style.display = '';
+      hint.innerHTML = '→ <strong>' + Lf(montoCuota) + '</strong> por quincena durante ' + cuotas + ' quincenas';
+    } else {
+      el('fCuotasHint').style.display = 'none';
+    }
+  }
+}
 
 async function saveRecord(){
-  const monto = parseFloat(el('fMonto').value);
-  if(!monto||monto<=0){ toast('Ingresa un monto valido','err'); return; }
+  const tipo  = el('fTipo').value;
   const fecha = el('fFecha').value;
   if(!fecha){ toast('Selecciona una fecha','err'); return; }
+
+  let montoRaw = parseFloat(el('fMonto').value);
+  if(!montoRaw || montoRaw <= 0){ toast('Ingresa un monto válido','err'); return; }
+
+  // Para comida: guardar el valor de consumo real, el descuento del 20% se calcula en planilla
+  // Para otros: guardar monto tal cual
+  let montoGuardado = montoRaw;
+  let montoDescuento = montoRaw; // lo que realmente se descuenta de nómina
+
+  if(tipo === 'comida'){
+    montoGuardado  = montoRaw;                              // consumo real
+    montoDescuento = parseFloat((montoRaw * 0.20).toFixed(2)); // 20% a descontar
+  }
+
+  const cuotas = tipo === 'prestamo' ? (parseInt(el('fCuotas').value) || 1) : null;
+
   const rec = {
-    id:genId(), tipo:el('fTipo').value, monto, fecha,
-    cuotas:el('fTipo').value==='prestamo'?(parseInt(el('fCuotas').value)||null):null,
-    desc:el('fDesc').value.trim(), estado:'pending',
-    createdAt:Date.now(), userId:session.id, userName:session.name
+    id:             genId(),
+    tipo,
+    monto:          montoGuardado,      // consumo real o monto total
+    montoDescuento: montoDescuento,     // lo que se aplica en nómina
+    fecha,
+    cuotas,
+    desc:           el('fDesc').value.trim(),
+    estado:         'pending',
+    createdAt:      Date.now(),
+    userId:         session.id,
+    userName:       session.name
   };
+
   try{
     await DB_Sol.crear(rec);
-  }catch(e){
-    // offline fallback
+  } catch(e){
     const local = JSON.parse(localStorage.getItem('cayena_cc_'+session.id)||'[]');
     local.push(rec);
     localStorage.setItem('cayena_cc_'+session.id, JSON.stringify(local));
+    const glob  = JSON.parse(localStorage.getItem('cayena_solicitudes_global')||'[]');
+    glob.push(rec);
+    localStorage.setItem('cayena_solicitudes_global', JSON.stringify(glob));
+  }
+
+  toast('Solicitud enviada ✓');
+  closeForm();
+  await render();
+}
     const glob = JSON.parse(localStorage.getItem('cayena_solicitudes_global')||'[]');
     glob.push(rec);
     localStorage.setItem('cayena_solicitudes_global', JSON.stringify(glob));

@@ -1011,7 +1011,7 @@ var session = null;
 try { session = JSON.parse(sessionStorage.getItem(SESSION_KEY)); } catch(e) {}
 
 var MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-var TIPO_LABEL = {adelanto:'💵 Adelanto', prestamo:'🏦 Préstamo', comida:'🍽️ Comida'};
+var TIPO_LABEL = {adelanto:'💵 Adelanto', prestamo:'🏦 Préstamo', comida:'🍽️ Comida', herramienta:'🔧 Herramienta'};
 
 var USERS = [
   {id:5, name:'Axel Rivera',     cargo:'Cuenta Corriente', initials:'AR', bg:'linear-gradient(135deg,#166534,#4ADE80)'},
@@ -1142,12 +1142,86 @@ function calcEmp(u){
   var sueldo   = parseFloat(cfg.sueldo)||0;
   var bruto    = sueldo+pagoH+bono;
 
-  // Descuentos aprobados (solo del período)
-  var descs=allSol.filter(function(s){
-    var uid=s.user_id!==undefined?s.user_id:s.userId;
-    return Number(uid)===Number(u.id)&&s.estado==='approved';
+  // ── Descuentos aprobados para este período ───────────────────────────────
+  // Para préstamos con cuotas: solo incluir la cuota que corresponde a ESTE período
+  var descs = [];
+  allSol.forEach(function(s){
+    var uid = s.user_id !== undefined ? s.user_id : s.userId;
+    if(Number(uid) !== Number(u.id)) return;
+    if(s.estado !== 'approved') return;
+
+    if(s.tipo === 'prestamo' && s.cuotas && s.cuotas > 1){
+      // ── Calcular qué cuota quincenal corresponde a este período ──────────
+      // La fecha de inicio es la fecha del préstamo
+      // Cuotas se descuentan cada 15 días desde esa fecha
+      var fechaInicio = s.fecha || (s.created_at ? s.created_at.substring(0,10) : null);
+      if(!fechaInicio) return;
+
+      var montoCuota = parseFloat(((s.monto || 0) / s.cuotas).toFixed(2));
+      var inicio = new Date(fechaInicio + 'T12:00:00');
+
+      // Generar todas las fechas de cuota
+      for(var c = 0; c < s.cuotas; c++){
+        // Cada cuota es 15 días después de la anterior
+        var fechaCuota = new Date(inicio);
+        fechaCuota.setDate(fechaCuota.getDate() + (15 * (c + 1)));
+
+        var cuotaYear  = fechaCuota.getFullYear();
+        var cuotaMes   = fmt2(fechaCuota.getMonth() + 1);
+        var cuotaDia   = fechaCuota.getDate();
+
+        // Determinar si esta cuota cae en el período actual
+        var enPeriodo = false;
+        if(tipoPerido === 'mensual'){
+          // Período mensual: YYYY-MM
+          var cuotaPer = cuotaYear + '-' + cuotaMes;
+          enPeriodo = (cuotaPer === periodoActual);
+        } else {
+          // Período quincenal: YYYY-MM-Q1 (días 1-15) o YYYY-MM-Q2 (días 16-fin)
+          var cuotaQ  = cuotaDia <= 15 ? 'Q1' : 'Q2';
+          var cuotaPer = cuotaYear + '-' + cuotaMes + '-' + cuotaQ;
+          enPeriodo = (cuotaPer === periodoActual);
+        }
+
+        if(enPeriodo){
+          // Clonar la solicitud con el monto de la cuota
+          descs.push(Object.assign({}, s, {
+            monto: montoCuota,
+            _esCuota: true,
+            _cuotaNum: c + 1,
+            _cuotaTotal: s.cuotas,
+            _fechaCuota: fechaCuota.toISOString().split('T')[0]
+          }));
+        }
+      }
+    } else {
+      // Adelantos, comida, herramientas — descuento simple en el período actual
+      // Solo incluir si la fecha del descuento cae en el período
+      var fechaSol = s.fecha || (s.created_at ? s.created_at.substring(0,10) : null);
+      if(!fechaSol) return;
+
+      var solYear = fechaSol.substring(0,4);
+      var solMes  = fechaSol.substring(5,7);
+      var solDia  = parseInt(fechaSol.substring(8,10));
+
+      var enPeriodo = false;
+      if(tipoPerido === 'mensual'){
+        enPeriodo = ((solYear + '-' + solMes) === periodoActual);
+      } else {
+        var solQ = solDia <= 15 ? 'Q1' : 'Q2';
+        enPeriodo = ((solYear + '-' + solMes + '-' + solQ) === periodoActual);
+      }
+
+      if(enPeriodo) descs.push(s);
+    }
   });
-  var totalDesc=descs.reduce(function(a,d){return a+(d.monto||0);},0);
+  var totalDesc=descs.reduce(function(a,d){
+    // Para comida usar montoDescuento (20%), para otros usar monto
+    var m = d.tipo === 'comida'
+      ? parseFloat(d.montoDescuento || d.monto * 0.20)
+      : parseFloat(d.montoDescuento || d.monto) || 0;
+    return a + m;
+  },0);
   var neto=Math.max(0,bruto-totalDesc);
 
   // Pendientes
@@ -1222,11 +1296,13 @@ function calcPlanillaNeta(){
 
     // Clasificar cada descuento aprobado por tipo
     d.descs.forEach(function(s){
-      var tipo = s.tipo || '';
-      var monto = parseFloat(s.monto) || 0;
-      if(tipo === 'adelanto')    adelantos += monto;
-      else if(tipo === 'prestamo') prestamos += monto;
-      else if(tipo === 'comida')   consumoEmpleados += monto * 0.20; // solo subsidio 20%
+      var tipo  = s.tipo || '';
+      // Usar montoDescuento si existe (comida ya tiene el 20% calculado)
+      // sino usar monto directamente
+      var monto = parseFloat(s.montoDescuento || s.monto) || 0;
+      if(tipo === 'adelanto')                        adelantos          += monto;
+      else if(tipo === 'prestamo')                   prestamos          += monto;
+      else if(tipo === 'comida')                     consumoEmpleados   += monto; // ya es el 20%
       else if(tipo === 'herramienta' || tipo === 'cobro') cobrosHerramientas += monto;
     });
   });
@@ -1476,9 +1552,19 @@ function renderExpNom(){
   if(d.descs.length){
     html+='<div style="font-size:11px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Descuentos</div>';
     d.descs.forEach(function(s){
+      var label = TIPO_LABEL[s.tipo]||s.tipo;
+      var extra = '';
+      var montoDisplay = parseFloat(s.montoDescuento || s.monto) || 0;
+      if(s._esCuota){
+        extra = ' · Cuota ' + s._cuotaNum + '/' + s._cuotaTotal + ' (vence ' + s._fechaCuota + ')';
+      } else if(s.tipo === 'comida' && s.montoDescuento){
+        extra = ' · Consumo: ' + Lf(s.monto) + ' → Descuento 20%';
+      } else if(s.desc||s.descripcion){
+        extra = ' · ' + (s.desc||s.descripcion).slice(0,24);
+      }
       html+='<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px">'+
-        '<span>'+(TIPO_LABEL[s.tipo]||s.tipo)+(s.desc||s.descripcion?' · '+(s.desc||s.descripcion).slice(0,20):'')+'</span>'+
-        '<span style="color:var(--red);font-weight:700">- '+Lf(s.monto)+'</span></div>';
+        '<span>'+label+extra+'</span>'+
+        '<span style="color:var(--red);font-weight:700">- '+Lf(montoDisplay)+'</span></div>';
     });
     html+='<div style="display:flex;justify-content:space-between;padding:5px 0;font-size:12px;color:var(--muted)"><span>Total desc.</span><span style="color:var(--red);font-weight:700">- '+Lf(d.totalDesc)+'</span></div>';
   }
@@ -1564,7 +1650,11 @@ function generarComprobante(userId){
   var fechaEmision=now.toLocaleDateString('es-HN',{day:'2-digit',month:'long',year:'numeric'});
 
   var descRows=d.descs.length
-    ?d.descs.map(function(s){return '<tr><td>'+(TIPO_LABEL[s.tipo]||s.tipo)+'</td><td style="color:#64748B;font-size:11px">'+(s.desc||s.descripcion||'')+'</td><td style="text-align:right;color:#EF4444;font-weight:600">- '+Lf(s.monto)+'</td></tr>';}).join('')
+    ?d.descs.map(function(s){
+      var label=(TIPO_LABEL[s.tipo]||s.tipo);
+      var extra = s._esCuota ? ' Cuota '+s._cuotaNum+'/'+s._cuotaTotal : (s.desc||s.descripcion||'');
+      return '<tr><td>'+label+'</td><td style="color:#64748B;font-size:11px">'+extra+'</td><td style="text-align:right;color:#EF4444;font-weight:600">- '+Lf(s.monto)+'</td></tr>';
+    }).join('')
     :'<tr><td colspan="3" style="color:#64748B;font-style:italic">Sin descuentos este período</td></tr>';
 
   var w=window.open('','_blank','width=860,height=760');
