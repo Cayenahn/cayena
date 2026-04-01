@@ -32,6 +32,7 @@ body{overflow:hidden}
 
 /* ── SIDEBAR ── */
 .logo-wrap{padding:24px 20px 20px;border-bottom:1px solid var(--border)}
+body.mobile .logo-wrap{display:none}
 .logo{font-size:22px;font-weight:800;letter-spacing:-0.5px;color:var(--text);line-height:1;display:flex;align-items:center;gap:8px}
 .logo-dot{width:8px;height:8px;border-radius:50%;background:linear-gradient(135deg,#2563EB,#84CC16)}
 .logo-rtn{font-size:10px;color:var(--muted);margin-top:4px;font-weight:400}
@@ -49,7 +50,7 @@ body{overflow:hidden}
 .ur{font-size:11px;color:var(--muted)}
 
 /* ── TOPBAR ── */
-.topbar{height:58px;background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;flex-shrink:0;gap:12px;box-shadow:var(--shadow)}
+.topbar{height:58px;background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;flex-shrink:0;gap:12px;box-shadow:var(--shadow);position:relative;z-index:300}
 .mb{display:none;background:none;border:none;color:var(--muted);cursor:pointer;padding:6px;line-height:1;border-radius:8px;min-height:44px}
 .mb:hover{background:var(--bg)}
 .tl{display:flex;align-items:center;gap:10px}
@@ -165,12 +166,12 @@ body{overflow:hidden}
 .mf{padding:16px 24px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;background:var(--bg)}
 
 /* OVERLAY BG */
-.ovbg{display:none;position:fixed;inset:0;background:rgba(15,23,42,.4);z-index:89}
-.ovbg.open{display:block}
+.sb-backdrop{display:none;position:fixed;inset:0;background:rgba(15,23,42,.4);z-index:89}
+.sb-backdrop.open{display:block}
 
 /* MOBILE */
 @media(max-width:900px){
-  .sidebar{position:fixed;left:0;top:0;bottom:0;height:100%;transform:translateX(-100%)
+  .sidebar{position:fixed;left:0;top:58px;bottom:0;height:calc(100% - 58px);transform:translateX(-100%);overflow-y:auto;overflow-x:hidden
 }
   .sidebar.open{transform:translateX(0)}
   .main{width:100%}
@@ -583,7 +584,7 @@ button {
 }
 
 /* Overlays/modales — iOS Safari no muestra bien backdrop-filter en todos */
-.ovbg {
+.sb-backdrop {
   -webkit-backdrop-filter: none; /* desactivar en iOS para rendimiento */
 }
 
@@ -660,14 +661,220 @@ p, td, input, textarea, .sol-meta {
 
 /* MOBILE_RESPONSIVE */
 
-@media(min-width:901px){.sidebar{position:relative;transform:none;height:100vh}.ovbg{display:none!important}}
+
+/* ── Sidebar system — mobile/desktop ── */
+.sb-backdrop{display:none;position:fixed;inset:0;background:rgba(15,23,42,.4);z-index:89}
+.sb-backdrop.open{display:block}
+body.mobile .sb-backdrop{top:58px}
+
+aside{position:fixed;top:0;left:-100%;width:80%;height:100%;transition:0.3s;z-index:200;overflow-y:auto;overflow-x:hidden}
+aside.active{left:0}
+@media(min-width:769px){aside{left:0;width:250px}}
+@media(max-width:768px){aside{left:-250px}aside.active{left:0}}
+body.mobile aside{left:-100%;width:80%;top:58px;height:calc(100% - 58px)}
+body.mobile aside.active{left:0}
+body.desktop aside{left:0;width:250px;top:0;height:100%}
+body.mobile  #menu-toggle{display:flex !important}
+body.desktop #menu-toggle{display:none !important}
+
+/* En mobile: botón dentro del topbar */
+body.mobile #menu-toggle{
+  position:static;
+  box-shadow:none;
+  background:none;
+  border:1px solid var(--border);
+  width:38px;
+  height:38px;
+  border-radius:10px;
+  flex-shrink:0;
+}
+body.mobile #menu-toggle .bar{background:var(--body)}
+body.mobile #menu-toggle:hover{background:var(--bg);box-shadow:none;transform:none}
+body.mobile #menu-toggle:active{transform:scale(.95)}
+body.mobile .sb-toggle{display:none !important}
+
+/* ── Hamburger button base ── */
+#menu-toggle{
+  width:38px;height:38px;border:none;border-radius:10px;
+  cursor:pointer;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  gap:5px;padding:0;flex-shrink:0;
+  transition:background .2s ease,box-shadow .2s ease,transform .15s ease;
+}
+#menu-toggle:hover{background:var(--blue-deep);box-shadow:0 6px 18px rgba(37,99,235,.45);transform:scale(1.06)}
+#menu-toggle:active{transform:scale(.95)}
+.bar{
+  display:block;width:20px;height:2px;border-radius:2px;background:#fff;
+  transition:transform .3s cubic-bezier(.4,0,.2,1),opacity .3s cubic-bezier(.4,0,.2,1),width .3s cubic-bezier(.4,0,.2,1);
+  transform-origin:center;
+}
+#menu-toggle.open .bar-1{transform:translateY(7px) rotate(45deg)}
+#menu-toggle.open .bar-2{opacity:0;width:0}
+#menu-toggle.open .bar-3{transform:translateY(-7px) rotate(-45deg)}
+
+/* logo-wrap hidden on mobile (aside starts below topbar) */
+body.mobile .logo-wrap{display:none}
+@media(min-width:901px){.sidebar{position:relative;transform:none;height:100vh}.sb-backdrop{display:none!important}}
+
+/* ── Backup section ─────────────────────────────────────────────────────── */
+.backup-section{background:var(--white);border:1px solid var(--border);border-radius:var(--r-lg);padding:20px 24px;margin-top:24px}
+.backup-title{font-size:13px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:8px;margin-bottom:16px}
+.backup-actions{display:flex;gap:12px;flex-wrap:wrap}
+.backup-btn{display:flex;flex-direction:column;align-items:flex-start;gap:3px;background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:12px 16px;font-size:13px;font-weight:600;color:var(--body);cursor:pointer;transition:all .15s;min-width:180px}
+.backup-btn svg{opacity:.6;margin-bottom:2px}
+.backup-btn:hover{border-color:var(--blue);color:var(--blue);background:#EFF6FF}
+.backup-btn:hover svg{opacity:1}
+.backup-import{cursor:pointer}
+.backup-sub{font-size:11px;font-weight:400;color:var(--muted)}
+
+
+/* ═══════════════════════════════════════════════════════
+   TOPBAR MOBILE — QuickBooks style
+   ═══════════════════════════════════════════════════════ */
+
+/* Topbar siempre una sola línea en mobile */
+@media(max-width:900px){
+  .topbar{
+    padding: 0 12px;
+    height: 56px;
+    flex-shrink: 0;
+  }
+  .tl{
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+  }
+  .ttl{
+    font-size: 15px !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 160px;
+  }
+  .tey, .tsep{ display: none !important; }
+
+  /* Selector de mes — compacto en mobile */
+  #mes-selector-topbar .mes-select{
+    font-size: 11px !important;
+    padding: 4px 6px !important;
+    max-width: 110px !important;
+  }
+  #mes-selector-topbar .mes-nav-btn{
+    width: 26px !important;
+    height: 26px !important;
+    font-size: 14px !important;
+  }
+
+  /* tr2: solo mostrar el botón primario, ocultar el resto */
+  .tr2{
+    gap: 6px;
+    flex-shrink: 0;
+  }
+  .tr2 .btn:not(.btn-primary):not(.btn-overflow){
+    display: none !important;
+  }
+  .tr2 .btn-primary{
+    padding: 8px 14px !important;
+    font-size: 12px !important;
+    min-height: 36px !important;
+    white-space: nowrap;
+  }
+
+  /* Botón overflow ⋯ */
+  .btn-overflow{
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    min-height: 36px;
+    padding: 0 !important;
+    font-size: 18px !important;
+    border-radius: 10px !important;
+  }
+}
+
+/* ── Menú overflow ── */
+.overflow-menu{
+  display: none;
+  position: fixed;
+  top: 60px;
+  right: 12px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  box-shadow: 0 8px 32px rgba(0,0,0,.12);
+  z-index: 500;
+  min-width: 200px;
+  overflow: hidden;
+  animation: omFadeIn .15s ease;
+}
+.overflow-menu.open{ display: block; }
+@keyframes omFadeIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+.om-item{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--body);
+  cursor: pointer;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  transition: background .1s;
+  font-family: var(--font, inherit);
+}
+.om-item:hover{ background: var(--bg); }
+.om-item:not(:last-child){ border-bottom: 1px solid var(--border); }
+.om-icon{ font-size: 16px; width: 20px; flex-shrink: 0; }
+.om-backdrop{
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 499;
+}
+.om-backdrop.open{ display: block; }
+
+/* ── Barra de acción inferior (botón primario fijo) ── */
+@media(max-width:900px){
+  .fab-primary{
+    position: fixed;
+    bottom: max(20px, calc(20px + env(safe-area-inset-bottom)));
+    right: 16px;
+    z-index: 200;
+    background: var(--blue);
+    color: #fff;
+    border: none;
+    border-radius: 999px;
+    padding: 14px 22px;
+    font-size: 14px;
+    font-weight: 700;
+    font-family: var(--font, inherit);
+    box-shadow: 0 4px 16px rgba(37,99,235,.4);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all .2s;
+    min-height: 48px;
+  }
+  .fab-primary:hover{ transform: scale(1.04); }
+  .fab-primary:active{ transform: scale(.96); }
+}
+@media(min-width:901px){
+  .fab-primary{ display: none !important; }
+}
+
 </style>
 </head>
 <body>
-<div class="ovbg" id="ovbg" onclick="closeSB()"></div>
+<div id="sb-backdrop" class="sb-backdrop"></div>
 <div class="app">
 
-  <aside class="sidebar" id="sb">
+  <aside class="sidebar" id="cayena-sidebar">
     <div class="logo-wrap">
       <div class="logo"><div class="logo-dot"></div>Cayena</div>
       <div class="logo-rtn">RTN: 0318-2001-022079</div>
@@ -687,7 +894,8 @@ p, td, input, textarea, .sol-meta {
       <a class="ni" href="cuenta-corriente.html"><svg viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M2 7h12M5 10h3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Cuenta Corriente</a>
       <a class="ni" href="asistencia.html"><svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.4"/><path d="M8 5v3l2 2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Asistencia</a>
       <div class="ng">Análisis</div>
-      <a class="ni" href="#"><svg viewBox="0 0 16 16" fill="none"><path d="M2 13L5 9l3 2.5L11 5l3 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Costo de Ventas</a>
+      <a class="ni" href="historial.html"><svg viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="M5 8h6M5 5.5h3M5 10.5h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Historial P&amp;L</a>
+      <a class="ni" href="wrap.html"><svg viewBox="0 0 16 16" fill="none"><path d="M2 13L5 9l3 2.5L11 5l3 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Wrap Financiero ✨</a>
     </nav>
     <div class="su">
       <div class="av">AD</div>
@@ -698,15 +906,28 @@ p, td, input, textarea, .sol-meta {
   <div class="main">
     <div class="topbar">
       <div class="tl">
-        <button class="mb" onclick="toggleSB()"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M2 5h16M2 10h16M2 15h16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
+        <button id="menu-toggle" aria-label="Abrir menú">
+          <span class="bar bar-1"></span>
+          <span class="bar bar-2"></span>
+          <span class="bar bar-3"></span>
+        </button>
+        <button id="sb-toggle" class="mb sb-toggle"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M2 5h16M2 10h16M2 15h16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
         <span class="tey">Cayena</span><div class="tsep"></div>
-        <span class="ttl">Estado de Resultados</span><div class="tsep"></div>
-        <span class="tper" id="tper">—</span>
+        <span class="ttl">Estado de Resultados</span><div class="tsep"></div><div id="mes-selector-topbar"></div>
       </div>
       <div class="tr2">
         <button class="btn" onclick="exportPDF()">Exportar PDF</button>
+        <button class="btn" onclick="if(typeof API_Backup!=='undefined')API_Backup.exportJSON();else alert('Carga api.js primero')">⬇ Backup</button>
+        <button class="btn" onclick="if(typeof API_Backup!=='undefined')API_Backup.exportCSV();else alert('Carga api.js primero')">⬇ CSV</button>
         <button class="btn btn-primary" onclick="openModal()">+ Ingresar datos</button>
+        <button class="btn btn-overflow" id="btn-overflow" title="Más opciones" aria-label="Más opciones">⋯</button>
       </div>
+      <div class="overflow-menu" id="overflow-menu">
+  <button class="om-item" onclick="exportPDF();document.getElementById('overflow-menu').classList.remove('open');document.getElementById('om-backdrop') && document.getElementById('om-backdrop').classList.remove('open')"><span class="om-icon">📄</span>Exportar PDF</button>
+  <button class="om-item" onclick="if(typeof API_Backup!=='undefined')API_Backup.exportJSON();document.getElementById('overflow-menu').classList.remove('open');document.getElementById('om-backdrop') && document.getElementById('om-backdrop').classList.remove('open')"><span class="om-icon">⬇</span>Backup JSON</button>
+  <button class="om-item" onclick="if(typeof API_Backup!=='undefined')API_Backup.exportCSV();document.getElementById('overflow-menu').classList.remove('open');document.getElementById('om-backdrop') && document.getElementById('om-backdrop').classList.remove('open')"><span class="om-icon">📊</span>Exportar CSV</button>
+</div>
+<div class="om-backdrop" id="om-backdrop"></div>
     </div>
 
     <div class="content">
@@ -722,12 +943,15 @@ p, td, input, textarea, .sol-meta {
       </div>
 
       <div class="sync-b" id="sync-b">
-        <div>
+          <div>
           <div class="sbt" id="sbt"></div>
           <div class="sbs" id="sbs"></div>
         </div>
         <button class="sbx" onclick="clearSync()">×</button>
       </div>
+
+      <!-- ── Banner planilla neta ── -->
+      <div id="planilla-neta-banner" style="display:none;align-items:flex-start;gap:12px;padding:12px 16px;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:var(--r);margin-bottom:16px;font-family:var(--font)"></div>
 
       <div class="sl">Ingresos</div>
       <div class="pl-block">
@@ -751,7 +975,12 @@ p, td, input, textarea, .sol-meta {
       <div class="sl">Gastos Operativos</div>
       <div class="pl-block">
         <div class="gr"><div class="gl"><svg class="gi" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="M5 8h6M5 5.5h6M5 10.5h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg><span class="gn">Gastos Operativos</span><span class="sc-chip sc-e" id="b-gop">Sin datos</span></div><span class="gv" id="gt-gop">—</span></div>
-        <div class="dr"><span class="dn">Nómina</span><span class="dp" id="p-nom">—</span><span class="da e" id="g-nom">—</span></div>
+        <div class="dr"><span class="dn">Nómina bruta (sueldos + bonos + horas)</span><span class="dp" id="p-nom">—</span><span class="da e" id="g-nom">—</span></div>
+        <div class="dr" id="dr-adelantos" style="display:none"><span class="dn" style="padding-left:16px;color:var(--muted)">↳ Adelantos entregados <span style="font-size:10px">(ya incluidos en bruto)</span></span><span class="dp" id="p-adelantos">—</span><span class="da e" id="g-adelantos">—</span></div>
+        <div class="dr" id="dr-prestamos" style="display:none"><span class="dn" style="padding-left:16px;color:var(--muted)">↳ Préstamos por cobrar <span style="font-size:10px">(cuentas por cobrar)</span></span><span class="dp" id="p-prestamos">—</span><span class="da e" id="g-prestamos">—</span></div>
+        <div class="dr" id="dr-comida" style="display:none"><span class="dn" style="padding-left:16px;color:var(--muted)">↳ Subsidio comida empleados <span style="font-size:10px">(80% asumido por empresa)</span></span><span class="dp" id="p-comida">—</span><span class="da e" id="g-comida">—</span></div>
+        <div class="dr" id="dr-herramientas" style="display:none"><span class="dn" style="padding-left:16px;color:var(--green-ui)">↳ Recuperación herramientas <span style="font-size:10px">(reduce gasto)</span></span><span class="dp" id="p-herramientas">—</span><span class="da e" id="g-herramientas" style="color:var(--green-ui)">—</span></div>
+        <div class="dr" id="dr-nom-neta" style="display:none"><span class="dn" style="font-weight:600">Nómina neta (salida real de caja)</span><span class="dp" id="p-nom-neta">—</span><span class="da" id="g-nom-neta" style="font-weight:700">—</span></div>
         <div class="dr"><span class="dn">Alquiler</span><span class="dp" id="p-alq">—</span><span class="da e" id="g-alq">—</span></div>
         <div class="dr"><span class="dn">Servicios públicos</span><span class="dp" id="p-srv">—</span><span class="da e" id="g-srv">—</span></div>
         <div class="dr"><span class="dn">Mantenimiento y reparaciones</span><span class="dp" id="p-mnt">—</span><span class="da e" id="g-mnt">—</span></div>
@@ -796,7 +1025,11 @@ p, td, input, textarea, .sol-meta {
     </div>
     <div class="fsh"><span>Gastos Operativos</span></div>
     <div class="fg">
-      <div class="ff"><label>Nómina (L.)</label><input type="number" id="f-nom" placeholder="0.00" min="0" step="0.01"></div>
+      <div class="ff">
+        <label>Nómina (L.) <span id="nom-planilla-hint" style="font-size:10px;font-weight:400;color:var(--muted)"></span></label>
+        <input type="number" id="f-nom" placeholder="0.00" min="0" step="0.01">
+        <div id="nom-planilla-detail" style="display:none;font-size:11px;color:var(--muted);margin-top:4px;line-height:1.5"></div>
+      </div>
       <div class="ff"><label>Alquiler (L.)</label><input type="number" id="f-alq" placeholder="6500.00" min="0" step="0.01"></div>
       <div class="ff"><label>Servicios públicos (L.)</label><input type="number" id="f-srv" placeholder="519.26" min="0" step="0.01"></div>
       <div class="ff"><label>Mantenimiento (L.)</label><input type="number" id="f-mnt" placeholder="0.00" min="0" step="0.01"></div>
@@ -822,22 +1055,19 @@ const v=id=>parseFloat(el(id).value)||0;
 const Lf=n=>'L '+parseFloat(n||0).toLocaleString('es-HN',{minimumFractionDigits:2,maximumFractionDigits:2});
 const pct=(n,t)=>t>0?(n/t*100).toFixed(1)+'%':'—';
 const MO=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-function toggleSB(){el('sb').classList.toggle('open');el('ovbg').classList.toggle('open');}
-function closeSB(){el('sb').classList.remove('open');el('ovbg').classList.remove('open');}
 function openModal(){
   const records=JSON.parse(localStorage.getItem('cayena_ingresos')||'[]');
   if(records.length){const t=parseFloat(records.reduce((s,r)=>s+(r.total||0),0).toFixed(2));if(t>0)el('f-ibv').value=t;}
   // Pre-fill compras del mes
   const compras=JSON.parse(localStorage.getItem('cayena_compras')||'[]');
   if(compras.length){
-    const now=new Date();const curY=now.getFullYear(),curM=now.getMonth();
+    const curY=getMesYear(),curM=getMesMonth();
     const mes=compras.filter(r=>{if(!r.fecha)return false;const[y,m]=r.fecha.split('-');return parseInt(y)===curY&&parseInt(m)-1===curM;});
     const t=parseFloat(mes.reduce((s,r)=>s+(r.total||0),0).toFixed(2));
     if(t>0)el('f-comp').value=t;
   }
   // Pre-fill inventario inicial y final
-  const now=new Date();
-  const curY=now.getFullYear(),curM=now.getMonth();
+  const curY=getMesYear(),curM=getMesMonth();
   const padM=String(curM+1).padStart(2,'0');
   const iniData=JSON.parse(localStorage.getItem('cayena_inv_inicial_'+curY+'-'+padM)||'{}');
   const finData=JSON.parse(localStorage.getItem('cayena_inv_final_'+curY+'-'+padM)||'{}');
@@ -861,7 +1091,7 @@ function calcular(){
   const ibv=v('f-ibv'),oi=v('f-oi'),ini=v('f-ini'),comp=v('f-comp'),fin=v('f-fin');
   const nom=v('f-nom'),alq=v('f-alq')||6500,srv=v('f-srv')||519.255,mnt=v('f-mnt'),pub=v('f-pub')||3000,oop=v('f-oop');
   const ofi=v('f-ofi'),oadm=v('f-oadm')||5440.463,gfin=v('f-gfin')||13542.32;
-  const now=new Date();const per=MO[now.getMonth()]+' '+now.getFullYear();
+  const per=getMesLabel();
   el('tper').textContent=per;el('cpb').textContent=per;
   const ti=ibv+oi,mp=ini+comp-fin,rb=ti-mp;
   const tg=nom+alq+srv+mnt+pub+oop,ro=rb-tg;
@@ -895,7 +1125,7 @@ function importFromIngresos(){
   if(!records.length)return;
   const total=parseFloat(records.reduce((s,r)=>s+(r.total||0),0).toFixed(2));
   if(total===0)return;
-  const now=new Date();const per=MO[now.getMonth()]+' '+now.getFullYear();
+  const per=getMesLabel();
   el('tper').textContent=per;el('cpb').textContent=per;
   el('f-ibv').value=total;
   el('sync-b').classList.add('show');
@@ -912,8 +1142,7 @@ function importFromIngresos(){
 function importFromCompras(){
   const records=JSON.parse(localStorage.getItem('cayena_compras')||'[]');
   if(!records.length)return;
-  const now=new Date();
-  const curY=now.getFullYear(),curM=now.getMonth();
+  const curY=getMesYear(),curM=getMesMonth();
   // Filter only records from the current month
   const mesActual=records.filter(r=>{
     if(!r.fecha)return false;
@@ -931,8 +1160,7 @@ function importFromCompras(){
   el('gt-c').textContent=Lf(total);
 }
 function importFromInventario(){
-  const now=new Date();
-  const curY=now.getFullYear(),curM=now.getMonth();
+  const curY=getMesYear(),curM=getMesMonth();
   const padM=String(curM+1).padStart(2,'0');
   const iniKey='cayena_inv_inicial_'+curY+'-'+padM;
   const finKey='cayena_inv_final_'+curY+'-'+padM;
@@ -963,12 +1191,143 @@ function importFromInventario(){
     el('b-c').textContent='Con datos';el('b-c').className='sc-chip sc-ok';
   }
 }
-const now=new Date();const per=MO[now.getMonth()]+' '+now.getFullYear();
+const per=getMesLabel();
 el('tper').textContent=per;el('cpb').textContent=per;
 importFromIngresos();
 importFromCompras();
 importFromInventario();
 importFromGastos();
+importFromPlanilla(); // debe ir ÚLTIMO — tiene prioridad sobre gastos para Nómina
+
+function importFromPlanilla(){
+  const raw = localStorage.getItem('cayena_planilla_neta');
+  if(!raw) return;
+  try {
+    const pn = JSON.parse(raw);
+    if(!pn || !pn.planillaBruta || pn.planillaBruta <= 0) return;
+
+    const nom              = pn.planillaBruta;
+    const adelantos        = pn.adelantos        || 0;
+    const prestamos        = pn.prestamos        || 0;
+    const subsidioComida   = pn.consumoEmpleados || 0; // 20% que paga el empleado → el 80% lo asume empresa
+    const cobrosHerram     = pn.cobrosHerramientas || 0;
+    // Subsidio real empresa = consumo total × 80%
+    // consumoEmpleados ya es el 20% del empleado, así que consumo total = consumoEmpleados / 0.20
+    const consumoTotal     = subsidioComida > 0 ? parseFloat((subsidioComida / 0.20).toFixed(2)) : 0;
+    const subsidioEmpresa  = parseFloat((consumoTotal * 0.80).toFixed(2));
+
+    // Nómina neta = bruta - adelantos - préstamos + subsidio empresa comida - cobros herramientas
+    // (adelantos y préstamos ya están dentro del bruto como salida de caja)
+    const planillaNeta = pn.planillaNeta;
+
+    // ── 1. Nómina bruta ───────────────────────────────────────────────────
+    el('f-nom').value = nom.toFixed(2);
+    const gNom = el('g-nom');
+    if(gNom){ gNom.textContent = Lf(nom); gNom.className = 'da'; }
+    el('b-gop').textContent = 'Con datos';
+    el('b-gop').className   = 'sc-chip sc-ok';
+
+    // ── 2. Adelantos ──────────────────────────────────────────────────────
+    if(adelantos > 0){
+      el('dr-adelantos').style.display = '';
+      el('g-adelantos').textContent = Lf(adelantos);
+    }
+
+    // ── 3. Préstamos ──────────────────────────────────────────────────────
+    if(prestamos > 0){
+      el('dr-prestamos').style.display = '';
+      el('g-prestamos').textContent = Lf(prestamos);
+    }
+
+    // ── 4. Subsidio comida (el 80% que asume la empresa) ─────────────────
+    if(subsidioEmpresa > 0){
+      el('dr-comida').style.display = '';
+      el('g-comida').textContent = Lf(subsidioEmpresa);
+    }
+
+    // ── 5. Cobros herramientas ────────────────────────────────────────────
+    if(cobrosHerram > 0){
+      el('dr-herramientas').style.display = '';
+      el('g-herramientas').textContent = '+ ' + Lf(cobrosHerram);
+    }
+
+    // ── 6. Nómina neta (salida real de caja) ─────────────────────────────
+    if(adelantos > 0 || prestamos > 0 || subsidioEmpresa > 0 || cobrosHerram > 0){
+      el('dr-nom-neta').style.display = '';
+      el('g-nom-neta').textContent = Lf(planillaNeta);
+      el('g-nom-neta').style.color = planillaNeta >= 0 ? 'var(--text)' : 'var(--red)';
+    }
+
+    // ── 7. Recalcular toda la cascada del P&L ─────────────────────────────
+    const ibv  = v('f-ibv');
+    const oi   = v('f-oi');
+    const ini  = v('f-ini');
+    const comp = v('f-comp');
+    const fin  = v('f-fin');
+    const alq  = v('f-alq')  || 6500;
+    const srv  = v('f-srv')  || 519.255;
+    const mnt  = v('f-mnt');
+    const pub  = v('f-pub')  || 3000;
+    const oop  = v('f-oop');
+    const ofi  = v('f-ofi');
+    const oadm = v('f-oadm') || 5440.463;
+    const gfin = v('f-gfin') || 13542.32;
+
+    const ti  = ibv + oi;
+    const mp  = ini + comp - fin;
+    const rb  = ti - mp;
+    // Para el P&L usamos nómina bruta (gasto contable real)
+    const tg  = nom + alq + srv + mnt + pub + oop;
+    const ro  = rb - tg;
+    const ta  = ofi + oadm + gfin;
+    const ai  = ro - ta;
+    const isr = ai > 0 ? ai * 0.15 : 0;
+    const neto = ai - isr;
+
+    el('p-nom').textContent    = ti > 0 && nom > 0 ? pct(nom, ti) : '—';
+    el('gt-gop').textContent   = tg > 0 ? Lf(tg) : '—';
+    sr('r-op', ro);
+    ss('r-ai', ai);
+    el('g-isr').textContent    = isr > 0 ? Lf(isr) : '—';
+    el('f-isr').textContent    = isr > 0 ? Lf(isr) : 'L 0.00';
+    const fn = el('r-neto');
+    fn.textContent = Lf(Math.abs(neto));
+    fn.className   = 'fv ' + (neto > 0 ? 'p' : neto < 0 ? 'n' : 'mt');
+
+    // ── 8. Banner ─────────────────────────────────────────────────────────
+    const banner = document.getElementById('planilla-neta-banner');
+    if(banner){
+      banner.style.display = 'flex';
+      banner.innerHTML =
+        '<div style="flex:1">' +
+          '<div style="font-size:12px;font-weight:700;color:var(--blue-deep)">💰 Planilla cargada · ' + (pn.periodo||'—') + '</div>' +
+          '<div style="font-size:11px;color:var(--body);margin-top:3px">' +
+            'Bruta P&amp;L: <strong>' + Lf(nom) + '</strong>' +
+            (adelantos > 0 ? ' &nbsp;·&nbsp; Adelantos: ' + Lf(adelantos) : '') +
+            (prestamos > 0 ? ' &nbsp;·&nbsp; Préstamos: ' + Lf(prestamos) : '') +
+            ' &nbsp;|&nbsp; Salida caja: <strong style="color:var(--blue)">' + Lf(planillaNeta) + '</strong>' +
+          '</div>' +
+        '</div>' +
+        '<button onclick="this.parentNode.style.display=\'none\'" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;padding:0 4px;min-height:auto;line-height:1">×</button>';
+    }
+
+    // ── 9. Hint modal ────────────────────────────────────────────────────
+    const hint   = document.getElementById('nom-planilla-hint');
+    const detail = document.getElementById('nom-planilla-detail');
+    if(hint)   hint.textContent = '· Planilla ' + (pn.periodo||'') + ' ✓';
+    if(detail){
+      detail.style.display = 'block';
+      detail.innerHTML =
+        '📊 Bruta: <strong>' + Lf(nom) + '</strong> &nbsp;·&nbsp; ' +
+        '💰 Neta caja: <strong style="color:var(--blue)">' + Lf(planillaNeta) + '</strong><br>' +
+        'Adelantos: '  + Lf(adelantos)      + ' &nbsp;·&nbsp; ' +
+        'Préstamos: '  + Lf(prestamos)      + ' &nbsp;·&nbsp; ' +
+        'Subsidio 80%: ' + Lf(subsidioEmpresa) + ' &nbsp;·&nbsp; ' +
+        'Cobros: '     + Lf(cobrosHerram);
+    }
+
+  } catch(e) { console.warn('[importFromPlanilla]', e); }
+}
 
 function importFromGastos(){
   const data=JSON.parse(localStorage.getItem('cayena_gastos_totales')||'null');
@@ -1045,7 +1404,97 @@ function exportPDF() {
   setTimeout(function(){w.print();}, 600);
 }
 
+// ── Backup init ──────────────────────────────────────────────────────────
+(function() {
+  var lbl = document.getElementById('backup-mes-label');
+  if (lbl && typeof getMesLabel === 'function') lbl.textContent = getMesLabel();
+})();
+
 </script>
 <script src="supabase-config.js"></script>
+<script src="mes-global.js"></script>
+<script src="api.js"></script>
+<script>
+// ── Selector de mes global ────────────────────────────────────────────────
+(function() {
+  if (typeof initSelectorMes === 'undefined') return;
+  initSelectorMes('mes-selector-topbar', '2026-01');
+})();
+</script>
+<script>
+// ── Overflow menu toggle ──────────────────────────────────────────────────────
+(function(){
+  var omBtn = document.getElementById('btn-overflow');
+  var omMenu = document.getElementById('overflow-menu');
+  var omBd = document.getElementById('om-backdrop');
+  if(!omBtn || !omMenu) return;
+  omBtn.addEventListener('click', function(e){
+    e.stopPropagation();
+    omMenu.classList.toggle('open');
+    omBd && omBd.classList.toggle('open');
+  });
+  omBd && omBd.addEventListener('click', function(){
+    omMenu.classList.remove('open');
+    omBd.classList.remove('open');
+  });
+  document.addEventListener('keydown', function(e){
+    if(e.key==='Escape'){ omMenu.classList.remove('open'); omBd && omBd.classList.remove('open'); }
+  });
+})();
+</script>
+<script>
+// ── Sidebar IIFE ──────────────────────────────────────────────────────────────
+(function () {
+  var sidebar  = document.getElementById('cayena-sidebar');
+  var toggle   = document.getElementById('sb-toggle');
+  var backdrop = document.getElementById('sb-backdrop');
+  if (!sidebar || !toggle) return;
+  function open() {
+    sidebar.classList.add('open');
+    if (backdrop) backdrop.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function close() {
+    sidebar.classList.remove('open');
+    if (backdrop) backdrop.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  toggle.addEventListener('click', function () {
+    sidebar.classList.contains('open') ? close() : open();
+  });
+  if (backdrop) backdrop.addEventListener('click', close);
+  window.addEventListener('resize', function () {
+    if (window.innerWidth > 900) close();
+  });
+})();
+
+// ── Menu-toggle ───────────────────────────────────────────────────────────────
+(function() {
+  var toggleBtn = document.getElementById('menu-toggle');
+  var sidebarEl = document.querySelector('aside');
+  if (!toggleBtn || !sidebarEl) return;
+  toggleBtn.addEventListener('click', function() {
+    sidebarEl.classList.toggle('active');
+    toggleBtn.classList.toggle('open');
+  });
+})();
+
+// ── Mobile/Desktop detection ──────────────────────────────────────────────────
+(function() {
+  function esMobile() {
+    return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  }
+  if (esMobile()) {
+    document.body.classList.add('mobile');
+  } else {
+    document.body.classList.add('desktop');
+    var aside = document.querySelector('aside');
+    if (aside) aside.classList.add('active');
+    var mt = document.getElementById('menu-toggle');
+    if (mt) mt.style.display = 'none';
+  }
+  var esMobile2 = window.innerWidth <= 768;
+})();
+</script>
 </body>
 </html>

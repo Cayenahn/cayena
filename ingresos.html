@@ -32,6 +32,7 @@ body{overflow-x:hidden}
 
 /* ── SIDEBAR ── */
 .logo-wrap{padding:24px 20px 20px;border-bottom:1px solid var(--border)}
+body.mobile .logo-wrap{display:none}
 .logo{font-size:22px;font-weight:800;letter-spacing:-0.5px;color:var(--text);line-height:1;display:flex;align-items:center;gap:8px}
 .logo-dot{width:8px;height:8px;border-radius:50%;background:linear-gradient(135deg,#2563EB,#84CC16)}
 .logo-rtn{font-size:10px;color:var(--muted);margin-top:4px}
@@ -48,7 +49,7 @@ body{overflow-x:hidden}
 .ur{font-size:11px;color:var(--muted)}
 
 /* ── TOPBAR ── */
-.topbar{height:58px;background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;flex-shrink:0;gap:10px;box-shadow:var(--shadow)}
+.topbar{height:58px;background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;flex-shrink:0;gap:10px;box-shadow:var(--shadow);position:relative;z-index:300}
 .mb{display:none;background:none;border:none;color:var(--muted);cursor:pointer;padding:6px;line-height:1;border-radius:8px;min-height:44px}
 .mb:hover{background:var(--bg)}
 .tl{display:flex;align-items:center;gap:10px;min-width:0}
@@ -248,12 +249,12 @@ body{overflow-x:hidden}
 .toast.ok{background:var(--green-ui)}
 
 /* OVERLAY BG */
-.ovbg{display:none;position:fixed;inset:0;background:rgba(15,23,42,.4);z-index:89}
-.ovbg.open{display:block}
+.sb-backdrop{display:none;position:fixed;inset:0;background:rgba(15,23,42,.4);z-index:89}
+.sb-backdrop.open{display:block}
 
 /* MOBILE */
 @media(max-width:900px){
-  .sidebar{position:fixed;left:0;top:0;bottom:0;height:100%;transform:translateX(-100%)
+  .sidebar{position:fixed;left:0;top:58px;bottom:0;height:calc(100% - 58px);transform:translateX(-100%);overflow-y:auto;overflow-x:hidden
 }
   .sidebar.open{transform:translateX(0)}
   .main{width:100%}
@@ -662,7 +663,7 @@ button {
 }
 
 /* Overlays/modales — iOS Safari no muestra bien backdrop-filter en todos */
-.ovbg {
+.sb-backdrop {
   -webkit-backdrop-filter: none; /* desactivar en iOS para rendimiento */
 }
 
@@ -739,14 +740,208 @@ p, td, input, textarea, .sol-meta {
 
 /* MOBILE_RESPONSIVE */
 
-@media(min-width:901px){.sidebar{position:relative;transform:none;height:100vh}.ovbg{display:none!important}}
+
+/* ── Sidebar system — mobile/desktop ── */
+.sb-backdrop{display:none;position:fixed;inset:0;background:rgba(15,23,42,.4);z-index:89}
+.sb-backdrop.open{display:block}
+body.mobile .sb-backdrop{top:58px}
+
+aside{position:fixed;top:0;left:-100%;width:80%;height:100%;transition:0.3s;z-index:200;overflow-y:auto;overflow-x:hidden}
+aside.active{left:0}
+@media(min-width:769px){aside{left:0;width:250px}}
+@media(max-width:768px){aside{left:-250px}aside.active{left:0}}
+body.mobile aside{left:-100%;width:80%;top:58px;height:calc(100% - 58px)}
+body.mobile aside.active{left:0}
+body.desktop aside{left:0;width:250px;top:0;height:100%}
+body.mobile  #menu-toggle{display:flex !important}
+body.desktop #menu-toggle{display:none !important}
+
+/* En mobile: botón dentro del topbar */
+body.mobile #menu-toggle{
+  position:static;
+  box-shadow:none;
+  background:none;
+  border:1px solid var(--border);
+  width:38px;
+  height:38px;
+  border-radius:10px;
+  flex-shrink:0;
+}
+body.mobile #menu-toggle .bar{background:var(--body)}
+body.mobile #menu-toggle:hover{background:var(--bg);box-shadow:none;transform:none}
+body.mobile #menu-toggle:active{transform:scale(.95)}
+body.mobile .sb-toggle{display:none !important}
+
+/* ── Hamburger button base ── */
+#menu-toggle{
+  width:38px;height:38px;border:none;border-radius:10px;
+  cursor:pointer;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  gap:5px;padding:0;flex-shrink:0;
+  transition:background .2s ease,box-shadow .2s ease,transform .15s ease;
+}
+#menu-toggle:hover{background:var(--blue-deep);box-shadow:0 6px 18px rgba(37,99,235,.45);transform:scale(1.06)}
+#menu-toggle:active{transform:scale(.95)}
+.bar{
+  display:block;width:20px;height:2px;border-radius:2px;background:#fff;
+  transition:transform .3s cubic-bezier(.4,0,.2,1),opacity .3s cubic-bezier(.4,0,.2,1),width .3s cubic-bezier(.4,0,.2,1);
+  transform-origin:center;
+}
+#menu-toggle.open .bar-1{transform:translateY(7px) rotate(45deg)}
+#menu-toggle.open .bar-2{opacity:0;width:0}
+#menu-toggle.open .bar-3{transform:translateY(-7px) rotate(-45deg)}
+
+/* logo-wrap hidden on mobile (aside starts below topbar) */
+body.mobile .logo-wrap{display:none}
+@media(min-width:901px){.sidebar{position:relative;transform:none;height:100vh}.sb-backdrop{display:none!important}}
+
+/* ═══════════════════════════════════════════════════════
+   TOPBAR MOBILE — QuickBooks style
+   ═══════════════════════════════════════════════════════ */
+
+/* Topbar siempre una sola línea en mobile */
+@media(max-width:900px){
+  .topbar{
+    padding: 0 12px;
+    height: 56px;
+    flex-shrink: 0;
+  }
+  .tl{
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+  }
+  .ttl{
+    font-size: 15px !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 160px;
+  }
+  .tey, .tsep{ display: none !important; }
+
+  /* Selector de mes — compacto en mobile */
+  #mes-selector-topbar .mes-select{
+    font-size: 11px !important;
+    padding: 4px 6px !important;
+    max-width: 110px !important;
+  }
+  #mes-selector-topbar .mes-nav-btn{
+    width: 26px !important;
+    height: 26px !important;
+    font-size: 14px !important;
+  }
+
+  /* tr2: solo mostrar el botón primario, ocultar el resto */
+  .tr2{
+    gap: 6px;
+    flex-shrink: 0;
+  }
+  .tr2 .btn:not(.btn-primary):not(.btn-overflow){
+    display: none !important;
+  }
+  .tr2 .btn-primary{
+    padding: 8px 14px !important;
+    font-size: 12px !important;
+    min-height: 36px !important;
+    white-space: nowrap;
+  }
+
+  /* Botón overflow ⋯ */
+  .btn-overflow{
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    min-height: 36px;
+    padding: 0 !important;
+    font-size: 18px !important;
+    border-radius: 10px !important;
+  }
+}
+
+/* ── Menú overflow ── */
+.overflow-menu{
+  display: none;
+  position: fixed;
+  top: 60px;
+  right: 12px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  box-shadow: 0 8px 32px rgba(0,0,0,.12);
+  z-index: 500;
+  min-width: 200px;
+  overflow: hidden;
+  animation: omFadeIn .15s ease;
+}
+.overflow-menu.open{ display: block; }
+@keyframes omFadeIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+.om-item{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--body);
+  cursor: pointer;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  transition: background .1s;
+  font-family: var(--font, inherit);
+}
+.om-item:hover{ background: var(--bg); }
+.om-item:not(:last-child){ border-bottom: 1px solid var(--border); }
+.om-icon{ font-size: 16px; width: 20px; flex-shrink: 0; }
+.om-backdrop{
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 499;
+}
+.om-backdrop.open{ display: block; }
+
+/* ── Barra de acción inferior (botón primario fijo) ── */
+@media(max-width:900px){
+  .fab-primary{
+    position: fixed;
+    bottom: max(20px, calc(20px + env(safe-area-inset-bottom)));
+    right: 16px;
+    z-index: 200;
+    background: var(--blue);
+    color: #fff;
+    border: none;
+    border-radius: 999px;
+    padding: 14px 22px;
+    font-size: 14px;
+    font-weight: 700;
+    font-family: var(--font, inherit);
+    box-shadow: 0 4px 16px rgba(37,99,235,.4);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all .2s;
+    min-height: 48px;
+  }
+  .fab-primary:hover{ transform: scale(1.04); }
+  .fab-primary:active{ transform: scale(.96); }
+}
+@media(min-width:901px){
+  .fab-primary{ display: none !important; }
+}
+
 </style>
 </head>
 <body>
-<div class="ovbg" id="ovbg" onclick="closeSB()"></div>
+<div id="sb-backdrop" class="sb-backdrop"></div>
 <div class="app">
 
-  <aside class="sidebar" id="sb">
+  <aside class="sidebar" id="cayena-sidebar">
     <div class="logo-wrap">
       <div class="logo"><div class="logo-dot"></div>Cayena</div>
       <div class="logo-rtn">RTN: 0318-2001-022079</div>
@@ -766,7 +961,8 @@ p, td, input, textarea, .sol-meta {
       <a class="ni" href="cuenta-corriente.html"><svg viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M2 7h12M5 10h3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Cuenta Corriente</a>
       <a class="ni" href="asistencia.html"><svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.4"/><path d="M8 5v3l2 2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Asistencia</a>
       <div class="ng">Análisis</div>
-      <a class="ni" href="#"><svg viewBox="0 0 16 16" fill="none"><path d="M2 13L5 9l3 2.5L11 5l3 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Costo de Ventas</a>
+      <a class="ni" href="historial.html"><svg viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="M5 8h6M5 5.5h3M5 10.5h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Historial P&amp;L</a>
+      <a class="ni" href="wrap.html"><svg viewBox="0 0 16 16" fill="none"><path d="M2 13L5 9l3 2.5L11 5l3 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Wrap Financiero ✨</a>
     </nav>
     <div class="su">
       <div class="av">AD</div>
@@ -777,14 +973,25 @@ p, td, input, textarea, .sol-meta {
   <div class="main">
     <div class="topbar">
       <div class="tl">
-        <button class="mb" onclick="toggleSB()"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M2 5h16M2 10h16M2 15h16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
+        <button id="menu-toggle" aria-label="Abrir menú">
+          <span class="bar bar-1"></span>
+          <span class="bar bar-2"></span>
+          <span class="bar bar-3"></span>
+        </button>
+        <button id="sb-toggle" class="mb sb-toggle"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M2 5h16M2 10h16M2 15h16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
         <span class="tey">Cayena</span><div class="tsep"></div>
-        <span class="ttl">Ingresos</span>
+        <span class="ttl">Ingresos</span><div class="tsep"></div><div id="mes-selector-topbar"></div>
       </div>
       <div class="tr2">
         <button class="btn" onclick="exportPDF()">Exportar PDF</button>
         <button class="btn btn-primary" onclick="syncToPL()">↑ Sincronizar P&L</button>
+        <button class="btn btn-overflow" id="btn-overflow" title="Más opciones" aria-label="Más opciones">⋯</button>
       </div>
+      <div class="overflow-menu" id="overflow-menu">
+  <button class="om-item" onclick="exportPDF();document.getElementById('overflow-menu').classList.remove('open');document.getElementById('om-backdrop') && document.getElementById('om-backdrop').classList.remove('open')"><span class="om-icon">📄</span>Exportar PDF</button>
+  <button class="om-item" onclick="syncToPL();document.getElementById('overflow-menu').classList.remove('open');document.getElementById('om-backdrop') && document.getElementById('om-backdrop').classList.remove('open')"><span class="om-icon">↑</span>Sincronizar P&L</button>
+</div>
+<div class="om-backdrop" id="om-backdrop"></div>
     </div>
 
     <div class="content">
@@ -1015,13 +1222,11 @@ let records=JSON.parse(localStorage.getItem('cayena_ingresos')||'[]');
 let selDate=null,calY,calM,isvSelDate=null,isvCalY,isvCalM;
 
 (function(){
-  const now=new Date();calY=now.getFullYear();calM=now.getMonth();
-  isvCalY=now.getFullYear();isvCalM=now.getMonth();
+  calY=getMesYear();calM=getMesMonth();
+  isvCalY=getMesYear();isvCalM=getMesMonth();
   buildBills();renderCal();renderISVCal();renderTable();updateKPIs();renderChart();
 })();
 
-function toggleSB(){el('sb').classList.toggle('open');el('ovbg').classList.toggle('open');}
-function closeSB(){el('sb').classList.remove('open');el('ovbg').classList.remove('open');}
 
 // ── BILLS ──
 function buildBills(){
@@ -1185,6 +1390,7 @@ function saveEntry(){
   records.push({fecha:selDate,ef,tr,pb,pos,total,ipv,neto,gravadas,exentas,isvGravadas,gravadas18,isv18});
   records.sort((a,b)=>a.fecha.localeCompare(b.fecha));
   localStorage.setItem('cayena_ingresos',JSON.stringify(records));
+  if(typeof setArrayMes==='function') setArrayMes('ingresos', records.filter(r=>r.fecha&&r.fecha.startsWith(getMesGlobal())));
   // Sync último registro a Supabase
   if(typeof DB_Ingresos !== 'undefined' && records.length > 0){
     const r = records[records.length-1];
@@ -1220,6 +1426,7 @@ function deleteEntry(fecha){
   if(!confirm('¿Eliminar el registro del '+fmtD(fecha)+'?'))return;
   records=records.filter(r=>r.fecha!==fecha);
   localStorage.setItem('cayena_ingresos',JSON.stringify(records));
+  if(typeof setArrayMes==='function') setArrayMes('ingresos', records.filter(r=>r.fecha&&r.fecha.startsWith(getMesGlobal())));
   // Sync último registro a Supabase
   if(typeof DB_Ingresos !== 'undefined' && records.length > 0){
     const r = records[records.length-1];
@@ -1345,5 +1552,89 @@ function exportPDF() {
 
 </script>
 <script src="supabase-config.js"></script>
+<script src="mes-global.js"></script>
+<script src="api.js"></script>
+<script>
+// ── Selector de mes global ────────────────────────────────────────────────
+(function() {
+  if (typeof initSelectorMes === 'undefined') return;
+  initSelectorMes('mes-selector-topbar', '2026-01');
+})();
+</script>
+<script>
+// ── Overflow menu toggle ──────────────────────────────────────────────────────
+(function(){
+  var omBtn = document.getElementById('btn-overflow');
+  var omMenu = document.getElementById('overflow-menu');
+  var omBd = document.getElementById('om-backdrop');
+  if(!omBtn || !omMenu) return;
+  omBtn.addEventListener('click', function(e){
+    e.stopPropagation();
+    omMenu.classList.toggle('open');
+    omBd && omBd.classList.toggle('open');
+  });
+  omBd && omBd.addEventListener('click', function(){
+    omMenu.classList.remove('open');
+    omBd.classList.remove('open');
+  });
+  document.addEventListener('keydown', function(e){
+    if(e.key==='Escape'){ omMenu.classList.remove('open'); omBd && omBd.classList.remove('open'); }
+  });
+})();
+</script>
+<script>
+// ── Sidebar IIFE ──────────────────────────────────────────────────────────────
+(function () {
+  var sidebar  = document.getElementById('cayena-sidebar');
+  var toggle   = document.getElementById('sb-toggle');
+  var backdrop = document.getElementById('sb-backdrop');
+  if (!sidebar || !toggle) return;
+  function open() {
+    sidebar.classList.add('open');
+    if (backdrop) backdrop.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function close() {
+    sidebar.classList.remove('open');
+    if (backdrop) backdrop.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  toggle.addEventListener('click', function () {
+    sidebar.classList.contains('open') ? close() : open();
+  });
+  if (backdrop) backdrop.addEventListener('click', close);
+  window.addEventListener('resize', function () {
+    if (window.innerWidth > 900) close();
+  });
+})();
+
+// ── Menu-toggle ───────────────────────────────────────────────────────────────
+(function() {
+  var toggleBtn = document.getElementById('menu-toggle');
+  var sidebarEl = document.querySelector('aside');
+  if (!toggleBtn || !sidebarEl) return;
+  toggleBtn.addEventListener('click', function() {
+    sidebarEl.classList.toggle('active');
+    toggleBtn.classList.toggle('open');
+  });
+})();
+
+// ── Mobile/Desktop detection ──────────────────────────────────────────────────
+(function() {
+  function esMobile() {
+    return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  }
+  if (esMobile()) {
+    document.body.classList.add('mobile');
+  } else {
+    document.body.classList.add('desktop');
+    var aside = document.querySelector('aside');
+    if (aside) aside.classList.add('active');
+    var mt = document.getElementById('menu-toggle');
+    if (mt) mt.style.display = 'none';
+  }
+  var esMobile2 = window.innerWidth <= 768;
+})();
+</script>
 </body>
 </html>
