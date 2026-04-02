@@ -716,7 +716,12 @@ body.mobile .sb-toggle{display:none !important}
 body.mobile .logo-wrap{display:none}
 @media(min-width:901px){.sidebar{position:relative;transform:none;height:100vh}.sb-backdrop{display:none!important}}
 
-/* ── Backup section ─────────────────────────────────────────────────────── */
+/* ── Sincronizar ── */
+#btn-sync{display:flex;align-items:center;gap:7px;min-width:130px;justify-content:center}
+#btn-sync.syncing svg{animation:spin-sync .8s linear infinite}
+#btn-sync.done{background:var(--green-ui);border-color:var(--green-ui)}
+#btn-sync.error{background:var(--red);border-color:var(--red)}
+@keyframes spin-sync{to{transform:rotate(360deg)}}
 .backup-section{background:var(--white);border:1px solid var(--border);border-radius:var(--r-lg);padding:20px 24px;margin-top:24px}
 .backup-title{font-size:13px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:8px;margin-bottom:16px}
 .backup-actions{display:flex;gap:12px;flex-wrap:wrap}
@@ -916,18 +921,12 @@ body.mobile .logo-wrap{display:none}
         <span class="ttl">Estado de Resultados</span><div class="tsep"></div><div id="mes-selector-topbar"></div>
       </div>
       <div class="tr2">
-        <button class="btn" onclick="exportPDF()">Exportar PDF</button>
-        <button class="btn" onclick="if(typeof API_Backup!=='undefined')API_Backup.exportJSON();else alert('Carga api.js primero')">⬇ Backup</button>
-        <button class="btn" onclick="if(typeof API_Backup!=='undefined')API_Backup.exportCSV();else alert('Carga api.js primero')">⬇ CSV</button>
-        <button class="btn btn-primary" onclick="openModal()">+ Ingresar datos</button>
-        <button class="btn btn-overflow" id="btn-overflow" title="Más opciones" aria-label="Más opciones">⋯</button>
+        <button class="btn btn-primary" id="btn-sync" onclick="sincronizar()">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0"><path d="M12.5 2.5A6 6 0 1 1 8.5 1.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M8.5 1.2V4M8.5 1.2H11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Sincronizar
+        </button>
       </div>
-      <div class="overflow-menu" id="overflow-menu">
-  <button class="om-item" onclick="exportPDF();document.getElementById('overflow-menu').classList.remove('open');document.getElementById('om-backdrop') && document.getElementById('om-backdrop').classList.remove('open')"><span class="om-icon">📄</span>Exportar PDF</button>
-  <button class="om-item" onclick="if(typeof API_Backup!=='undefined')API_Backup.exportJSON();document.getElementById('overflow-menu').classList.remove('open');document.getElementById('om-backdrop') && document.getElementById('om-backdrop').classList.remove('open')"><span class="om-icon">⬇</span>Backup JSON</button>
-  <button class="om-item" onclick="if(typeof API_Backup!=='undefined')API_Backup.exportCSV();document.getElementById('overflow-menu').classList.remove('open');document.getElementById('om-backdrop') && document.getElementById('om-backdrop').classList.remove('open')"><span class="om-icon">📊</span>Exportar CSV</button>
-</div>
-<div class="om-backdrop" id="om-backdrop"></div>
+      <div class="om-backdrop" id="om-backdrop"></div>
     </div>
 
     <div class="content">
@@ -939,6 +938,7 @@ body.mobile .logo-wrap{display:none}
         <div class="co-meta">
           <div class="co-doc">Período activo</div>
           <div class="co-period-badge" id="cpb">— Período</div>
+          <div id="ultima-sync" style="font-size:10px;color:rgba(255,255,255,.5);margin-top:4px;text-align:right"></div>
         </div>
       </div>
 
@@ -1127,6 +1127,44 @@ function calcular(){
 const per=getMesLabel();
 el('tper').textContent=per;el('cpb').textContent=per;
 // importTodosLosDatos() se llama después de cargar supabase-config.js
+
+async function sincronizar(){
+  const btn = document.getElementById('btn-sync');
+  if(!btn || btn.classList.contains('syncing')) return;
+
+  // Estado: cargando
+  btn.classList.add('syncing');
+  btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0"><path d="M12.5 2.5A6 6 0 1 1 8.5 1.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M8.5 1.2V4M8.5 1.2H11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> Sincronizando...';
+  btn.disabled = true;
+
+  try {
+    await importTodosLosDatos();
+
+    // Estado: éxito
+    btn.classList.remove('syncing');
+    btn.classList.add('done');
+    btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0"><path d="M2 7l3.5 3.5L12 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> Sincronizado';
+
+    // Guardar fecha de última sync
+    const ahora = new Date().toLocaleString('es-HN', {day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+    localStorage.setItem('cayena_ultima_sync', ahora);
+    const badge = document.getElementById('ultima-sync');
+    if(badge) badge.textContent = 'Última sync: ' + ahora;
+
+  } catch(e) {
+    btn.classList.remove('syncing');
+    btn.classList.add('error');
+    btn.innerHTML = '⚠ Error — reintentar';
+    console.error('[sincronizar]', e);
+  }
+
+  // Restaurar botón después de 3s
+  setTimeout(()=>{
+    btn.classList.remove('done','error');
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0"><path d="M12.5 2.5A6 6 0 1 1 8.5 1.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M8.5 1.2V4M8.5 1.2H11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> Sincronizar';
+  }, 3000);
+}
 
 async function importTodosLosDatos(){
   const periodo  = getMesGlobal();          // "YYYY-MM"
@@ -1699,10 +1737,17 @@ function exportPDF() {
   initSelectorMes('mes-selector-topbar', '2026-01');
 })();
 
-// ── Cargar todos los datos en tiempo real (DEBE ir después de supabase-config.js) ──
+// ── Mostrar última sincronización ─────────────────────────────────────────
+(function(){
+  const ultima = localStorage.getItem('cayena_ultima_sync');
+  const badge  = document.getElementById('ultima-sync');
+  if(badge) badge.textContent = ultima ? 'Última sync: ' + ultima : 'Sin sincronizar aún';
+})();
+
+// ── Carga inicial automática ──────────────────────────────────────────────
 importTodosLosDatos();
 
-// Re-cargar cuando el usuario cambia el mes global
+// Re-cargar cuando cambia el mes global
 document.addEventListener('mesGlobalCambiado', function() {
   importTodosLosDatos();
 });
