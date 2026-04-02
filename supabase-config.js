@@ -55,11 +55,43 @@ const SB = {
  
 // ─── CACHE ────────────────────────────────────────────────────────────────────
 const Cache = {
-  _s:{}, _ttl:20000,
-  set(k,d){ this._s[k]={d,t:Date.now()}; },
-  get(k){ const e=this._s[k]; return e&&Date.now()-e.t<this._ttl?e.d:null; },
-  del(k){ delete this._s[k]; },
-  clear(){ this._s={}; }
+  _s:{}, _ttl: 5 * 60 * 1000, // 5 minutos en memoria
+  _lsPrefix: 'cayena_cache_',
+  set(k,d){
+    this._s[k]={d,t:Date.now()};
+    // Persistir en localStorage para sobrevivir recargas
+    try{ localStorage.setItem(this._lsPrefix+k, JSON.stringify({d,t:Date.now()})); }catch(e){}
+  },
+  get(k){
+    // 1. Buscar en memoria
+    const e=this._s[k];
+    if(e && Date.now()-e.t < this._ttl) return e.d;
+    // 2. Buscar en localStorage (cache persistente entre recargas)
+    try{
+      const ls = localStorage.getItem(this._lsPrefix+k);
+      if(ls){
+        const p = JSON.parse(ls);
+        if(p && Date.now()-p.t < this._ttl){
+          this._s[k]=p; // restaurar en memoria
+          return p.d;
+        }
+      }
+    }catch(e){}
+    return null;
+  },
+  del(k){
+    delete this._s[k];
+    try{ localStorage.removeItem(this._lsPrefix+k); }catch(e){}
+  },
+  clear(){
+    this._s={};
+    // Limpiar solo las keys del cache de Supabase
+    try{
+      Object.keys(localStorage)
+        .filter(k=>k.startsWith(this._lsPrefix))
+        .forEach(k=>localStorage.removeItem(k));
+    }catch(e){}
+  }
 };
  
 // ─── MÓDULO: SOLICITUDES (Cuenta Corriente ↔ Planilla) ───────────────────────
