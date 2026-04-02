@@ -77,11 +77,6 @@ body.mobile .logo-wrap{display:none}
 .co-period-badge{display:inline-block;background:rgba(255,255,255,.2);backdrop-filter:blur(10px);color:#fff;font-size:12px;font-weight:600;padding:6px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.3)}
 
 /* ── SYNC BANNER ── */
-.sync-b{display:none;align-items:center;justify-content:space-between;padding:12px 16px;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:var(--r);margin-bottom:16px}
-.sync-b.show{display:flex}
-.sbt{font-size:13px;font-weight:600;color:#16A34A}
-.sbs{font-size:11px;color:var(--muted);margin-top:2px}
-.sbx{background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;line-height:1;border-radius:6px;padding:2px 6px}
 .sbx:hover{background:var(--border)}
 
 /* ── SECTION LABEL ── */
@@ -146,24 +141,14 @@ body.mobile .logo-wrap{display:none}
 .fv.p{color:#BEF264}.fv.n{color:#FCA5A5}.fv.mt{color:rgba(255,255,255,.3)}
 
 /* MODAL */
-.overlay{display:none;position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:200;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;backdrop-filter:blur(4px)}
 .overlay.open{display:flex}
-.modal{background:var(--white);border-radius:var(--r-xl);border:1px solid var(--border);width:100%;max-width:600px;margin:auto;overflow:hidden;box-shadow:0 25px 50px rgba(0,0,0,.15)}
-.mh{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid var(--border)}
-.mt2{font-size:16px;font-weight:700;color:var(--text)}
-.mx{background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;line-height:1;border-radius:8px;padding:4px 8px}
 .mx:hover{background:var(--bg);color:var(--text)}
-.fsh{padding:8px 24px 6px;background:var(--bg);border-bottom:1px solid var(--border)}
 .fsh span{font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
-.fg{display:grid;grid-template-columns:1fr 1fr}
-.ff{padding:14px 24px;border-bottom:1px solid var(--border);border-right:1px solid var(--border)}
 .ff:nth-child(even){border-right:none}
-.ff.full{grid-column:1/-1;border-right:none}
 .ff label{display:block;font-size:11px;font-weight:500;color:var(--muted);margin-bottom:6px}
 .ff input{width:100%;font-family:var(--font);font-size:15px;font-weight:600;color:var(--text);background:transparent;border:none;border-bottom:2px solid var(--border);padding:4px 0;outline:none;transition:border-color .15s}
 .ff input:focus{border-bottom-color:var(--blue)}
 .ff input::placeholder{color:var(--border);font-weight:400}
-.mf{padding:16px 24px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;background:var(--bg)}
 
 /* OVERLAY BG */
 .sb-backdrop{display:none;position:fixed;inset:0;background:rgba(15,23,42,.4);z-index:89}
@@ -722,15 +707,6 @@ body.mobile .logo-wrap{display:none}
 #btn-sync.done{background:var(--green-ui);border-color:var(--green-ui)}
 #btn-sync.error{background:var(--red);border-color:var(--red)}
 @keyframes spin-sync{to{transform:rotate(360deg)}}
-.backup-section{background:var(--white);border:1px solid var(--border);border-radius:var(--r-lg);padding:20px 24px;margin-top:24px}
-.backup-title{font-size:13px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:8px;margin-bottom:16px}
-.backup-actions{display:flex;gap:12px;flex-wrap:wrap}
-.backup-btn{display:flex;flex-direction:column;align-items:flex-start;gap:3px;background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:12px 16px;font-size:13px;font-weight:600;color:var(--body);cursor:pointer;transition:all .15s;min-width:180px}
-.backup-btn svg{opacity:.6;margin-bottom:2px}
-.backup-btn:hover{border-color:var(--blue);color:var(--blue);background:#EFF6FF}
-.backup-btn:hover svg{opacity:1}
-.backup-import{cursor:pointer}
-.backup-sub{font-size:11px;font-weight:400;color:var(--muted)}
 
 
 /* ═══════════════════════════════════════════════════════
@@ -942,14 +918,6 @@ body.mobile .logo-wrap{display:none}
         </div>
       </div>
 
-      <div class="sync-b" id="sync-b">
-          <div>
-          <div class="sbt" id="sbt"></div>
-          <div class="sbs" id="sbs"></div>
-        </div>
-        <button class="sbx" onclick="clearSync()">×</button>
-      </div>
-
       <!-- ── Banner planilla neta ── -->
       <div id="planilla-neta-banner" style="display:none;align-items:flex-start;gap:12px;padding:12px 16px;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:var(--r);margin-bottom:16px;font-family:var(--font)"></div>
 
@@ -1009,44 +977,14 @@ body.mobile .logo-wrap{display:none}
   </div>
 </div>
 
-<div class="overlay" id="overlay" onclick="if(event.target===this)closeModal()">
-  <div class="modal">
-    <div class="mh"><span class="mt2">Ingresar datos — P&L</span><button class="mx" onclick="closeModal()">×</button></div>
-    <div class="fsh"><span>Ingresos</span></div>
-    <div class="fg">
-      <div class="ff"><label>Ingreso Bruto en Ventas (L.)</label><input type="number" id="f-ibv" placeholder="0.00" min="0" step="0.01"></div>
-      <div class="ff"><label>Otros Ingresos (L.)</label><input type="number" id="f-oi" placeholder="0.00" min="0" step="0.01"></div>
-    </div>
-    <div class="fsh"><span>Costo de Producción</span></div>
-    <div class="fg">
-      <div class="ff"><label>Inventario Inicial (L.)</label><input type="number" id="f-ini" placeholder="0.00" min="0" step="0.01"></div>
-      <div class="ff"><label>Compras del Mes (L.)</label><input type="number" id="f-comp" placeholder="0.00" min="0" step="0.01"></div>
-      <div class="ff full"><label>Inventario Final (L.)</label><input type="number" id="f-fin" placeholder="0.00" min="0" step="0.01"></div>
-    </div>
-    <div class="fsh"><span>Gastos Operativos</span></div>
-    <div class="fg">
-      <div class="ff">
-        <label>Nómina (L.) <span id="nom-planilla-hint" style="font-size:10px;font-weight:400;color:var(--muted)"></span></label>
-        <input type="number" id="f-nom" placeholder="0.00" min="0" step="0.01">
-        <div id="nom-planilla-detail" style="display:none;font-size:11px;color:var(--muted);margin-top:4px;line-height:1.5"></div>
-      </div>
-      <div class="ff"><label>Alquiler (L.)</label><input type="number" id="f-alq" placeholder="6500.00" min="0" step="0.01"></div>
-      <div class="ff"><label>Servicios públicos (L.)</label><input type="number" id="f-srv" placeholder="519.26" min="0" step="0.01"></div>
-      <div class="ff"><label>Mantenimiento (L.)</label><input type="number" id="f-mnt" placeholder="0.00" min="0" step="0.01"></div>
-      <div class="ff"><label>Publicidad y marketing (L.)</label><input type="number" id="f-pub" placeholder="3000.00" min="0" step="0.01"></div>
-      <div class="ff"><label>Otros Gastos Operativos (L.)</label><input type="number" id="f-oop" placeholder="0.00" min="0" step="0.01"></div>
-    </div>
-    <div class="fsh"><span>Gastos Administrativos</span></div>
-    <div class="fg">
-      <div class="ff"><label>Gastos de Oficina (L.)</label><input type="number" id="f-ofi" placeholder="0.00" min="0" step="0.01"></div>
-      <div class="ff"><label>Otros Gastos Administrativos (L.)</label><input type="number" id="f-oadm" placeholder="5440.46" min="0" step="0.01"></div>
-      <div class="ff full"><label>Gastos financieros (L.)</label><input type="number" id="f-gfin" placeholder="13542.32" min="0" step="0.01"></div>
-    </div>
-    <div class="mf">
-      <button class="btn" onclick="clearForm()">Limpiar</button>
-      <button class="btn btn-primary" onclick="calcular()">Calcular P&L</button>
-    </div>
-  </div>
+<!-- Inputs ocultos para cálculos internos — usados por importTodosLosDatos -->
+<div style="display:none">
+  <input id="f-ibv" type="number"><input id="f-oi" type="number">
+  <input id="f-ini" type="number"><input id="f-comp" type="number"><input id="f-fin" type="number">
+  <input id="f-nom" type="number"><input id="f-alq" type="number"><input id="f-srv" type="number">
+  <input id="f-mnt" type="number"><input id="f-pub" type="number"><input id="f-oop" type="number">
+  <input id="f-ofi" type="number"><input id="f-oadm" type="number"><input id="f-gfin" type="number">
+  <input id="f-isr" type="number">
 </div>
 
 <script>
@@ -1055,69 +993,9 @@ const v=id=>parseFloat(el(id).value)||0;
 const Lf=n=>'L '+parseFloat(n||0).toLocaleString('es-HN',{minimumFractionDigits:2,maximumFractionDigits:2});
 const pct=(n,t)=>t>0?(n/t*100).toFixed(1)+'%':'—';
 const MO=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-function openModal(){
-  const records=JSON.parse(localStorage.getItem('cayena_ingresos')||'[]');
-  if(records.length){const t=parseFloat(records.reduce((s,r)=>s+(r.total||0),0).toFixed(2));if(t>0)el('f-ibv').value=t;}
-  // Pre-fill compras del mes
-  const compras=JSON.parse(localStorage.getItem('cayena_compras')||'[]');
-  if(compras.length){
-    const curY=getMesYear(),curM=getMesMonth();
-    const mes=compras.filter(r=>{if(!r.fecha)return false;const[y,m]=r.fecha.split('-');return parseInt(y)===curY&&parseInt(m)-1===curM;});
-    const t=parseFloat(mes.reduce((s,r)=>s+(r.total||0),0).toFixed(2));
-    if(t>0)el('f-comp').value=t;
-  }
-  // Pre-fill inventario inicial y final
-  const curY=getMesYear(),curM=getMesMonth();
-  const padM=String(curM+1).padStart(2,'0');
-  const iniData=JSON.parse(localStorage.getItem('cayena_inv_inicial_'+curY+'-'+padM)||'{}');
-  const finData=JSON.parse(localStorage.getItem('cayena_inv_final_'+curY+'-'+padM)||'{}');
-  const storedPrices=JSON.parse(localStorage.getItem('cayena_precios')||'{}');
-  function calcInvTotal(data){return parseFloat(Object.entries(data).reduce((s,[name,qty])=>{const price=storedPrices[name]||0;return s+(parseFloat(qty)||0)*price;},0).toFixed(2));}
-  const iniTotal=calcInvTotal(iniData);
-  const finTotal=calcInvTotal(finData);
-  if(iniTotal>0)el('f-ini').value=iniTotal;
-  if(finTotal>0)el('f-fin').value=finTotal;
-  // Pre-fill gastos desde cayena_gastos_totales
-  importFromGastos();
-  el('overlay').classList.add('open');document.body.style.overflow='hidden';
-}
-function closeModal(){el('overlay').classList.remove('open');document.body.style.overflow='';}
-function clearForm(){['f-ibv','f-oi','f-ini','f-comp','f-fin','f-nom','f-alq','f-srv','f-mnt','f-pub','f-oop','f-ofi','f-oadm','f-gfin'].forEach(id=>el(id).value='');}
-function clearSync(){el('sync-b').classList.remove('show');}
 function sa(id,val){const e=el(id);e.textContent=val===0?'—':Lf(val);e.className=val===0?'da e':'da';}
 function sr(id,val){const e=el(id);e.textContent=Lf(Math.abs(val));e.className='rv '+(val>0?'p':val<0?'n':'m');}
 function ss(id,val){const e=el(id);e.textContent=Lf(Math.abs(val));e.className='srv '+(val>0?'p':val<0?'n':'m');}
-function calcular(){
-  const ibv=v('f-ibv'),oi=v('f-oi'),ini=v('f-ini'),comp=v('f-comp'),fin=v('f-fin');
-  const nom=v('f-nom'),alq=v('f-alq')||6500,srv=v('f-srv')||519.255,mnt=v('f-mnt'),pub=v('f-pub')||3000,oop=v('f-oop');
-  const ofi=v('f-ofi'),oadm=v('f-oadm')||5440.463,gfin=v('f-gfin')||13542.32;
-  const per=getMesLabel();
-  el('tper').textContent=per;el('cpb').textContent=per;
-  const ti=ibv+oi,mp=ini+comp-fin,rb=ti-mp;
-  const tg=nom+alq+srv+mnt+pub+oop,ro=rb-tg;
-  const ta=ofi+oadm+gfin,ai=ro-ta;
-  const isr=ai>0?ai*.15:0,neto=ai-isr;
-  el('b-v').textContent=ti>0?'Con datos':'Sin datos';el('b-v').className='sc-chip '+(ti>0?'sc-ok':'sc-e');
-  el('gt-v').textContent=ti>0?Lf(ti):'—';
-  sa('r-ibv',ibv);sa('r-oi',oi);
-  el('p-ibv').textContent=ti>0?pct(ibv,ti):'100%';el('p-oi').textContent=ti>0?pct(oi,ti):'—';
-  el('b-c').textContent=(ini>0||comp>0)?'Con datos':'Sin datos';el('b-c').className='sc-chip '+((ini>0||comp>0)?'sc-ok':'sc-e');
-  el('gt-c').textContent=mp>0?Lf(mp):'—';
-  sa('r-ini',ini);sa('r-comp',comp);sa('r-fin',fin);sr('r-mp',mp);
-  el('sk-ing').textContent=Lf(ti);el('sk-costo').textContent=Lf(mp>0?mp:0);
-  el('sk-bruto').textContent=Lf(Math.abs(rb));el('sk-bruto').className='scv '+(rb>0?'gr':rb<0?'rd':'mt');
-  el('sk-margen').textContent='Margen: '+(ti>0?(rb/ti*100).toFixed(1):'0.0')+'%';
-  el('b-gop').textContent=tg>0?'Con datos':'Sin datos';el('b-gop').className='sc-chip '+(tg>0?'sc-ok':'sc-e');
-  el('gt-gop').textContent=tg>0?Lf(tg):'—';
-  [['g-nom','p-nom',nom],['g-alq','p-alq',alq],['g-srv','p-srv',srv],['g-mnt','p-mnt',mnt],['g-pub','p-pub',pub],['g-oop','p-oop',oop]].forEach(([a,p,val])=>{sa(a,val);el(p).textContent=ti>0&&val>0?pct(val,ti):'—';});
-  sr('r-op',ro);
-  el('gt-ga').textContent=ta>0?Lf(ta):'—';
-  [['g-ofi','p-ofi',ofi],['g-oadm','p-oadm',oadm],['g-gfin','p-gfin',gfin]].forEach(([a,p,val])=>{sa(a,val);el(p).textContent=ti>0&&val>0?pct(val,ti):'—';});
-  ss('r-ai',ai);el('g-isr').textContent=isr>0?Lf(isr):'—';
-  el('f-isr').textContent=isr>0?Lf(isr):'L 0.00';
-  const fn=el('r-neto');fn.textContent=Lf(Math.abs(neto));fn.className='fv '+(neto>0?'p':neto<0?'n':'mt');
-  closeModal();
-}
 
 
 
@@ -1670,55 +1548,6 @@ function importFromInventario(){}
 }
 
 
-function exportPDF() {
-  var now = new Date();
-  var fecha = now.toLocaleDateString('es-HN', {day:'2-digit',month:'long',year:'numeric'});
-  var hora = now.toLocaleTimeString('es-HN', {hour:'2-digit',minute:'2-digit'});
-  var Lf = function(n){return 'L ' + parseFloat(n||0).toLocaleString('es-HN',{minimumFractionDigits:2,maximumFractionDigits:2});};
-  var per = document.getElementById('tper') ? document.getElementById('tper').textContent : '—';
-  function g(id){var e=document.getElementById(id);return e?e.textContent:'—';}
-  var html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>P&L Cayena</title>' + CSS_BLOCK + '</head><body>'
-    + '<div class="header"><div><h1>Estado de Resultados</h1><div style="font-size:11px;color:#64748B;margin-top:4px">Cayena · RTN: 0318-2001-022079 · Siguatepeque, Honduras</div></div>'
-    + '<div class="meta">Exportado: ' + fecha + ' ' + hora + '<br>Per\u00EDodo: ' + per + '</div></div>'
-    + '<div class="section"><div class="section-title">Ingresos</div>'
-    + '<table><thead><tr><th>Concepto</th><th>%</th><th>Monto</th></tr></thead><tbody>'
-    + '<tr><td>Ingreso Bruto en Ventas</td><td>' + g('p-ibv') + '</td><td>' + g('r-ibv') + '</td></tr>'
-    + '<tr><td>Otros Ingresos</td><td>' + g('p-oi') + '</td><td>' + g('r-oi') + '</td></tr>'
-    + '</tbody></table></div>'
-    + '<div class="section"><div class="section-title">Costo de Producci\u00F3n</div>'
-    + '<table><thead><tr><th>Concepto</th><th>Monto</th></tr></thead><tbody>'
-    + '<tr><td>Inventario Inicial</td><td>' + g('r-ini') + '</td></tr>'
-    + '<tr><td>(+) Compras del Mes</td><td>' + g('r-comp') + '</td></tr>'
-    + '<tr><td>(-) Inventario Final</td><td>' + g('r-fin') + '</td></tr>'
-    + '</tbody><tfoot><tr><td>(=) Materia Prima Utilizada</td><td>' + g('r-mp') + '</td></tr></tfoot></table></div>'
-    + '<div class="section"><div class="section-title">Gastos Operativos</div>'
-    + '<table><thead><tr><th>Concepto</th><th>%</th><th>Monto</th></tr></thead><tbody>'
-    + '<tr><td>N\u00F3mina</td><td>' + g('p-nom') + '</td><td>' + g('g-nom') + '</td></tr>'
-    + '<tr><td>Alquiler</td><td>' + g('p-alq') + '</td><td>' + g('g-alq') + '</td></tr>'
-    + '<tr><td>Servicios p\u00FAblicos</td><td>' + g('p-srv') + '</td><td>' + g('g-srv') + '</td></tr>'
-    + '<tr><td>Mantenimiento</td><td>' + g('p-mnt') + '</td><td>' + g('g-mnt') + '</td></tr>'
-    + '<tr><td>Publicidad</td><td>' + g('p-pub') + '</td><td>' + g('g-pub') + '</td></tr>'
-    + '<tr><td>Otros Gastos Op.</td><td>' + g('p-oop') + '</td><td>' + g('g-oop') + '</td></tr>'
-    + '</tbody><tfoot><tr><td colspan="2">Resultado Operativo</td><td>' + g('r-op') + '</td></tr></tfoot></table></div>'
-    + '<div class="section"><div class="section-title">Gastos Administrativos</div>'
-    + '<table><thead><tr><th>Concepto</th><th>%</th><th>Monto</th></tr></thead><tbody>'
-    + '<tr><td>Gastos de Oficina</td><td>' + g('p-ofi') + '</td><td>' + g('g-ofi') + '</td></tr>'
-    + '<tr><td>Otros Gastos Adm.</td><td>' + g('p-oadm') + '</td><td>' + g('g-oadm') + '</td></tr>'
-    + '<tr><td>Gastos financieros</td><td>' + g('p-gfin') + '</td><td>' + g('g-gfin') + '</td></tr>'
-    + '</tbody><tfoot>'
-    + '<tr><td colspan="2">Resultado Antes de Impuestos</td><td>' + g('r-ai') + '</td></tr>'
-    + '<tr><td colspan="2">ISR (15%)</td><td>' + g('g-isr') + '</td></tr>'
-    + '</tfoot></table></div>'
-    + '<div style="background:linear-gradient(135deg,#1E3A8A,#2563EB);border-radius:10px;padding:20px 24px;display:flex;justify-content:space-between;align-items:center;color:#fff">'
-    + '<div style="font-size:14px;font-weight:700">Resultado Neto del Ejercicio</div>'
-    + '<div style="font-size:28px;font-weight:800">' + g('r-neto') + '</div></div>'
-    + '<div class="footer"><span>Cayena - Estado de Resultados</span><span>' + fecha + '</span></div>'
-    + '</body></html>';
-  var w = window.open('','_blank','width=900,height=700');
-  w.document.write(html);
-  w.document.close();
-  setTimeout(function(){w.print();}, 600);
-}
 
 // ── Backup init ──────────────────────────────────────────────────────────
 (function() {
