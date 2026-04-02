@@ -1175,128 +1175,128 @@ function renderPL(d) {
 
 
 }
+// ── GASTOS FIJOS por defecto (fallback sin Supabase) ─────────────────────────
+const GFIJOS_DEFAULT = [
+  {id:'f01',cuenta:'Otros Gastos Administrativos',montoBase:1500},
+  {id:'f02',cuenta:'Servicios públicos',montoBase:null},
+  {id:'f03',cuenta:'Alquiler',montoBase:6500},
+  {id:'f04',cuenta:'Otros Gastos Administrativos',montoBase:1125.31},
+  {id:'f05',cuenta:'Otros gastos operativos',montoBase:10000},
+  {id:'f06',cuenta:'Servicios públicos',montoBase:63.91},
+  {id:'f07',cuenta:'Otros Gastos Administrativos',montoBase:2508.33},
+  {id:'f08',cuenta:'Servicios públicos',montoBase:455.34},
+  {id:'f09',cuenta:'Gastos financieros',montoBase:10000},
+  {id:'f10',cuenta:'Gastos financieros',montoBase:47.52},
+  {id:'f11',cuenta:'Gastos financieros',montoBase:494.80},
+  {id:'f12',cuenta:'Otros gastos operativos',montoBase:94.12},
+  {id:'f13',cuenta:'Gastos financieros',montoBase:3000},
+  {id:'f14',cuenta:'Otros Gastos Administrativos',montoBase:306.82},
+  {id:'f15',cuenta:'Publicidad y marketing',montoBase:3000},
+];
+
 async function importTodosLosDatos(){
   const periodo  = getMesGlobal();
   const perLabel = getMesLabel();
   const [Y, M]   = periodo.split('-').map(Number);
+  const padM     = String(M).padStart(2,'0');
   el('tper').textContent = perLabel;
   el('cpb').textContent  = perLabel;
 
-  let ibv=0,oi=0,comp=0,ini=0,fin=0;
-  let nom=0,adelantos=0,prestamos=0,consumoEmp=0,cobrosHerram=0,planillaNeta=0;
-  let alq=0,srv=0,mnt=0,pub=0,oop=0,ofi=0,oadm=0,gfin=0;
+  // ── Todas las llamadas Supabase en PARALELO ───────────────────────────────
+  const t0 = performance.now();
+  const [rowsIng, rowsCmp, precios, iniMap, finMap, fijos, mesMap, vars, allSolD, empCfgD] =
+    await Promise.all([
+      DB_Ingresos.getByPeriodo(periodo).catch(()=>
+        JSON.parse(localStorage.getItem('cayena_ingresos')||'[]')
+          .filter(r=>(r.periodo===periodo)||(r.fecha||'').startsWith(periodo))),
+      DB_Compras.getAll().catch(()=>
+        JSON.parse(localStorage.getItem('cayena_compras')||'[]')),
+      DB_Inv.getPrecios().catch(()=>
+        JSON.parse(localStorage.getItem('cayena_precios')||'{}')),
+      DB_Inv.getInventario(periodo,'inicial').catch(()=>
+        JSON.parse(localStorage.getItem(`cayena_inv_inicial_${Y}-${padM}`)||'{}')),
+      DB_Inv.getInventario(periodo,'final').catch(()=>
+        JSON.parse(localStorage.getItem(`cayena_inv_final_${Y}-${padM}`)||'{}')),
+      DB_Gastos.getFijos().catch(()=>GFIJOS_DEFAULT),
+      DB_Gastos.getMes(periodo).catch(()=>
+        JSON.parse(localStorage.getItem(`cayena_gastos_fijos_${periodo}`)||'{}')),
+      DB_Gastos.getVars(periodo).catch(()=>
+        JSON.parse(localStorage.getItem(`cayena_gastos_vars_${periodo}`)||'[]')),
+      DB_Sol.getAll().catch(()=>
+        JSON.parse(localStorage.getItem('cayena_solicitudes_global')||'[]')),
+      DB_Planilla.getCfg().catch(()=>
+        JSON.parse(localStorage.getItem('cayena_planilla_cfg')||'{}')),
+    ]);
+  console.log(`[Sync] Supabase paralelo: ${(performance.now()-t0).toFixed(0)}ms`);
 
-  // 1. INGRESOS
-  try {
-    let rows=[];
-    try{rows=await DB_Ingresos.getByPeriodo(periodo);}catch(e){rows=JSON.parse(localStorage.getItem('cayena_ingresos')||'[]').filter(r=>(r.periodo===periodo)||(r.fecha||'').startsWith(periodo));}
-    ibv=parseFloat(rows.reduce((s,r)=>s+(parseFloat(r.total)||0),0).toFixed(2));
-  }catch(e){console.warn('ingresos:',e);}
+  // ── Calcular valores ──────────────────────────────────────────────────────
+  const ibv  = parseFloat(rowsIng.reduce((s,r)=>s+(parseFloat(r.total)||0),0).toFixed(2));
+  const comp = parseFloat(rowsCmp.filter(r=>(r.fecha||'').startsWith(periodo)).reduce((s,r)=>s+(parseFloat(r.monto||r.total||0)),0).toFixed(2));
+  const ci   = map=>parseFloat(Object.entries(map).reduce((s,[n,q])=>s+(parseFloat(q)||0)*(precios[n]||0),0).toFixed(2));
+  const ini  = ci(iniMap);
+  const fin  = ci(finMap);
 
-  // 2. COMPRAS
-  try {
-    let rows=[];
-    try{rows=await DB_Compras.getAll();}catch(e){rows=JSON.parse(localStorage.getItem('cayena_compras')||'[]');}
-    comp=parseFloat(rows.filter(r=>(r.fecha||'').startsWith(periodo)).reduce((s,r)=>s+(parseFloat(r.monto||r.total||0)),0).toFixed(2));
-  }catch(e){console.warn('compras:',e);}
+  const bycat={};
+  (fijos.length?fijos:GFIJOS_DEFAULT).forEach(g=>{
+    const sv=mesMap[g.id];
+    const mo=sv!==undefined&&sv!==null?parseFloat(sv):(parseFloat(g.montoBase||g.monto_base)||0);
+    bycat[g.cuenta]=(bycat[g.cuenta]||0)+mo;
+  });
+  vars.forEach(v=>{bycat[v.cuenta]=(bycat[v.cuenta]||0)+(parseFloat(v.monto)||0);});
 
-  // 3. INVENTARIO
-  try {
-    let precios={},iniMap={},finMap={};
-    const padM=String(M).padStart(2,'0');
-    try{precios=await DB_Inv.getPrecios();}catch(e){precios=JSON.parse(localStorage.getItem('cayena_precios')||'{}');}
-    try{iniMap=await DB_Inv.getInventario(periodo,'inicial');}catch(e){iniMap=JSON.parse(localStorage.getItem(`cayena_inv_inicial_${Y}-${padM}`)||'{}');}
-    try{finMap=await DB_Inv.getInventario(periodo,'final');}catch(e){finMap=JSON.parse(localStorage.getItem(`cayena_inv_final_${Y}-${padM}`)||'{}');}
-    const ci=map=>parseFloat(Object.entries(map).reduce((s,[n,q])=>s+(parseFloat(q)||0)*(precios[n]||0),0).toFixed(2));
-    ini=ci(iniMap); fin=ci(finMap);
-  }catch(e){console.warn('inventario:',e);}
+  const oi  =parseFloat((bycat['Otros Ingresos']||0).toFixed(2));
+  const alq =parseFloat((bycat['Alquiler']||0).toFixed(2));
+  const srv =parseFloat((bycat['Servicios públicos']||0).toFixed(2));
+  const mnt =parseFloat((bycat['Mantenimiento y reparaciones']||0).toFixed(2));
+  const pub =parseFloat((bycat['Publicidad y marketing']||0).toFixed(2));
+  const oop =parseFloat((bycat['Otros gastos operativos']||0).toFixed(2));
+  const ofi =parseFloat((bycat['Gastos de Oficina']||0).toFixed(2));
+  const oadm=parseFloat((bycat['Otros Gastos Administrativos']||0).toFixed(2));
+  const gfin=parseFloat((bycat['Gastos financieros']||0).toFixed(2));
 
-  // 4. GASTOS
-  try {
-    const GFIJOS=[
-      {id:'f01',cuenta:'Otros Gastos Administrativos',montoBase:1500},
-      {id:'f02',cuenta:'Servicios públicos',montoBase:null},
-      {id:'f03',cuenta:'Alquiler',montoBase:6500},
-      {id:'f04',cuenta:'Otros Gastos Administrativos',montoBase:1125.31},
-      {id:'f05',cuenta:'Otros gastos operativos',montoBase:10000},
-      {id:'f06',cuenta:'Servicios públicos',montoBase:63.91},
-      {id:'f07',cuenta:'Otros Gastos Administrativos',montoBase:2508.33},
-      {id:'f08',cuenta:'Servicios públicos',montoBase:455.34},
-      {id:'f09',cuenta:'Gastos financieros',montoBase:10000},
-      {id:'f10',cuenta:'Gastos financieros',montoBase:47.52},
-      {id:'f11',cuenta:'Gastos financieros',montoBase:494.80},
-      {id:'f12',cuenta:'Otros gastos operativos',montoBase:94.12},
-      {id:'f13',cuenta:'Gastos financieros',montoBase:3000},
-      {id:'f14',cuenta:'Otros Gastos Administrativos',montoBase:306.82},
-      {id:'f15',cuenta:'Publicidad y marketing',montoBase:3000},
-    ];
-    let fijos=GFIJOS,mesMap={},vars=[];
-    try{fijos=await DB_Gastos.getFijos();}catch(e){}
-    try{mesMap=await DB_Gastos.getMes(periodo);}catch(e){mesMap=JSON.parse(localStorage.getItem(`cayena_gastos_fijos_${periodo}`)||'{}');}
-    try{vars=await DB_Gastos.getVars(periodo);}catch(e){vars=JSON.parse(localStorage.getItem(`cayena_gastos_vars_${periodo}`)||'[]');}
-    const bycat={};
-    fijos.forEach(g=>{const sv=mesMap[g.id];const mo=sv!==undefined&&sv!==null?parseFloat(sv):(parseFloat(g.montoBase||g.monto_base)||0);bycat[g.cuenta]=(bycat[g.cuenta]||0)+mo;});
-    vars.forEach(v=>{bycat[v.cuenta]=(bycat[v.cuenta]||0)+(parseFloat(v.monto)||0);});
-    alq=parseFloat((bycat['Alquiler']||0).toFixed(2));
-    srv=parseFloat((bycat['Servicios públicos']||0).toFixed(2));
-    mnt=parseFloat((bycat['Mantenimiento y reparaciones']||0).toFixed(2));
-    pub=parseFloat((bycat['Publicidad y marketing']||0).toFixed(2));
-    oop=parseFloat((bycat['Otros gastos operativos']||0).toFixed(2));
-    ofi=parseFloat((bycat['Gastos de Oficina']||0).toFixed(2));
-    oadm=parseFloat((bycat['Otros Gastos Administrativos']||0).toFixed(2));
-    gfin=parseFloat((bycat['Gastos financieros']||0).toFixed(2));
-    oi=parseFloat((bycat['Otros Ingresos']||0).toFixed(2));
-  }catch(e){console.warn('gastos:',e);}
-
-  // 5. PLANILLA
-  try {
-    const UP=[{id:5},{id:3},{id:4},{id:2}];
-    let allSolD=[],empCfgD={};
-    try{allSolD=await DB_Sol.getAll();}catch(e){allSolD=JSON.parse(localStorage.getItem('cayena_solicitudes_global')||'[]');}
-    try{empCfgD=await DB_Planilla.getCfg();}catch(e){empCfgD=JSON.parse(localStorage.getItem('cayena_planilla_cfg')||'{}');}
-    let pb=0;
-    UP.forEach(u=>{
-      const cfg=empCfgD[u.id]||{sueldo:0,bono:0};
-      pb+=(parseFloat(cfg.sueldo)||0)+(parseFloat(cfg.bono)||0);
-      allSolD.forEach(s=>{
-        const uid=s.user_id!==undefined?s.user_id:s.userId;
-        if(Number(uid)!==Number(u.id)||s.estado!=='approved')return;
-        if(s.tipo==='prestamo'&&s.cuotas&&s.cuotas>1){
-          const fi=s.fecha;if(!fi)return;
-          const mc=parseFloat(((s.monto||0)/s.cuotas).toFixed(2));
-          const ini2=new Date(fi+'T12:00:00');
-          for(let cc=0;cc<s.cuotas;cc++){const fc=new Date(ini2);fc.setDate(fc.getDate()+(15*(cc+1)));const cp=fc.getFullYear()+'-'+String(fc.getMonth()+1).padStart(2,'0');if(cp===periodo)prestamos+=mc;}
-        } else {
-          const fp=(s.fecha||'').substring(0,7);if(fp!==periodo)return;
-          const m=parseFloat(s.montoDescuento||s.monto)||0;
-          if(s.tipo==='adelanto')adelantos+=m;
-          else if(s.tipo==='prestamo')prestamos+=m;
-          else if(s.tipo==='comida')consumoEmp+=m;
-          else if(s.tipo==='herramienta')cobrosHerram+=m;
-        }
-      });
+  const UP=[{id:5},{id:3},{id:4},{id:2}];
+  let pb=0,adelantos=0,prestamos=0,consumoEmp=0,cobrosHerram=0;
+  UP.forEach(u=>{
+    const cfg=empCfgD[u.id]||{sueldo:0,bono:0};
+    pb+=(parseFloat(cfg.sueldo)||0)+(parseFloat(cfg.bono)||0);
+    allSolD.forEach(s=>{
+      const uid=s.user_id!==undefined?s.user_id:s.userId;
+      if(Number(uid)!==Number(u.id)||s.estado!=='approved')return;
+      if(s.tipo==='prestamo'&&s.cuotas&&s.cuotas>1){
+        const fi=s.fecha;if(!fi)return;
+        const mc=parseFloat(((s.monto||0)/s.cuotas).toFixed(2));
+        const i2=new Date(fi+'T12:00:00');
+        for(let cc=0;cc<s.cuotas;cc++){const fc=new Date(i2);fc.setDate(fc.getDate()+(15*(cc+1)));if(fc.getFullYear()+'-'+String(fc.getMonth()+1).padStart(2,'0')===periodo)prestamos+=mc;}
+      } else {
+        if((s.fecha||'').substring(0,7)!==periodo)return;
+        const m=parseFloat(s.montoDescuento||s.monto)||0;
+        if(s.tipo==='adelanto')adelantos+=m;
+        else if(s.tipo==='prestamo')prestamos+=m;
+        else if(s.tipo==='comida')consumoEmp+=m;
+        else if(s.tipo==='herramienta')cobrosHerram+=m;
+      }
     });
-    nom=parseFloat(pb.toFixed(2));
-    adelantos=parseFloat(adelantos.toFixed(2));
-    prestamos=parseFloat(prestamos.toFixed(2));
-    consumoEmp=parseFloat(consumoEmp.toFixed(2));
-    cobrosHerram=parseFloat(cobrosHerram.toFixed(2));
-    planillaNeta=parseFloat((nom-adelantos-prestamos-consumoEmp+cobrosHerram).toFixed(2));
-    localStorage.setItem('cayena_planilla_neta',JSON.stringify({periodo,planillaBruta:nom,adelantos,prestamos,consumoEmpleados:consumoEmp,cobrosHerramientas:cobrosHerram,planillaNeta}));
-  }catch(e){console.warn('planilla:',e);}
+  });
+  const nom=parseFloat(pb.toFixed(2));
+  adelantos=parseFloat(adelantos.toFixed(2));
+  prestamos=parseFloat(prestamos.toFixed(2));
+  consumoEmp=parseFloat(consumoEmp.toFixed(2));
+  cobrosHerram=parseFloat(cobrosHerram.toFixed(2));
+  const planillaNeta=parseFloat((nom-adelantos-prestamos-consumoEmp+cobrosHerram).toFixed(2));
+  localStorage.setItem('cayena_planilla_neta',JSON.stringify({periodo,planillaBruta:nom,adelantos,prestamos,consumoEmpleados:consumoEmp,cobrosHerramientas:cobrosHerram,planillaNeta}));
 
-  // 6. CALCULAR P&L
-  const ti=parseFloat((ibv+oi).toFixed(2));
-  const mp=parseFloat((ini+comp-fin).toFixed(2));
-  const rb=parseFloat((ti-mp).toFixed(2));
+  // ── P&L ───────────────────────────────────────────────────────────────────
+  const ti  =parseFloat((ibv+oi).toFixed(2));
+  const mp  =parseFloat((ini+comp-fin).toFixed(2));
+  const rb  =parseFloat((ti-mp).toFixed(2));
   const tgop=parseFloat((nom+alq+srv+mnt+pub+oop).toFixed(2));
-  const ro=parseFloat((rb-tgop).toFixed(2));
-  const tga=parseFloat((ofi+oadm+gfin).toFixed(2));
-  const ai=parseFloat((ro-tga).toFixed(2));
-  const isr=ai>0?parseFloat((ai*0.15).toFixed(2)):0;
+  const ro  =parseFloat((rb-tgop).toFixed(2));
+  const tga =parseFloat((ofi+oadm+gfin).toFixed(2));
+  const ai  =parseFloat((ro-tga).toFixed(2));
+  const isr =ai>0?parseFloat((ai*0.15).toFixed(2)):0;
   const neto=parseFloat((ai-isr).toFixed(2));
 
-  // 7. KPIs
+  // ── KPIs ──────────────────────────────────────────────────────────────────
   const kpisEl=document.getElementById('dash-kpis');
   if(kpisEl){
     const margen=ti>0?(neto/ti*100).toFixed(1):'0.0';
@@ -1309,11 +1309,11 @@ async function importTodosLosDatos(){
     </div>`;
   }
 
-  // 8. P&L
+  // ── Render P&L ────────────────────────────────────────────────────────────
   const plEl=document.getElementById('pl-content');
   if(plEl){
     const d={mes:periodo,label:perLabel,ibv,oi,ti,ini,cmp:comp,fin,mp,rb,nom,alq,srv,mnt,pub,oop,tgop,ro,ofi,oadm,gfin,tga,ai,isr,neto,adelantos,prestamos,consumoEmp,cobrosHerram,planillaNeta,hasData:ti>0||comp>0||tgop>0};
-    plEl.innerHTML=d.hasData?renderPL(d):`<div class="empty-pl"><div class="ico">📋</div><h3>Sin datos para ${perLabel}</h3><p>Presiona <strong>Sincronizar</strong> para cargar los datos del período.</p></div>`;
+    plEl.innerHTML=d.hasData?renderPL(d):`<div class="empty-pl"><div class="ico">📋</div><h3>Sin datos para ${perLabel}</h3><p>Presiona <strong>Sincronizar</strong>.</p></div>`;
   }
 }
 
