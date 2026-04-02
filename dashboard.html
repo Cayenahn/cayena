@@ -1120,86 +1120,344 @@ function calcular(){
 }
 
 
-function importFromIngresos(){
-  const records=JSON.parse(localStorage.getItem('cayena_ingresos')||'[]');
-  if(!records.length)return;
-  const total=parseFloat(records.reduce((s,r)=>s+(r.total||0),0).toFixed(2));
-  if(total===0)return;
-  const per=getMesLabel();
-  el('tper').textContent=per;el('cpb').textContent=per;
-  el('f-ibv').value=total;
-  el('sync-b').classList.add('show');
-  el('sbt').textContent='Total acumulado del mes importado — '+Lf(total);
-  el('sbs').textContent=records.length+' día'+(records.length!==1?'s':'')+' registrado'+(records.length!==1?'s':'')+' · '+per+' · Completa el P&L con "+ Ingresar datos"';
-  el('b-v').textContent='Con datos';el('b-v').className='sc-chip sc-ok';
-  el('gt-v').textContent=Lf(total);
-  el('r-ibv').textContent=Lf(total);el('r-ibv').className='da';
-  el('p-ibv').textContent='100%';
-  el('sk-ing').textContent=Lf(total);
-  el('sk-bruto').textContent=Lf(total);el('sk-bruto').className='scv gr';
-  el('sk-margen').textContent='Margen: 100.0% (sin costos ingresados)';
-}
-function importFromCompras(){
-  const records=JSON.parse(localStorage.getItem('cayena_compras')||'[]');
-  if(!records.length)return;
-  const curY=getMesYear(),curM=getMesMonth();
-  // Filter only records from the current month
-  const mesActual=records.filter(r=>{
-    if(!r.fecha)return false;
-    const[y,m]=r.fecha.split('-');
-    return parseInt(y)===curY&&parseInt(m)-1===curM;
-  });
-  if(!mesActual.length)return;
-  const total=parseFloat(mesActual.reduce((s,r)=>s+(r.total||0),0).toFixed(2));
-  if(total===0)return;
-  // Pre-fill "(+) Compras del Mes" field in modal
-  el('f-comp').value=total;
-  // Reflect immediately in the display row
-  el('r-comp').textContent=Lf(total);el('r-comp').className='da';
-  el('b-c').textContent='Con datos';el('b-c').className='sc-chip sc-ok';
-  el('gt-c').textContent=Lf(total);
-}
-function importFromInventario(){
-  const curY=getMesYear(),curM=getMesMonth();
-  const padM=String(curM+1).padStart(2,'0');
-  const iniKey='cayena_inv_inicial_'+curY+'-'+padM;
-  const finKey='cayena_inv_final_'+curY+'-'+padM;
-  const iniData=JSON.parse(localStorage.getItem(iniKey)||'{}');
-  const finData=JSON.parse(localStorage.getItem(finKey)||'{}');
-  // Sum all values: qty × price (prices from cayena_precios or fallback 0)
-  const storedPrices=JSON.parse(localStorage.getItem('cayena_precios')||'{}');
-  function calcTotal(data){
-    return parseFloat(Object.entries(data).reduce((s,[name,qty])=>{
-      const price=storedPrices[name]||0;
-      return s+(parseFloat(qty)||0)*price;
-    },0).toFixed(2));
-  }
-  const iniTotal=calcTotal(iniData);
-  const finTotal=calcTotal(finData);
-  // Pre-fill Inventario Inicial
-  if(iniTotal>0){
-    el('f-ini').value=iniTotal;
-    el('r-ini').textContent=Lf(iniTotal);el('r-ini').className='da';
-  }
-  // Pre-fill Inventario Final
-  if(finTotal>0){
-    el('f-fin').value=finTotal;
-    el('r-fin').textContent=Lf(finTotal);el('r-fin').className='da';
-  }
-  // Update costo block chip if either has data
-  if(iniTotal>0||finTotal>0){
-    el('b-c').textContent='Con datos';el('b-c').className='sc-chip sc-ok';
-  }
+
+
+
 }
 const per=getMesLabel();
 el('tper').textContent=per;el('cpb').textContent=per;
-importFromIngresos();
-importFromCompras();
-importFromInventario();
-importFromGastos();
-importFromPlanilla(); // async — consulta Supabase directo
+importTodosLosDatos(); // carga todo desde Supabase en tiempo real
 
-async function importFromPlanilla(){
+async function importTodosLosDatos(){
+  const periodo  = getMesGlobal();          // "YYYY-MM"
+  const perLabel = getMesLabel();           // "Marzo 2026"
+  const [Y, M]   = periodo.split('-').map(Number);
+
+  el('tper').textContent = perLabel;
+  el('cpb').textContent  = perLabel;
+
+  // ── VARIABLES ACUMULADORAS ────────────────────────────────────────────────
+  let ibv=0, oi=0, comp=0, ini=0, fin=0;
+  let nom=0, adelantos=0, prestamos=0, consumoEmp=0, cobrosHerram=0, planillaNeta=0;
+  let alq=0, srv=0, mnt=0, pub=0, oop=0, ofi=0, oadm=0, gfin=0;
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // 1. INGRESOS — DB_Ingresos.getByPeriodo
+  // ══════════════════════════════════════════════════════════════════════════
+  try {
+    let rows = [];
+    try { rows = await DB_Ingresos.getByPeriodo(periodo); }
+    catch(e){ rows = JSON.parse(localStorage.getItem('cayena_ingresos')||'[]').filter(r=>r.periodo===periodo||r.fecha?.startsWith(periodo)); }
+
+    ibv = parseFloat(rows.reduce((s,r)=>s+(parseFloat(r.total||r.total||0)),0).toFixed(2));
+
+    if(ibv > 0){
+      el('b-v').textContent = 'Con datos'; el('b-v').className = 'sc-chip sc-ok';
+      el('gt-v').textContent = Lf(ibv);
+      sa('r-ibv', ibv);
+      el('sk-ing').textContent = Lf(ibv);
+      el('p-ibv').textContent = '100%';
+      el('sync-b').classList.add('show');
+      el('sbt').textContent = 'Ingresos importados — ' + Lf(ibv);
+      el('sbs').textContent = rows.length + ' día(s) registrado(s) · ' + perLabel;
+    }
+  } catch(e){ console.warn('import ingresos:', e); }
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // 2. COMPRAS — DB_Compras.getAll filtrado por período
+  // ══════════════════════════════════════════════════════════════════════════
+  try {
+    let rows = [];
+    try { rows = await DB_Compras.getAll(); }
+    catch(e){ rows = JSON.parse(localStorage.getItem('cayena_compras')||'[]'); }
+
+    const mesRows = rows.filter(r => (r.fecha||'').startsWith(periodo));
+    comp = parseFloat(mesRows.reduce((s,r)=>s+(parseFloat(r.monto||r.total||0)),0).toFixed(2));
+
+    if(comp > 0){
+      el('b-c').textContent = 'Con datos'; el('b-c').className = 'sc-chip sc-ok';
+      el('gt-c').textContent = Lf(comp);
+      sa('r-comp', comp);
+      el('f-comp').value = comp.toFixed(2);
+    }
+  } catch(e){ console.warn('import compras:', e); }
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // 3. INVENTARIO — DB_Inv inicial y final
+  // ══════════════════════════════════════════════════════════════════════════
+  try {
+    let precios = {}, iniMap = {}, finMap = {};
+    const padM = String(M).padStart(2,'0');
+
+    try { precios = await DB_Inv.getPrecios(); }
+    catch(e){ precios = JSON.parse(localStorage.getItem('cayena_precios')||'{}'); }
+
+    try { iniMap = await DB_Inv.getInventario(periodo, 'inicial'); }
+    catch(e){ iniMap = JSON.parse(localStorage.getItem(`cayena_inv_inicial_${Y}-${padM}`)||'{}'); }
+
+    try { finMap = await DB_Inv.getInventario(periodo, 'final'); }
+    catch(e){ finMap = JSON.parse(localStorage.getItem(`cayena_inv_final_${Y}-${padM}`)||'{}'); }
+
+    const calcInv = map => parseFloat(
+      Object.entries(map).reduce((s,[prod,qty])=>s+(parseFloat(qty)||0)*(precios[prod]||0),0).toFixed(2)
+    );
+
+    ini = calcInv(iniMap);
+    fin = calcInv(finMap);
+
+    if(ini > 0){ sa('r-ini', ini); el('f-ini').value = ini.toFixed(2); }
+    if(fin > 0){ sa('r-fin', fin); el('f-fin').value = fin.toFixed(2); }
+    if(ini > 0 || fin > 0){
+      el('b-c').textContent = 'Con datos'; el('b-c').className = 'sc-chip sc-ok';
+    }
+  } catch(e){ console.warn('import inventario:', e); }
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // 4. GASTOS — DB_Gastos.getFijos + getMes + getVars
+  // ══════════════════════════════════════════════════════════════════════════
+  try {
+    const GASTOS_FIJOS_LOCAL = [
+      {id:'f01',cuenta:'Otros Gastos Administrativos',montoBase:1500},
+      {id:'f02',cuenta:'Servicios públicos',          montoBase:null},
+      {id:'f03',cuenta:'Alquiler',                    montoBase:6500},
+      {id:'f04',cuenta:'Otros Gastos Administrativos',montoBase:1125.31},
+      {id:'f05',cuenta:'Otros gastos operativos',     montoBase:10000},
+      {id:'f06',cuenta:'Servicios públicos',           montoBase:63.91},
+      {id:'f07',cuenta:'Otros Gastos Administrativos',montoBase:2508.33},
+      {id:'f08',cuenta:'Servicios públicos',           montoBase:455.34},
+      {id:'f09',cuenta:'Gastos financieros',           montoBase:10000},
+      {id:'f10',cuenta:'Gastos financieros',           montoBase:47.52},
+      {id:'f11',cuenta:'Gastos financieros',           montoBase:494.80},
+      {id:'f12',cuenta:'Otros gastos operativos',      montoBase:94.12},
+      {id:'f13',cuenta:'Gastos financieros',           montoBase:3000},
+      {id:'f14',cuenta:'Otros Gastos Administrativos', montoBase:306.82},
+      {id:'f15',cuenta:'Publicidad y marketing',       montoBase:3000},
+    ];
+
+    let fijos = GASTOS_FIJOS_LOCAL, mesMap = {}, vars = [];
+
+    try { fijos = await DB_Gastos.getFijos(); }    catch(e){}
+    try { mesMap = await DB_Gastos.getMes(periodo); } catch(e){
+      mesMap = JSON.parse(localStorage.getItem(`cayena_gastos_fijos_${periodo}`)||'{}');
+    }
+    try { vars = await DB_Gastos.getVars(periodo); }  catch(e){
+      vars = JSON.parse(localStorage.getItem(`cayena_gastos_vars_${periodo}`)||'[]');
+    }
+
+    const bycat = {};
+    fijos.forEach(g => {
+      const saved = mesMap[g.id];
+      const monto = saved !== undefined && saved !== null ? parseFloat(saved) : (parseFloat(g.montoBase||g.monto_base)||0);
+      const cuenta = g.cuenta || 'Otros Gastos Administrativos';
+      bycat[cuenta] = (bycat[cuenta]||0) + monto;
+    });
+    vars.forEach(v => {
+      const cuenta = v.cuenta || 'Otros Gastos Administrativos';
+      bycat[cuenta] = (bycat[cuenta]||0) + (parseFloat(v.monto)||0);
+    });
+
+    alq  = parseFloat((bycat['Alquiler']                    ||0).toFixed(2));
+    srv  = parseFloat((bycat['Servicios públicos']          ||0).toFixed(2));
+    mnt  = parseFloat((bycat['Mantenimiento y reparaciones']||0).toFixed(2));
+    pub  = parseFloat((bycat['Publicidad y marketing']      ||0).toFixed(2));
+    oop  = parseFloat((bycat['Otros gastos operativos']     ||0).toFixed(2));
+    ofi  = parseFloat((bycat['Gastos de Oficina']           ||0).toFixed(2));
+    oadm = parseFloat((bycat['Otros Gastos Administrativos']||0).toFixed(2));
+    gfin = parseFloat((bycat['Gastos financieros']          ||0).toFixed(2));
+    oi   = parseFloat((bycat['Otros Ingresos']              ||0).toFixed(2));
+
+    // Actualizar campos del modal
+    if(alq  > 0) el('f-alq').value  = alq.toFixed(2);
+    if(srv  > 0) el('f-srv').value  = srv.toFixed(2);
+    if(mnt  > 0) el('f-mnt').value  = mnt.toFixed(2);
+    if(pub  > 0) el('f-pub').value  = pub.toFixed(2);
+    if(oop  > 0) el('f-oop').value  = oop.toFixed(2);
+    if(ofi  > 0) el('f-ofi').value  = ofi.toFixed(2);
+    if(oadm > 0) el('f-oadm').value = oadm.toFixed(2);
+    if(gfin > 0) el('f-gfin').value = gfin.toFixed(2);
+    if(oi   > 0){ el('f-oi').value  = oi.toFixed(2); sa('r-oi', oi); }
+
+    // Actualizar display P&L gastos
+    [['g-alq','p-alq',alq],['g-srv','p-srv',srv],['g-mnt','p-mnt',mnt],
+     ['g-pub','p-pub',pub],['g-oop','p-oop',oop]].forEach(([a,p,val])=>{
+       sa(a,val);
+    });
+    [['g-ofi','p-ofi',ofi],['g-oadm','p-oadm',oadm],['g-gfin','p-gfin',gfin]].forEach(([a,p,val])=>{
+      sa(a,val);
+    });
+    if((alq+srv+mnt+pub+oop) > 0){
+      el('b-gop').textContent = 'Con datos'; el('b-gop').className = 'sc-chip sc-ok';
+    }
+
+  } catch(e){ console.warn('import gastos:', e); }
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // 5. PLANILLA — DB_Sol + DB_Planilla (mismo cálculo que planilla.html)
+  // ══════════════════════════════════════════════════════════════════════════
+  try {
+    const USERS_PL = [{id:5},{id:3},{id:4},{id:2}];
+    let allSolD = [], empCfgD = {};
+
+    try { allSolD = await DB_Sol.getAll(); }
+    catch(e){ allSolD = JSON.parse(localStorage.getItem('cayena_solicitudes_global')||'[]'); }
+
+    try { empCfgD = await DB_Planilla.getCfg(); }
+    catch(e){ empCfgD = JSON.parse(localStorage.getItem('cayena_planilla_cfg')||'{}'); }
+
+    let planillaBruta = 0;
+    adelantos=0; prestamos=0; consumoEmp=0; cobrosHerram=0;
+
+    USERS_PL.forEach(u => {
+      const cfg   = empCfgD[u.id] || {sueldo:0,bono:0};
+      planillaBruta += (parseFloat(cfg.sueldo)||0) + (parseFloat(cfg.bono)||0);
+
+      allSolD.forEach(s => {
+        const uid = s.user_id !== undefined ? s.user_id : s.userId;
+        if(Number(uid) !== Number(u.id) || s.estado !== 'approved') return;
+
+        if(s.tipo === 'prestamo' && s.cuotas && s.cuotas > 1){
+          const fi = s.fecha; if(!fi) return;
+          const montoCuota = parseFloat(((s.monto||0)/s.cuotas).toFixed(2));
+          const inicio = new Date(fi+'T12:00:00');
+          for(let c=0; c<s.cuotas; c++){
+            const fc = new Date(inicio);
+            fc.setDate(fc.getDate()+(15*(c+1)));
+            const cp = fc.getFullYear()+'-'+String(fc.getMonth()+1).padStart(2,'0');
+            if(cp === periodo) prestamos += montoCuota;
+          }
+        } else {
+          const fp = (s.fecha||'').substring(0,7);
+          if(fp !== periodo) return;
+          const m = parseFloat(s.montoDescuento||s.monto)||0;
+          if(s.tipo==='adelanto')         adelantos   += m;
+          else if(s.tipo==='prestamo')    prestamos   += m;
+          else if(s.tipo==='comida')      consumoEmp  += m;
+          else if(s.tipo==='herramienta') cobrosHerram+= m;
+        }
+      });
+    });
+
+    planillaBruta = parseFloat(planillaBruta.toFixed(2));
+    adelantos     = parseFloat(adelantos.toFixed(2));
+    prestamos     = parseFloat(prestamos.toFixed(2));
+    consumoEmp    = parseFloat(consumoEmp.toFixed(2));
+    cobrosHerram  = parseFloat(cobrosHerram.toFixed(2));
+    planillaNeta  = parseFloat((planillaBruta-adelantos-prestamos-consumoEmp+cobrosHerram).toFixed(2));
+    nom = planillaBruta;
+
+    const consumoTotal    = consumoEmp>0 ? parseFloat((consumoEmp/0.20).toFixed(2)) : 0;
+    const subsidioEmpresa = parseFloat((consumoTotal*0.80).toFixed(2));
+
+    if(nom > 0){
+      el('f-nom').value = nom.toFixed(2);
+      const gNom = el('g-nom');
+      if(gNom){ gNom.textContent = Lf(nom); gNom.className = 'da'; }
+      el('b-gop').textContent = 'Con datos'; el('b-gop').className = 'sc-chip sc-ok';
+    }
+    if(adelantos>0){ el('dr-adelantos').style.display=''; el('g-adelantos').textContent=Lf(adelantos); }
+    if(prestamos>0){ el('dr-prestamos').style.display=''; el('g-prestamos').textContent=Lf(prestamos); }
+    if(subsidioEmpresa>0){ el('dr-comida').style.display=''; el('g-comida').textContent=Lf(subsidioEmpresa); }
+    if(cobrosHerram>0){ el('dr-herramientas').style.display=''; el('g-herramientas').textContent='+'+Lf(cobrosHerram); }
+    if(adelantos>0||prestamos>0||subsidioEmpresa>0||cobrosHerram>0){
+      el('dr-nom-neta').style.display='';
+      el('g-nom-neta').textContent=Lf(planillaNeta);
+    }
+
+    // Banner planilla
+    const banner = document.getElementById('planilla-neta-banner');
+    if(banner && nom > 0){
+      banner.style.display='flex';
+      banner.innerHTML =
+        '<div style="flex:1"><div style="font-size:12px;font-weight:700;color:var(--blue-deep)">💰 Nómina · '+periodo+'</div>'+
+        '<div style="font-size:11px;color:var(--body);margin-top:3px">Bruta: <strong>'+Lf(nom)+'</strong>'+
+        (adelantos>0?' · Adelantos: '+Lf(adelantos):'')+
+        (prestamos>0?' · Préstamos: '+Lf(prestamos):'')+
+        ' · Salida caja: <strong style="color:var(--blue)">'+Lf(planillaNeta)+'</strong></div></div>'+
+        '<button onclick="this.parentNode.style.display=\'none\'" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;padding:0 4px;min-height:auto;line-height:1">×</button>';
+    }
+
+  } catch(e){ console.warn('import planilla:', e); }
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // 6. CALCULAR P&L COMPLETO Y ACTUALIZAR TODO EL DISPLAY
+  // ══════════════════════════════════════════════════════════════════════════
+  const ti   = ibv + oi;
+  const mp   = parseFloat((ini + comp - fin).toFixed(2));
+  const rb   = parseFloat((ti - mp).toFixed(2));
+  const tgop = parseFloat((nom + alq + srv + mnt + pub + oop).toFixed(2));
+  const ro   = parseFloat((rb - tgop).toFixed(2));
+  const tga  = parseFloat((ofi + oadm + gfin).toFixed(2));
+  const ai   = parseFloat((ro - tga).toFixed(2));
+  const isr  = ai > 0 ? parseFloat((ai*0.15).toFixed(2)) : 0;
+  const neto = parseFloat((ai - isr).toFixed(2));
+
+  // Ingresos
+  if(ti > 0){
+    el('p-ibv').textContent = ti>0 ? pct(ibv,ti) : '100%';
+    el('p-oi').textContent  = ti>0&&oi>0 ? pct(oi,ti) : '—';
+    el('sk-ing').textContent    = Lf(ti);
+    el('sk-costo').textContent  = Lf(mp>0?mp:0);
+    el('sk-bruto').textContent  = Lf(Math.abs(rb));
+    el('sk-bruto').className    = 'scv '+(rb>0?'gr':rb<0?'rd':'mt');
+    el('sk-margen').textContent = 'Margen: '+(ti>0?(rb/ti*100).toFixed(1):'0.0')+'%';
+  }
+
+  // Costo de producción
+  if(mp !== 0){ sr('r-mp', mp); }
+
+  // Gastos operativos — porcentajes
+  const gFields = [['g-alq','p-alq',alq],['g-srv','p-srv',srv],['g-mnt','p-mnt',mnt],
+                   ['g-pub','p-pub',pub],['g-oop','p-oop',oop]];
+  gFields.forEach(([a,p,val])=>{ if(ti>0&&val>0) el(p).textContent=pct(val,ti); });
+  if(nom>0) el('p-nom').textContent = ti>0 ? pct(nom,ti) : '—';
+
+  // Totales de sección
+  if(tgop>0){ el('gt-gop').textContent=Lf(tgop); el('b-gop').textContent='Con datos'; el('b-gop').className='sc-chip sc-ok'; }
+  if(tga>0)  el('gt-ga').textContent=Lf(tga);
+
+  // Gastos admin — porcentajes
+  [['g-ofi','p-ofi',ofi],['g-oadm','p-oadm',oadm],['g-gfin','p-gfin',gfin]].forEach(([a,p,val])=>{
+    if(ti>0&&val>0) el(p).textContent=pct(val,ti);
+  });
+
+  // Resultados en cascada
+  sr('r-op', ro);
+  ss('r-ai', ai);
+  el('g-isr').textContent = isr>0 ? Lf(isr) : '—';
+  el('f-isr').textContent = isr>0 ? Lf(isr) : 'L 0.00';
+  const fn = el('r-neto');
+  fn.textContent = Lf(Math.abs(neto));
+  fn.className   = 'fv '+(neto>0?'p':neto<0?'n':'mt');
+
+  // Summary KPIs
+  el('sk-ing').textContent   = Lf(ti);
+  el('sk-costo').textContent = Lf(mp>0?mp:0);
+
+  // Salvar en localStorage para offline
+  localStorage.setItem('cayena_planilla_neta', JSON.stringify({
+    periodo, planillaBruta:nom, adelantos, prestamos,
+    consumoEmpleados:consumoEmp, cobrosHerramientas:cobrosHerram, planillaNeta
+  }));
+}
+
+// Funciones legacy mantenidas por compatibilidad con el modal
+function importFromPlanilla(){ /* reemplazada por importTodosLosDatos */ }
+function importFromGastos(){
+  const data=JSON.parse(localStorage.getItem('cayena_gastos_totales')||'null');
+  if(!data||!data.bycat)return;
+  const b=data.bycat;
+  const MAP={
+    'Nómina':'f-nom','Alquiler':'f-alq','Servicios públicos':'f-srv',
+    'Mantenimiento y reparaciones':'f-mnt','Publicidad y marketing':'f-pub',
+    'Otros gastos operativos':'f-oop','Gastos de Oficina':'f-ofi',
+    'Otros Gastos Administrativos':'f-oadm','Gastos financieros':'f-gfin',
+  };
+  Object.entries(MAP).forEach(([cuenta,fid])=>{ if(b[cuenta]>0) el(fid).value=b[cuenta].toFixed(2); });
+  if(b['Otros Ingresos']>0){ el('f-oi').value=b['Otros Ingresos'].toFixed(2); }
+}
+function importFromIngresos(){}
+function importFromCompras(){}
+function importFromInventario(){}
   try {
     // ── 1. Período actual desde mes-global.js ─────────────────────────────
     const periodo = getMesGlobal().substring(0,7); // "YYYY-MM"
@@ -1373,30 +1631,6 @@ async function importFromPlanilla(){
   } catch(e) { console.warn('[importFromPlanilla]', e); }
 }
 
-function importFromGastos(){
-  const data=JSON.parse(localStorage.getItem('cayena_gastos_totales')||'null');
-  if(!data||!data.bycat)return;
-  const b=data.bycat;
-  const MAP={
-    'Nómina':'f-nom',
-    'Alquiler':'f-alq',
-    'Servicios públicos':'f-srv',
-    'Mantenimiento y reparaciones':'f-mnt',
-    'Publicidad y marketing':'f-pub',
-    'Otros gastos operativos':'f-oop',
-    'Gastos de Oficina':'f-ofi',
-    'Otros Gastos Administrativos':'f-oadm',
-    'Gastos financieros':'f-gfin',
-  };
-  Object.entries(MAP).forEach(([cuenta,fid])=>{
-    if(b[cuenta]>0) el(fid).value=b[cuenta].toFixed(2);
-  });
-  if(b['Otros Ingresos']>0){
-    el('f-oi').value=b['Otros Ingresos'].toFixed(2);
-    el('r-oi').textContent=Lf(b['Otros Ingresos']);el('r-oi').className='da';
-  }
-}
-var CSS_BLOCK = '<style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;font-size:11px;color:#0F172A;background:#fff;padding:24px}.header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;padding-bottom:14px;border-bottom:2px solid #2563EB}.header h1{font-size:20px;font-weight:800;color:#1E3A8A}.header .meta{text-align:right;font-size:10px;color:#64748B;line-height:1.8}.kpi-row{display:grid;gap:10px;margin-bottom:18px}.kpi{background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:12px 14px}.kpi-lbl{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:#64748B;margin-bottom:4px}.kpi-val{font-size:18px;font-weight:800;color:#2563EB}table{width:100%;border-collapse:collapse;margin-bottom:16px}thead th{background:#1E3A8A;color:#fff;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:8px 10px;text-align:left}thead th:not(:first-child){text-align:right}tbody tr:nth-child(even){background:#F8FAFC}tbody td{padding:7px 10px;font-size:10px;color:#334155;border-bottom:1px solid #E2E8F0}tbody td:not(:first-child){text-align:right;font-variant-numeric:tabular-nums}tfoot td{background:#EFF6FF;font-weight:700;font-size:11px;padding:9px 10px;border-top:2px solid #2563EB;color:#1E3A8A}tfoot td:not(:first-child){text-align:right}.section{margin-bottom:20px}.section-title{font-size:12px;font-weight:700;color:#1E3A8A;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid #E2E8F0;text-transform:uppercase;letter-spacing:.5px}.footer{margin-top:20px;padding-top:10px;border-top:1px solid #E2E8F0;font-size:9px;color:#94A3B8;display:flex;justify-content:space-between}@media print{body{padding:0}@page{margin:15mm;size:A4}}</style>';
 
 function exportPDF() {
   var now = new Date();
