@@ -849,6 +849,92 @@ body.mobile .logo-wrap{display:none}
   .fab-primary{ display: none !important; }
 }
 
+
+/* ── P&L sections (sistema historial) ── */
+.kpi-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.kpi-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px 18px;box-shadow:var(--shadow)}
+.kpi-card-lbl{font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.kpi-card-val{font-size:20px;font-weight:800;letter-spacing:-0.5px;font-variant-numeric:tabular-nums;line-height:1;margin-bottom:2px}
+.kpi-card-sub{font-size:11px;color:var(--muted)}
+.pl-section{background:var(--white);border:1px solid var(--border);border-radius:var(--r-xl);overflow:hidden;margin-bottom:20px;box-shadow:var(--shadow)}
+.pl-section-head{background:linear-gradient(135deg,var(--blue-deep),var(--blue));padding:14px 20px;display:flex;align-items:center;justify-content:space-between}
+.pl-section-title{font-size:13px;font-weight:700;color:#fff;display:flex;align-items:center;gap:8px}
+.pl-section-total{font-size:16px;font-weight:800;color:#fff;font-variant-numeric:tabular-nums;letter-spacing:-0.5px}
+.pl-row{display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:12px;padding:11px 20px;border-bottom:1px solid var(--border);transition:background .1s}
+.pl-row:last-child{border-bottom:none}
+.pl-row:hover{background:var(--bg)}
+.pl-row.subtotal{background:#F8FAFC;border-top:1px solid var(--border)}
+.pl-row.result{background:linear-gradient(135deg,#EFF6FF,#F0FDF4);border-top:2px solid var(--blue)}
+.pl-row.result-neg{background:linear-gradient(135deg,var(--red-soft),#FFF7ED);border-top:2px solid var(--red)}
+.pl-name{font-size:13px;color:var(--body);font-weight:400}
+.pl-name.bold{font-weight:700;color:var(--text)}
+.pl-pct{font-size:11px;color:var(--muted);text-align:right;min-width:40px}
+.pl-val{font-size:13px;font-weight:600;text-align:right;font-variant-numeric:tabular-nums;min-width:100px}
+.pl-val.zero{color:var(--muted);font-weight:400}
+.pl-val.pos{color:var(--green-ui)}
+.pl-val.neg{color:var(--red)}
+.pl-val.neutral{color:var(--text)}
+.pl-val.big{font-size:18px;font-weight:800;letter-spacing:-0.5px}
+.result-block{background:linear-gradient(135deg,var(--blue-deep),var(--blue));border-radius:var(--r-xl);padding:24px 28px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;gap:16px;box-shadow:0 8px 24px rgba(37,99,235,.25)}
+.result-block.neg{background:linear-gradient(135deg,#991B1B,var(--red))}
+.result-lbl{font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.6);margin-bottom:6px}
+.result-name{font-size:16px;font-weight:700;color:#fff}
+.result-val{font-size:36px;font-weight:800;color:#fff;font-variant-numeric:tabular-nums;letter-spacing:-1px;text-align:right}
+.result-margen{font-size:13px;color:rgba(255,255,255,.7);margin-top:4px;text-align:right}
+.empty-pl{text-align:center;padding:60px 20px;color:var(--muted)}
+.empty-pl .ico{font-size:48px;margin-bottom:16px}
+.empty-pl h3{font-size:16px;font-weight:700;color:var(--text);margin-bottom:8px}
+.empty-pl p{font-size:13px;line-height:1.6;max-width:320px;margin:0 auto 20px}
+@media(max-width:768px){
+  .kpi-summary{grid-template-columns:1fr 1fr}
+  .result-block{flex-direction:column;align-items:flex-start;gap:10px}
+  .result-val{font-size:28px;text-align:left}
+  .pl-row{gap:8px;padding:10px 14px}
+  .pl-val{min-width:80px;font-size:12px}
+}
+
+/* ── P&L sections (sistema historial) ── */
+.kpi-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.kpi-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px 18px;box-shadow:var(--shadow)}
+.kpi-card-lbl{font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.kpi-card-val{font-size:20px;font-weight:800;letter-spacing:-0.5px;font-variant-numeric:tabular-nums;line-height:1;margin-bottom:2px}
+.kpi-card-sub{font-size:11px;color:var(--muted)}
+.pl-section{background:var(--white);border:1px solid var(--border);border-radius:var(--r-xl);overflow:hidden;margin-bottom:20px;box-shadow:var(--shadow)}
+.pl-section-head{background:linear-gradient(135deg,var(--blue-deep),var(--blue));padding:14px 20px;display:flex;align-items:center;justify-content:space-between}
+.pl-section-title{font-size:13px;font-weight:700;color:#fff;display:flex;align-items:center;gap:8px}
+.pl-section-total{font-size:16px;font-weight:800;color:#fff;font-variant-numeric:tabular-nums;letter-spacing:-0.5px}
+.pl-row{display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:12px;padding:11px 20px;border-bottom:1px solid var(--border);transition:background .1s}
+.pl-row:last-child{border-bottom:none}
+.pl-row:hover{background:var(--bg)}
+.pl-row.subtotal{background:#F8FAFC;border-top:1px solid var(--border)}
+.pl-row.result{background:linear-gradient(135deg,#EFF6FF,#F0FDF4);border-top:2px solid var(--blue)}
+.pl-row.result-neg{background:linear-gradient(135deg,var(--red-soft),#FFF7ED);border-top:2px solid var(--red)}
+.pl-name{font-size:13px;color:var(--body);font-weight:400}
+.pl-name.bold{font-weight:700;color:var(--text)}
+.pl-pct{font-size:11px;color:var(--muted);text-align:right;min-width:40px}
+.pl-val{font-size:13px;font-weight:600;text-align:right;font-variant-numeric:tabular-nums;min-width:100px}
+.pl-val.zero{color:var(--muted);font-weight:400}
+.pl-val.pos{color:var(--green-ui)}
+.pl-val.neg{color:var(--red)}
+.pl-val.neutral{color:var(--text)}
+.pl-val.big{font-size:18px;font-weight:800;letter-spacing:-0.5px}
+.result-block{background:linear-gradient(135deg,var(--blue-deep),var(--blue));border-radius:var(--r-xl);padding:24px 28px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;gap:16px;box-shadow:0 8px 24px rgba(37,99,235,.25)}
+.result-block.neg{background:linear-gradient(135deg,#991B1B,var(--red))}
+.result-lbl{font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.6);margin-bottom:6px}
+.result-name{font-size:16px;font-weight:700;color:#fff}
+.result-val{font-size:36px;font-weight:800;color:#fff;font-variant-numeric:tabular-nums;letter-spacing:-1px;text-align:right}
+.result-margen{font-size:13px;color:rgba(255,255,255,.7);margin-top:4px;text-align:right}
+.empty-pl{text-align:center;padding:60px 20px;color:var(--muted)}
+.empty-pl .ico{font-size:48px;margin-bottom:16px}
+.empty-pl h3{font-size:16px;font-weight:700;color:var(--text);margin-bottom:8px}
+.empty-pl p{font-size:13px;line-height:1.6;max-width:320px;margin:0 auto 20px}
+@media(max-width:768px){
+  .kpi-summary{grid-template-columns:1fr 1fr}
+  .result-block{flex-direction:column;align-items:flex-start;gap:10px}
+  .result-val{font-size:28px;text-align:left}
+  .pl-row{gap:8px;padding:10px 14px}
+  .pl-val{min-width:80px;font-size:12px}
+}
 </style>
 </head>
 <body>
@@ -921,63 +1007,19 @@ body.mobile .logo-wrap{display:none}
       <!-- ── Banner planilla neta ── -->
       <div id="planilla-neta-banner" style="display:none;align-items:flex-start;gap:12px;padding:12px 16px;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:var(--r);margin-bottom:16px;font-family:var(--font)"></div>
 
-      <div class="sl">Ingresos</div>
-      <div class="pl-block">
-        <div class="gr"><div class="gl"><svg class="gi" viewBox="0 0 16 16" fill="none"><path d="M2 12L5.5 7.5L8.5 10L11 5.5L14 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="gn">Ventas</span><span class="sc-chip sc-e" id="b-v">Sin datos</span></div><span class="gv" id="gt-v">—</span></div>
-        <div class="dr"><span class="dn">Ingreso Bruto en Ventas</span><span class="dp" id="p-ibv">100%</span><span class="da e" id="r-ibv">—</span></div>
-        <div class="dr"><span class="dn">Otros Ingresos</span><span class="dp" id="p-oi">—</span><span class="da e" id="r-oi">—</span></div>
-      </div>
-      <div class="pl-block">
-        <div class="gr"><div class="gl"><svg class="gi" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.4"/><path d="M5.5 8h5M8 5.5v5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg><span class="gn">Costo de Producción</span><span class="sc-chip sc-e" id="b-c">Sin datos</span></div><span class="gv" id="gt-c">—</span></div>
-        <div class="dr"><span class="dn">Inventario Inicial de Materia Prima</span><span class="dp">—</span><span class="da e" id="r-ini">—</span></div>
-        <div class="dr"><span class="dn">(+) Compras del Mes</span><span class="dp">—</span><span class="da e" id="r-comp">—</span></div>
-        <div class="dr"><span class="dn">(−) Inventario Final de Materia Prima</span><span class="dp">—</span><span class="da e" id="r-fin">—</span></div>
-        <div class="rr"><span class="rl">(=) Materia Prima Utilizada</span><span class="rv m" id="r-mp">—</span></div>
-      </div>
-      <div class="sg">
-        <div class="sc2"><div class="scl">Ingresos Netos</div><div class="scv bl" id="sk-ing">L 0.00</div><div class="scs">Base de cálculo</div></div>
-        <div class="sc2"><div class="scl">Costo de Producción</div><div class="scv bl" id="sk-costo">L 0.00</div><div class="scs">Inv.Ini + Compras − Inv.Fin</div></div>
-        <div class="sc2"><div class="scl">Resultado Bruto en Ventas</div><div class="scv mt" id="sk-bruto">L 0.00</div><div class="scs" id="sk-margen">Margen: 0.0%</div></div>
+      <!-- ── 4 KPIs del mes ── -->
+      <div id="dash-kpis"></div>
+
+      <!-- ── P&L del mes activo (renderizado por importTodosLosDatos) ── -->
+      <div id="pl-content">
+        <div class="empty-pl">
+          <div class="ico">📊</div>
+          <h3>Cargando datos...</h3>
+          <p>Presiona Sincronizar o espera la carga automática</p>
+        </div>
       </div>
 
-      <div class="sl">Gastos Operativos</div>
-      <div class="pl-block">
-        <div class="gr"><div class="gl"><svg class="gi" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="M5 8h6M5 5.5h6M5 10.5h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg><span class="gn">Gastos Operativos</span><span class="sc-chip sc-e" id="b-gop">Sin datos</span></div><span class="gv" id="gt-gop">—</span></div>
-        <div class="dr"><span class="dn">Nómina bruta (sueldos + bonos + horas)</span><span class="dp" id="p-nom">—</span><span class="da e" id="g-nom">—</span></div>
-        <div class="dr" id="dr-adelantos" style="display:none"><span class="dn" style="padding-left:16px;color:var(--muted)">↳ Adelantos entregados <span style="font-size:10px">(ya incluidos en bruto)</span></span><span class="dp" id="p-adelantos">—</span><span class="da e" id="g-adelantos">—</span></div>
-        <div class="dr" id="dr-prestamos" style="display:none"><span class="dn" style="padding-left:16px;color:var(--muted)">↳ Préstamos por cobrar <span style="font-size:10px">(cuentas por cobrar)</span></span><span class="dp" id="p-prestamos">—</span><span class="da e" id="g-prestamos">—</span></div>
-        <div class="dr" id="dr-comida" style="display:none"><span class="dn" style="padding-left:16px;color:var(--muted)">↳ Subsidio comida empleados <span style="font-size:10px">(80% asumido por empresa)</span></span><span class="dp" id="p-comida">—</span><span class="da e" id="g-comida">—</span></div>
-        <div class="dr" id="dr-herramientas" style="display:none"><span class="dn" style="padding-left:16px;color:var(--green-ui)">↳ Recuperación herramientas <span style="font-size:10px">(reduce gasto)</span></span><span class="dp" id="p-herramientas">—</span><span class="da e" id="g-herramientas" style="color:var(--green-ui)">—</span></div>
-        <div class="dr" id="dr-nom-neta" style="display:none"><span class="dn" style="font-weight:600">Nómina neta (salida real de caja)</span><span class="dp" id="p-nom-neta">—</span><span class="da" id="g-nom-neta" style="font-weight:700">—</span></div>
-        <div class="dr"><span class="dn">Alquiler</span><span class="dp" id="p-alq">—</span><span class="da e" id="g-alq">—</span></div>
-        <div class="dr"><span class="dn">Servicios públicos</span><span class="dp" id="p-srv">—</span><span class="da e" id="g-srv">—</span></div>
-        <div class="dr"><span class="dn">Mantenimiento y reparaciones</span><span class="dp" id="p-mnt">—</span><span class="da e" id="g-mnt">—</span></div>
-        <div class="dr"><span class="dn">Publicidad y marketing</span><span class="dp" id="p-pub">—</span><span class="da e" id="g-pub">—</span></div>
-        <div class="dr"><span class="dn">Otros Gastos Operativos</span><span class="dp" id="p-oop">—</span><span class="da e" id="g-oop">—</span></div>
-        <div class="rr"><span class="rl">Resultado Operativo</span><span class="rv m" id="r-op">—</span></div>
-      </div>
-
-      <div class="sl">Gastos Administrativos</div>
-      <div class="pl-block">
-        <div class="gr"><div class="gl"><svg class="gi" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M3 8h7M3 12h5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg><span class="gn">Gastos Administrativos</span></div><span class="gv" id="gt-ga">—</span></div>
-        <div class="dr"><span class="dn">Gastos de Oficina</span><span class="dp" id="p-ofi">—</span><span class="da e" id="g-ofi">—</span></div>
-        <div class="dr"><span class="dn">Otros Gastos Administrativos</span><span class="dp" id="p-oadm">—</span><span class="da e" id="g-oadm">—</span></div>
-        <div class="dr"><span class="dn">Gastos financieros</span><span class="dp" id="p-gfin">—</span><span class="da e" id="g-gfin">—</span></div>
-        <div class="sr"><span class="srl">Resultado Antes de Impuestos</span><span class="srv m" id="r-ai">—</span></div>
-        <div class="ir"><span class="il">Impuesto sobre renta (15%)</span><span class="iv" id="g-isr">—</span></div>
-      </div>
-
-      <div class="sl">Resultado Final</div>
-      <div class="fb">
-        <div><div class="fey">Resultado del período</div><div class="fnn">Resultado Neto del Ejercicio</div></div>
-        <div class="fm"><div class="fml">ISR aplicado</div><div class="fmv" id="f-isr">—</div></div>
-        <div class="fr"><div class="frl">Total neto</div><div class="fv mt" id="r-neto">—</div></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Inputs ocultos para cálculos internos — usados por importTodosLosDatos -->
+      <!-- Inputs ocultos para cálculos internos — usados por importTodosLosDatos -->
 <div style="display:none">
   <input id="f-ibv" type="number"><input id="f-oi" type="number">
   <input id="f-ini" type="number"><input id="f-comp" type="number"><input id="f-fin" type="number">
@@ -991,52 +1033,34 @@ body.mobile .logo-wrap{display:none}
 const el=id=>document.getElementById(id);
 const v=id=>parseFloat(el(id).value)||0;
 const Lf=n=>'L '+parseFloat(n||0).toLocaleString('es-HN',{minimumFractionDigits:2,maximumFractionDigits:2});
+const Lk=v=>{const n=parseFloat(v)||0;return n>=1e6?'L '+(n/1e6).toFixed(2)+'M':n>=1e3?'L '+(n/1000).toFixed(1)+'K':Lf(n);};
 const pct=(n,t)=>t>0?(n/t*100).toFixed(1)+'%':'—';
 const MO=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-function sa(id,val){const e=el(id);e.textContent=val===0?'—':Lf(val);e.className=val===0?'da e':'da';}
-function sr(id,val){const e=el(id);e.textContent=Lf(Math.abs(val));e.className='rv '+(val>0?'p':val<0?'n':'m');}
-function ss(id,val){const e=el(id);e.textContent=Lf(Math.abs(val));e.className='srv '+(val>0?'p':val<0?'n':'m');}
+function sa(id,val){const e=el(id);if(!e)return;e.textContent=val===0?'—':Lf(val);e.className=val===0?'da e':'da';}
+function sr(id,val){const e=el(id);if(!e)return;e.textContent=Lf(Math.abs(val));e.className='rv '+(val>0?'p':val<0?'n':'m');}
+function ss(id,val){const e=el(id);if(!e)return;e.textContent=Lf(Math.abs(val));e.className='srv '+(val>0?'p':val<0?'n':'m');}
 
-
-
-
-
-}
-const per=getMesLabel();
-el('tper').textContent=per;el('cpb').textContent=per;
-// importTodosLosDatos() se llama después de cargar supabase-config.js
-
+// ── renderPL — mismo sistema que historial.html ───────────────────────────────
 async function sincronizar(){
   const btn = document.getElementById('btn-sync');
   if(!btn || btn.classList.contains('syncing')) return;
-
-  // Estado: cargando
   btn.classList.add('syncing');
-  btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0"><path d="M12.5 2.5A6 6 0 1 1 8.5 1.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M8.5 1.2V4M8.5 1.2H11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> Sincronizando...';
   btn.disabled = true;
-
+  btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0"><path d="M12.5 2.5A6 6 0 1 1 8.5 1.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M8.5 1.2V4M8.5 1.2H11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> Sincronizando...';
   try {
     await importTodosLosDatos();
-
-    // Estado: éxito
     btn.classList.remove('syncing');
     btn.classList.add('done');
     btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0"><path d="M2 7l3.5 3.5L12 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> Sincronizado';
-
-    // Guardar fecha de última sync
-    const ahora = new Date().toLocaleString('es-HN', {day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+    const ahora = new Date().toLocaleString('es-HN',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
     localStorage.setItem('cayena_ultima_sync', ahora);
     const badge = document.getElementById('ultima-sync');
     if(badge) badge.textContent = 'Última sync: ' + ahora;
-
   } catch(e) {
     btn.classList.remove('syncing');
     btn.classList.add('error');
     btn.innerHTML = '⚠ Error — reintentar';
-    console.error('[sincronizar]', e);
   }
-
-  // Restaurar botón después de 3s
   setTimeout(()=>{
     btn.classList.remove('done','error');
     btn.disabled = false;
@@ -1044,508 +1068,260 @@ async function sincronizar(){
   }, 3000);
 }
 
-async function importTodosLosDatos(){
-  const periodo  = getMesGlobal();          // "YYYY-MM"
-  const perLabel = getMesLabel();           // "Marzo 2026"
-  const [Y, M]   = periodo.split('-').map(Number);
+function renderPL(d) {
+  const r = (name, val, bold) => `
+    <div class="pl-row${bold?' subtotal':''}">
+      <div class="pl-name${bold?' bold':''}">${name}</div>
+      <div class="pl-pct">${d.ti>0&&val>0?pct(val,d.ti):''}</div>
+      <div class="pl-val ${val===0?'zero':'neutral'}">${val===0?'—':Lf(val)}</div>
+    </div>`;
+  const rr = (name, val, neg) => `
+    <div class="pl-row result${neg?' result-neg':''}">
+      <div class="pl-name bold">${name}</div>
+      <div class="pl-pct"></div>
+      <div class="pl-val big ${val>0?'pos':val<0?'neg':'neutral'}">${Lf(Math.abs(val))}</div>
+    </div>`;
 
+  // Desglose nómina
+  let nomRows = r('Nómina bruta (sueldos + bonos)', d.nom, false);
+  if(d.adelantos>0) nomRows += `<div class="pl-row"><div class="pl-name" style="padding-left:16px;color:var(--muted)">↳ Adelantos entregados</div><div class="pl-pct"></div><div class="pl-val zero">${Lf(d.adelantos)}</div></div>`;
+  if(d.prestamos>0) nomRows += `<div class="pl-row"><div class="pl-name" style="padding-left:16px;color:var(--muted)">↳ Préstamos por cobrar</div><div class="pl-pct"></div><div class="pl-val zero">${Lf(d.prestamos)}</div></div>`;
+  const consumoTotal = d.consumoEmp>0 ? parseFloat((d.consumoEmp/0.20).toFixed(2)) : 0;
+  const subsidio80   = parseFloat((consumoTotal*0.80).toFixed(2));
+  if(subsidio80>0)  nomRows += `<div class="pl-row"><div class="pl-name" style="padding-left:16px;color:var(--muted)">↳ Subsidio comida (80% empresa)</div><div class="pl-pct"></div><div class="pl-val zero">${Lf(subsidio80)}</div></div>`;
+  if(d.cobrosHerram>0) nomRows += `<div class="pl-row"><div class="pl-name" style="padding-left:16px;color:var(--green-ui)">↳ Recuperación herramientas</div><div class="pl-pct"></div><div class="pl-val pos">+ ${Lf(d.cobrosHerram)}</div></div>`;
+  if(d.adelantos>0||d.prestamos>0||subsidio80>0||d.cobrosHerram>0)
+    nomRows += `<div class="pl-row subtotal"><div class="pl-name bold">Nómina neta (salida real de caja)</div><div class="pl-pct"></div><div class="pl-val neutral">${Lf(d.planillaNeta)}</div></div>`;
+
+  return `
+  <!-- INGRESOS -->
+  <div class="pl-section">
+    <div class="pl-section-head">
+      <div class="pl-section-title">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 12L5.5 7.5L8.5 10L11 5.5L14 9" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Ingresos
+      </div>
+      <div class="pl-section-total">${Lf(d.ti)}</div>
+    </div>
+    ${r('Ingreso Bruto en Ventas', d.ibv)}
+    ${r('Otros Ingresos', d.oi)}
+    ${rr('Total Ingresos', d.ti)}
+  </div>
+
+  <!-- COSTO DE PRODUCCIÓN -->
+  <div class="pl-section">
+    <div class="pl-section-head">
+      <div class="pl-section-title">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.5" stroke="white" stroke-width="1.4"/><path d="M5.5 8h5M8 5.5v5" stroke="white" stroke-width="1.4" stroke-linecap="round"/></svg>
+        Costo de Producción
+      </div>
+      <div class="pl-section-total">${Lf(d.mp>0?d.mp:d.cmp)}</div>
+    </div>
+    ${r('Inventario Inicial de Materia Prima', d.ini)}
+    ${r('(+) Compras del Mes', d.cmp)}
+    ${r('(−) Inventario Final de Materia Prima', d.fin)}
+    ${rr('(=) Materia Prima Utilizada · Resultado Bruto', d.rb, d.rb<0)}
+  </div>
+
+  <!-- GASTOS OPERATIVOS -->
+  <div class="pl-section">
+    <div class="pl-section-head">
+      <div class="pl-section-title">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="2" stroke="white" stroke-width="1.4"/><path d="M5 8h6M5 5.5h6M5 10.5h4" stroke="white" stroke-width="1.4" stroke-linecap="round"/></svg>
+        Gastos Operativos
+      </div>
+      <div class="pl-section-total">${Lf(d.tgop)}</div>
+    </div>
+    ${nomRows}
+    ${r('Alquiler', d.alq)}
+    ${r('Servicios públicos', d.srv)}
+    ${r('Mantenimiento y reparaciones', d.mnt)}
+    ${r('Publicidad y marketing', d.pub)}
+    ${r('Otros Gastos Operativos', d.oop)}
+    ${rr('Resultado Operativo', d.ro, d.ro<0)}
+  </div>
+
+  <!-- GASTOS ADMINISTRATIVOS -->
+  <div class="pl-section">
+    <div class="pl-section-head">
+      <div class="pl-section-title">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M3 8h7M3 12h5" stroke="white" stroke-width="1.4" stroke-linecap="round"/></svg>
+        Gastos Administrativos
+      </div>
+      <div class="pl-section-total">${Lf(d.tga)}</div>
+    </div>
+    ${r('Gastos de Oficina', d.ofi)}
+    ${r('Otros Gastos Administrativos', d.oadm)}
+    ${r('Gastos Financieros', d.gfin)}
+    ${r('Impuesto sobre Renta (15%)', d.isr)}
+    ${rr('Resultado Antes de Impuestos', d.ai, d.ai<0)}
+  </div>
+
+  <!-- RESULTADO FINAL -->
+  <div class="result-block${d.neto<0?' neg':''}">
+    <div>
+      <div class="result-lbl">Resultado del período · ${d.label}</div>
+      <div class="result-name">Resultado Neto del Ejercicio</div>
+    </div>
+    <div>
+      <div class="result-val">${Lf(Math.abs(d.neto))}</div>
+      <div class="result-margen">Margen: ${d.ti>0?(d.neto/d.ti*100).toFixed(1):'0.0'}% · ISR: ${Lf(d.isr)}</div>
+    </div>
+  </div>`;
+}
+
+
+
+
+
+}
+async function importTodosLosDatos(){
+  const periodo  = getMesGlobal();
+  const perLabel = getMesLabel();
+  const [Y, M]   = periodo.split('-').map(Number);
   el('tper').textContent = perLabel;
   el('cpb').textContent  = perLabel;
 
-  // ── VARIABLES ACUMULADORAS ────────────────────────────────────────────────
-  let ibv=0, oi=0, comp=0, ini=0, fin=0;
-  let nom=0, adelantos=0, prestamos=0, consumoEmp=0, cobrosHerram=0, planillaNeta=0;
-  let alq=0, srv=0, mnt=0, pub=0, oop=0, ofi=0, oadm=0, gfin=0;
+  let ibv=0,oi=0,comp=0,ini=0,fin=0;
+  let nom=0,adelantos=0,prestamos=0,consumoEmp=0,cobrosHerram=0,planillaNeta=0;
+  let alq=0,srv=0,mnt=0,pub=0,oop=0,ofi=0,oadm=0,gfin=0;
 
-  // ══════════════════════════════════════════════════════════════════════════
-  // 1. INGRESOS — DB_Ingresos.getByPeriodo
-  // ══════════════════════════════════════════════════════════════════════════
+  // 1. INGRESOS
   try {
-    let rows = [];
-    try { rows = await DB_Ingresos.getByPeriodo(periodo); }
-    catch(e){ rows = JSON.parse(localStorage.getItem('cayena_ingresos')||'[]').filter(r=>r.periodo===periodo||r.fecha?.startsWith(periodo)); }
+    let rows=[];
+    try{rows=await DB_Ingresos.getByPeriodo(periodo);}catch(e){rows=JSON.parse(localStorage.getItem('cayena_ingresos')||'[]').filter(r=>(r.periodo===periodo)||(r.fecha||'').startsWith(periodo));}
+    ibv=parseFloat(rows.reduce((s,r)=>s+(parseFloat(r.total)||0),0).toFixed(2));
+  }catch(e){console.warn('ingresos:',e);}
 
-    ibv = parseFloat(rows.reduce((s,r)=>s+(parseFloat(r.total||r.total||0)),0).toFixed(2));
-
-    if(ibv > 0){
-      el('b-v').textContent = 'Con datos'; el('b-v').className = 'sc-chip sc-ok';
-      el('gt-v').textContent = Lf(ibv);
-      sa('r-ibv', ibv);
-      el('sk-ing').textContent = Lf(ibv);
-      el('p-ibv').textContent = '100%';
-      el('sync-b').classList.add('show');
-      el('sbt').textContent = 'Ingresos importados — ' + Lf(ibv);
-      el('sbs').textContent = rows.length + ' día(s) registrado(s) · ' + perLabel;
-    }
-  } catch(e){ console.warn('import ingresos:', e); }
-
-  // ══════════════════════════════════════════════════════════════════════════
-  // 2. COMPRAS — DB_Compras.getAll filtrado por período
-  // ══════════════════════════════════════════════════════════════════════════
+  // 2. COMPRAS
   try {
-    let rows = [];
-    try { rows = await DB_Compras.getAll(); }
-    catch(e){ rows = JSON.parse(localStorage.getItem('cayena_compras')||'[]'); }
+    let rows=[];
+    try{rows=await DB_Compras.getAll();}catch(e){rows=JSON.parse(localStorage.getItem('cayena_compras')||'[]');}
+    comp=parseFloat(rows.filter(r=>(r.fecha||'').startsWith(periodo)).reduce((s,r)=>s+(parseFloat(r.monto||r.total||0)),0).toFixed(2));
+  }catch(e){console.warn('compras:',e);}
 
-    const mesRows = rows.filter(r => (r.fecha||'').startsWith(periodo));
-    comp = parseFloat(mesRows.reduce((s,r)=>s+(parseFloat(r.monto||r.total||0)),0).toFixed(2));
-
-    if(comp > 0){
-      el('b-c').textContent = 'Con datos'; el('b-c').className = 'sc-chip sc-ok';
-      el('gt-c').textContent = Lf(comp);
-      sa('r-comp', comp);
-      el('f-comp').value = comp.toFixed(2);
-    }
-  } catch(e){ console.warn('import compras:', e); }
-
-  // ══════════════════════════════════════════════════════════════════════════
-  // 3. INVENTARIO — DB_Inv inicial y final
-  // ══════════════════════════════════════════════════════════════════════════
+  // 3. INVENTARIO
   try {
-    let precios = {}, iniMap = {}, finMap = {};
-    const padM = String(M).padStart(2,'0');
+    let precios={},iniMap={},finMap={};
+    const padM=String(M).padStart(2,'0');
+    try{precios=await DB_Inv.getPrecios();}catch(e){precios=JSON.parse(localStorage.getItem('cayena_precios')||'{}');}
+    try{iniMap=await DB_Inv.getInventario(periodo,'inicial');}catch(e){iniMap=JSON.parse(localStorage.getItem(`cayena_inv_inicial_${Y}-${padM}`)||'{}');}
+    try{finMap=await DB_Inv.getInventario(periodo,'final');}catch(e){finMap=JSON.parse(localStorage.getItem(`cayena_inv_final_${Y}-${padM}`)||'{}');}
+    const ci=map=>parseFloat(Object.entries(map).reduce((s,[n,q])=>s+(parseFloat(q)||0)*(precios[n]||0),0).toFixed(2));
+    ini=ci(iniMap); fin=ci(finMap);
+  }catch(e){console.warn('inventario:',e);}
 
-    try { precios = await DB_Inv.getPrecios(); }
-    catch(e){ precios = JSON.parse(localStorage.getItem('cayena_precios')||'{}'); }
-
-    try { iniMap = await DB_Inv.getInventario(periodo, 'inicial'); }
-    catch(e){ iniMap = JSON.parse(localStorage.getItem(`cayena_inv_inicial_${Y}-${padM}`)||'{}'); }
-
-    try { finMap = await DB_Inv.getInventario(periodo, 'final'); }
-    catch(e){ finMap = JSON.parse(localStorage.getItem(`cayena_inv_final_${Y}-${padM}`)||'{}'); }
-
-    const calcInv = map => parseFloat(
-      Object.entries(map).reduce((s,[prod,qty])=>s+(parseFloat(qty)||0)*(precios[prod]||0),0).toFixed(2)
-    );
-
-    ini = calcInv(iniMap);
-    fin = calcInv(finMap);
-
-    if(ini > 0){ sa('r-ini', ini); el('f-ini').value = ini.toFixed(2); }
-    if(fin > 0){ sa('r-fin', fin); el('f-fin').value = fin.toFixed(2); }
-    if(ini > 0 || fin > 0){
-      el('b-c').textContent = 'Con datos'; el('b-c').className = 'sc-chip sc-ok';
-    }
-  } catch(e){ console.warn('import inventario:', e); }
-
-  // ══════════════════════════════════════════════════════════════════════════
-  // 4. GASTOS — DB_Gastos.getFijos + getMes + getVars
-  // ══════════════════════════════════════════════════════════════════════════
+  // 4. GASTOS
   try {
-    const GASTOS_FIJOS_LOCAL = [
+    const GFIJOS=[
       {id:'f01',cuenta:'Otros Gastos Administrativos',montoBase:1500},
-      {id:'f02',cuenta:'Servicios públicos',          montoBase:null},
-      {id:'f03',cuenta:'Alquiler',                    montoBase:6500},
+      {id:'f02',cuenta:'Servicios públicos',montoBase:null},
+      {id:'f03',cuenta:'Alquiler',montoBase:6500},
       {id:'f04',cuenta:'Otros Gastos Administrativos',montoBase:1125.31},
-      {id:'f05',cuenta:'Otros gastos operativos',     montoBase:10000},
-      {id:'f06',cuenta:'Servicios públicos',           montoBase:63.91},
+      {id:'f05',cuenta:'Otros gastos operativos',montoBase:10000},
+      {id:'f06',cuenta:'Servicios públicos',montoBase:63.91},
       {id:'f07',cuenta:'Otros Gastos Administrativos',montoBase:2508.33},
-      {id:'f08',cuenta:'Servicios públicos',           montoBase:455.34},
-      {id:'f09',cuenta:'Gastos financieros',           montoBase:10000},
-      {id:'f10',cuenta:'Gastos financieros',           montoBase:47.52},
-      {id:'f11',cuenta:'Gastos financieros',           montoBase:494.80},
-      {id:'f12',cuenta:'Otros gastos operativos',      montoBase:94.12},
-      {id:'f13',cuenta:'Gastos financieros',           montoBase:3000},
-      {id:'f14',cuenta:'Otros Gastos Administrativos', montoBase:306.82},
-      {id:'f15',cuenta:'Publicidad y marketing',       montoBase:3000},
+      {id:'f08',cuenta:'Servicios públicos',montoBase:455.34},
+      {id:'f09',cuenta:'Gastos financieros',montoBase:10000},
+      {id:'f10',cuenta:'Gastos financieros',montoBase:47.52},
+      {id:'f11',cuenta:'Gastos financieros',montoBase:494.80},
+      {id:'f12',cuenta:'Otros gastos operativos',montoBase:94.12},
+      {id:'f13',cuenta:'Gastos financieros',montoBase:3000},
+      {id:'f14',cuenta:'Otros Gastos Administrativos',montoBase:306.82},
+      {id:'f15',cuenta:'Publicidad y marketing',montoBase:3000},
     ];
+    let fijos=GFIJOS,mesMap={},vars=[];
+    try{fijos=await DB_Gastos.getFijos();}catch(e){}
+    try{mesMap=await DB_Gastos.getMes(periodo);}catch(e){mesMap=JSON.parse(localStorage.getItem(`cayena_gastos_fijos_${periodo}`)||'{}');}
+    try{vars=await DB_Gastos.getVars(periodo);}catch(e){vars=JSON.parse(localStorage.getItem(`cayena_gastos_vars_${periodo}`)||'[]');}
+    const bycat={};
+    fijos.forEach(g=>{const sv=mesMap[g.id];const mo=sv!==undefined&&sv!==null?parseFloat(sv):(parseFloat(g.montoBase||g.monto_base)||0);bycat[g.cuenta]=(bycat[g.cuenta]||0)+mo;});
+    vars.forEach(v=>{bycat[v.cuenta]=(bycat[v.cuenta]||0)+(parseFloat(v.monto)||0);});
+    alq=parseFloat((bycat['Alquiler']||0).toFixed(2));
+    srv=parseFloat((bycat['Servicios públicos']||0).toFixed(2));
+    mnt=parseFloat((bycat['Mantenimiento y reparaciones']||0).toFixed(2));
+    pub=parseFloat((bycat['Publicidad y marketing']||0).toFixed(2));
+    oop=parseFloat((bycat['Otros gastos operativos']||0).toFixed(2));
+    ofi=parseFloat((bycat['Gastos de Oficina']||0).toFixed(2));
+    oadm=parseFloat((bycat['Otros Gastos Administrativos']||0).toFixed(2));
+    gfin=parseFloat((bycat['Gastos financieros']||0).toFixed(2));
+    oi=parseFloat((bycat['Otros Ingresos']||0).toFixed(2));
+  }catch(e){console.warn('gastos:',e);}
 
-    let fijos = GASTOS_FIJOS_LOCAL, mesMap = {}, vars = [];
-
-    try { fijos = await DB_Gastos.getFijos(); }    catch(e){}
-    try { mesMap = await DB_Gastos.getMes(periodo); } catch(e){
-      mesMap = JSON.parse(localStorage.getItem(`cayena_gastos_fijos_${periodo}`)||'{}');
-    }
-    try { vars = await DB_Gastos.getVars(periodo); }  catch(e){
-      vars = JSON.parse(localStorage.getItem(`cayena_gastos_vars_${periodo}`)||'[]');
-    }
-
-    const bycat = {};
-    fijos.forEach(g => {
-      const saved = mesMap[g.id];
-      const monto = saved !== undefined && saved !== null ? parseFloat(saved) : (parseFloat(g.montoBase||g.monto_base)||0);
-      const cuenta = g.cuenta || 'Otros Gastos Administrativos';
-      bycat[cuenta] = (bycat[cuenta]||0) + monto;
-    });
-    vars.forEach(v => {
-      const cuenta = v.cuenta || 'Otros Gastos Administrativos';
-      bycat[cuenta] = (bycat[cuenta]||0) + (parseFloat(v.monto)||0);
-    });
-
-    alq  = parseFloat((bycat['Alquiler']                    ||0).toFixed(2));
-    srv  = parseFloat((bycat['Servicios públicos']          ||0).toFixed(2));
-    mnt  = parseFloat((bycat['Mantenimiento y reparaciones']||0).toFixed(2));
-    pub  = parseFloat((bycat['Publicidad y marketing']      ||0).toFixed(2));
-    oop  = parseFloat((bycat['Otros gastos operativos']     ||0).toFixed(2));
-    ofi  = parseFloat((bycat['Gastos de Oficina']           ||0).toFixed(2));
-    oadm = parseFloat((bycat['Otros Gastos Administrativos']||0).toFixed(2));
-    gfin = parseFloat((bycat['Gastos financieros']          ||0).toFixed(2));
-    oi   = parseFloat((bycat['Otros Ingresos']              ||0).toFixed(2));
-
-    // Actualizar campos del modal
-    if(alq  > 0) el('f-alq').value  = alq.toFixed(2);
-    if(srv  > 0) el('f-srv').value  = srv.toFixed(2);
-    if(mnt  > 0) el('f-mnt').value  = mnt.toFixed(2);
-    if(pub  > 0) el('f-pub').value  = pub.toFixed(2);
-    if(oop  > 0) el('f-oop').value  = oop.toFixed(2);
-    if(ofi  > 0) el('f-ofi').value  = ofi.toFixed(2);
-    if(oadm > 0) el('f-oadm').value = oadm.toFixed(2);
-    if(gfin > 0) el('f-gfin').value = gfin.toFixed(2);
-    if(oi   > 0){ el('f-oi').value  = oi.toFixed(2); sa('r-oi', oi); }
-
-    // Actualizar display P&L gastos
-    [['g-alq','p-alq',alq],['g-srv','p-srv',srv],['g-mnt','p-mnt',mnt],
-     ['g-pub','p-pub',pub],['g-oop','p-oop',oop]].forEach(([a,p,val])=>{
-       sa(a,val);
-    });
-    [['g-ofi','p-ofi',ofi],['g-oadm','p-oadm',oadm],['g-gfin','p-gfin',gfin]].forEach(([a,p,val])=>{
-      sa(a,val);
-    });
-    if((alq+srv+mnt+pub+oop) > 0){
-      el('b-gop').textContent = 'Con datos'; el('b-gop').className = 'sc-chip sc-ok';
-    }
-
-  } catch(e){ console.warn('import gastos:', e); }
-
-  // ══════════════════════════════════════════════════════════════════════════
-  // 5. PLANILLA — DB_Sol + DB_Planilla (mismo cálculo que planilla.html)
-  // ══════════════════════════════════════════════════════════════════════════
+  // 5. PLANILLA
   try {
-    const USERS_PL = [{id:5},{id:3},{id:4},{id:2}];
-    let allSolD = [], empCfgD = {};
-
-    try { allSolD = await DB_Sol.getAll(); }
-    catch(e){ allSolD = JSON.parse(localStorage.getItem('cayena_solicitudes_global')||'[]'); }
-
-    try { empCfgD = await DB_Planilla.getCfg(); }
-    catch(e){ empCfgD = JSON.parse(localStorage.getItem('cayena_planilla_cfg')||'{}'); }
-
-    let planillaBruta = 0;
-    adelantos=0; prestamos=0; consumoEmp=0; cobrosHerram=0;
-
-    USERS_PL.forEach(u => {
-      const cfg   = empCfgD[u.id] || {sueldo:0,bono:0};
-      planillaBruta += (parseFloat(cfg.sueldo)||0) + (parseFloat(cfg.bono)||0);
-
-      allSolD.forEach(s => {
-        const uid = s.user_id !== undefined ? s.user_id : s.userId;
-        if(Number(uid) !== Number(u.id) || s.estado !== 'approved') return;
-
-        if(s.tipo === 'prestamo' && s.cuotas && s.cuotas > 1){
-          const fi = s.fecha; if(!fi) return;
-          const montoCuota = parseFloat(((s.monto||0)/s.cuotas).toFixed(2));
-          const inicio = new Date(fi+'T12:00:00');
-          for(let c=0; c<s.cuotas; c++){
-            const fc = new Date(inicio);
-            fc.setDate(fc.getDate()+(15*(c+1)));
-            const cp = fc.getFullYear()+'-'+String(fc.getMonth()+1).padStart(2,'0');
-            if(cp === periodo) prestamos += montoCuota;
-          }
+    const UP=[{id:5},{id:3},{id:4},{id:2}];
+    let allSolD=[],empCfgD={};
+    try{allSolD=await DB_Sol.getAll();}catch(e){allSolD=JSON.parse(localStorage.getItem('cayena_solicitudes_global')||'[]');}
+    try{empCfgD=await DB_Planilla.getCfg();}catch(e){empCfgD=JSON.parse(localStorage.getItem('cayena_planilla_cfg')||'{}');}
+    let pb=0;
+    UP.forEach(u=>{
+      const cfg=empCfgD[u.id]||{sueldo:0,bono:0};
+      pb+=(parseFloat(cfg.sueldo)||0)+(parseFloat(cfg.bono)||0);
+      allSolD.forEach(s=>{
+        const uid=s.user_id!==undefined?s.user_id:s.userId;
+        if(Number(uid)!==Number(u.id)||s.estado!=='approved')return;
+        if(s.tipo==='prestamo'&&s.cuotas&&s.cuotas>1){
+          const fi=s.fecha;if(!fi)return;
+          const mc=parseFloat(((s.monto||0)/s.cuotas).toFixed(2));
+          const ini2=new Date(fi+'T12:00:00');
+          for(let cc=0;cc<s.cuotas;cc++){const fc=new Date(ini2);fc.setDate(fc.getDate()+(15*(cc+1)));const cp=fc.getFullYear()+'-'+String(fc.getMonth()+1).padStart(2,'0');if(cp===periodo)prestamos+=mc;}
         } else {
-          const fp = (s.fecha||'').substring(0,7);
-          if(fp !== periodo) return;
-          const m = parseFloat(s.montoDescuento||s.monto)||0;
-          if(s.tipo==='adelanto')         adelantos   += m;
-          else if(s.tipo==='prestamo')    prestamos   += m;
-          else if(s.tipo==='comida')      consumoEmp  += m;
-          else if(s.tipo==='herramienta') cobrosHerram+= m;
+          const fp=(s.fecha||'').substring(0,7);if(fp!==periodo)return;
+          const m=parseFloat(s.montoDescuento||s.monto)||0;
+          if(s.tipo==='adelanto')adelantos+=m;
+          else if(s.tipo==='prestamo')prestamos+=m;
+          else if(s.tipo==='comida')consumoEmp+=m;
+          else if(s.tipo==='herramienta')cobrosHerram+=m;
         }
       });
     });
+    nom=parseFloat(pb.toFixed(2));
+    adelantos=parseFloat(adelantos.toFixed(2));
+    prestamos=parseFloat(prestamos.toFixed(2));
+    consumoEmp=parseFloat(consumoEmp.toFixed(2));
+    cobrosHerram=parseFloat(cobrosHerram.toFixed(2));
+    planillaNeta=parseFloat((nom-adelantos-prestamos-consumoEmp+cobrosHerram).toFixed(2));
+    localStorage.setItem('cayena_planilla_neta',JSON.stringify({periodo,planillaBruta:nom,adelantos,prestamos,consumoEmpleados:consumoEmp,cobrosHerramientas:cobrosHerram,planillaNeta}));
+  }catch(e){console.warn('planilla:',e);}
 
-    planillaBruta = parseFloat(planillaBruta.toFixed(2));
-    adelantos     = parseFloat(adelantos.toFixed(2));
-    prestamos     = parseFloat(prestamos.toFixed(2));
-    consumoEmp    = parseFloat(consumoEmp.toFixed(2));
-    cobrosHerram  = parseFloat(cobrosHerram.toFixed(2));
-    planillaNeta  = parseFloat((planillaBruta-adelantos-prestamos-consumoEmp+cobrosHerram).toFixed(2));
-    nom = planillaBruta;
+  // 6. CALCULAR P&L
+  const ti=parseFloat((ibv+oi).toFixed(2));
+  const mp=parseFloat((ini+comp-fin).toFixed(2));
+  const rb=parseFloat((ti-mp).toFixed(2));
+  const tgop=parseFloat((nom+alq+srv+mnt+pub+oop).toFixed(2));
+  const ro=parseFloat((rb-tgop).toFixed(2));
+  const tga=parseFloat((ofi+oadm+gfin).toFixed(2));
+  const ai=parseFloat((ro-tga).toFixed(2));
+  const isr=ai>0?parseFloat((ai*0.15).toFixed(2)):0;
+  const neto=parseFloat((ai-isr).toFixed(2));
 
-    const consumoTotal    = consumoEmp>0 ? parseFloat((consumoEmp/0.20).toFixed(2)) : 0;
-    const subsidioEmpresa = parseFloat((consumoTotal*0.80).toFixed(2));
-
-    if(nom > 0){
-      el('f-nom').value = nom.toFixed(2);
-      const gNom = el('g-nom');
-      if(gNom){ gNom.textContent = Lf(nom); gNom.className = 'da'; }
-      el('b-gop').textContent = 'Con datos'; el('b-gop').className = 'sc-chip sc-ok';
-    }
-    if(adelantos>0){ el('dr-adelantos').style.display=''; el('g-adelantos').textContent=Lf(adelantos); }
-    if(prestamos>0){ el('dr-prestamos').style.display=''; el('g-prestamos').textContent=Lf(prestamos); }
-    if(subsidioEmpresa>0){ el('dr-comida').style.display=''; el('g-comida').textContent=Lf(subsidioEmpresa); }
-    if(cobrosHerram>0){ el('dr-herramientas').style.display=''; el('g-herramientas').textContent='+'+Lf(cobrosHerram); }
-    if(adelantos>0||prestamos>0||subsidioEmpresa>0||cobrosHerram>0){
-      el('dr-nom-neta').style.display='';
-      el('g-nom-neta').textContent=Lf(planillaNeta);
-    }
-
-    // Banner planilla
-    const banner = document.getElementById('planilla-neta-banner');
-    if(banner && nom > 0){
-      banner.style.display='flex';
-      banner.innerHTML =
-        '<div style="flex:1"><div style="font-size:12px;font-weight:700;color:var(--blue-deep)">💰 Nómina · '+periodo+'</div>'+
-        '<div style="font-size:11px;color:var(--body);margin-top:3px">Bruta: <strong>'+Lf(nom)+'</strong>'+
-        (adelantos>0?' · Adelantos: '+Lf(adelantos):'')+
-        (prestamos>0?' · Préstamos: '+Lf(prestamos):'')+
-        ' · Salida caja: <strong style="color:var(--blue)">'+Lf(planillaNeta)+'</strong></div></div>'+
-        '<button onclick="this.parentNode.style.display=\'none\'" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;padding:0 4px;min-height:auto;line-height:1">×</button>';
-    }
-
-  } catch(e){ console.warn('import planilla:', e); }
-
-  // ══════════════════════════════════════════════════════════════════════════
-  // 6. CALCULAR P&L COMPLETO Y ACTUALIZAR TODO EL DISPLAY
-  // ══════════════════════════════════════════════════════════════════════════
-  const ti   = ibv + oi;
-  const mp   = parseFloat((ini + comp - fin).toFixed(2));
-  const rb   = parseFloat((ti - mp).toFixed(2));
-  const tgop = parseFloat((nom + alq + srv + mnt + pub + oop).toFixed(2));
-  const ro   = parseFloat((rb - tgop).toFixed(2));
-  const tga  = parseFloat((ofi + oadm + gfin).toFixed(2));
-  const ai   = parseFloat((ro - tga).toFixed(2));
-  const isr  = ai > 0 ? parseFloat((ai*0.15).toFixed(2)) : 0;
-  const neto = parseFloat((ai - isr).toFixed(2));
-
-  // Ingresos
-  if(ti > 0){
-    el('p-ibv').textContent = ti>0 ? pct(ibv,ti) : '100%';
-    el('p-oi').textContent  = ti>0&&oi>0 ? pct(oi,ti) : '—';
-    el('sk-ing').textContent    = Lf(ti);
-    el('sk-costo').textContent  = Lf(mp>0?mp:0);
-    el('sk-bruto').textContent  = Lf(Math.abs(rb));
-    el('sk-bruto').className    = 'scv '+(rb>0?'gr':rb<0?'rd':'mt');
-    el('sk-margen').textContent = 'Margen: '+(ti>0?(rb/ti*100).toFixed(1):'0.0')+'%';
+  // 7. KPIs
+  const kpisEl=document.getElementById('dash-kpis');
+  if(kpisEl){
+    const margen=ti>0?(neto/ti*100).toFixed(1):'0.0';
+    const fc=ti>0?(comp/ti*100).toFixed(1):'0.0';
+    kpisEl.innerHTML=`<div class="kpi-summary">
+      <div class="kpi-card"><div class="kpi-card-lbl">Ingresos brutos</div><div class="kpi-card-val" style="color:var(--blue)">${Lk(ti)}</div><div class="kpi-card-sub">${periodo}</div></div>
+      <div class="kpi-card"><div class="kpi-card-lbl">Costo de producción</div><div class="kpi-card-val" style="color:var(--amber)">${Lk(mp>0?mp:comp)}</div><div class="kpi-card-sub">Food cost: ${fc}%</div></div>
+      <div class="kpi-card"><div class="kpi-card-lbl">Gastos operativos</div><div class="kpi-card-val" style="color:var(--orange)">${Lk(tgop+tga)}</div><div class="kpi-card-sub">${ti>0?pct(tgop+tga,ti):'—'} de ingresos</div></div>
+      <div class="kpi-card"><div class="kpi-card-lbl">Margen neto</div><div class="kpi-card-val" style="color:${parseFloat(margen)>=15?'var(--green-ui)':parseFloat(margen)>=0?'var(--amber)':'var(--red)'}">${margen}%</div><div class="kpi-card-sub">${neto>=0?'Positivo':'Negativo'}</div></div>
+    </div>`;
   }
 
-  // Costo de producción
-  if(mp !== 0){ sr('r-mp', mp); }
-
-  // Gastos operativos — porcentajes
-  const gFields = [['g-alq','p-alq',alq],['g-srv','p-srv',srv],['g-mnt','p-mnt',mnt],
-                   ['g-pub','p-pub',pub],['g-oop','p-oop',oop]];
-  gFields.forEach(([a,p,val])=>{ if(ti>0&&val>0) el(p).textContent=pct(val,ti); });
-  if(nom>0) el('p-nom').textContent = ti>0 ? pct(nom,ti) : '—';
-
-  // Totales de sección
-  if(tgop>0){ el('gt-gop').textContent=Lf(tgop); el('b-gop').textContent='Con datos'; el('b-gop').className='sc-chip sc-ok'; }
-  if(tga>0)  el('gt-ga').textContent=Lf(tga);
-
-  // Gastos admin — porcentajes
-  [['g-ofi','p-ofi',ofi],['g-oadm','p-oadm',oadm],['g-gfin','p-gfin',gfin]].forEach(([a,p,val])=>{
-    if(ti>0&&val>0) el(p).textContent=pct(val,ti);
-  });
-
-  // Resultados en cascada
-  sr('r-op', ro);
-  ss('r-ai', ai);
-  el('g-isr').textContent = isr>0 ? Lf(isr) : '—';
-  el('f-isr').textContent = isr>0 ? Lf(isr) : 'L 0.00';
-  const fn = el('r-neto');
-  fn.textContent = Lf(Math.abs(neto));
-  fn.className   = 'fv '+(neto>0?'p':neto<0?'n':'mt');
-
-  // Summary KPIs
-  el('sk-ing').textContent   = Lf(ti);
-  el('sk-costo').textContent = Lf(mp>0?mp:0);
-
-  // Salvar en localStorage para offline
-  localStorage.setItem('cayena_planilla_neta', JSON.stringify({
-    periodo, planillaBruta:nom, adelantos, prestamos,
-    consumoEmpleados:consumoEmp, cobrosHerramientas:cobrosHerram, planillaNeta
-  }));
+  // 8. P&L
+  const plEl=document.getElementById('pl-content');
+  if(plEl){
+    const d={mes:periodo,label:perLabel,ibv,oi,ti,ini,cmp:comp,fin,mp,rb,nom,alq,srv,mnt,pub,oop,tgop,ro,ofi,oadm,gfin,tga,ai,isr,neto,adelantos,prestamos,consumoEmp,cobrosHerram,planillaNeta,hasData:ti>0||comp>0||tgop>0};
+    plEl.innerHTML=d.hasData?renderPL(d):`<div class="empty-pl"><div class="ico">📋</div><h3>Sin datos para ${perLabel}</h3><p>Presiona <strong>Sincronizar</strong> para cargar los datos del período.</p></div>`;
+  }
 }
 
-// Funciones legacy mantenidas por compatibilidad con el modal
-function importFromPlanilla(){ /* reemplazada por importTodosLosDatos */ }
-function importFromGastos(){
-  const data=JSON.parse(localStorage.getItem('cayena_gastos_totales')||'null');
-  if(!data||!data.bycat)return;
-  const b=data.bycat;
-  const MAP={
-    'Nómina':'f-nom','Alquiler':'f-alq','Servicios públicos':'f-srv',
-    'Mantenimiento y reparaciones':'f-mnt','Publicidad y marketing':'f-pub',
-    'Otros gastos operativos':'f-oop','Gastos de Oficina':'f-ofi',
-    'Otros Gastos Administrativos':'f-oadm','Gastos financieros':'f-gfin',
-  };
-  Object.entries(MAP).forEach(([cuenta,fid])=>{ if(b[cuenta]>0) el(fid).value=b[cuenta].toFixed(2); });
-  if(b['Otros Ingresos']>0){ el('f-oi').value=b['Otros Ingresos'].toFixed(2); }
-}
-function importFromIngresos(){}
-function importFromCompras(){}
-function importFromInventario(){}
-  try {
-    // ── 1. Período actual desde mes-global.js ─────────────────────────────
-    const periodo = getMesGlobal().substring(0,7); // "YYYY-MM"
 
-    let allSolD = [], empCfgD = {};
-    try { allSolD = await DB_Sol.getAll(); } catch(e) {
-      allSolD = JSON.parse(localStorage.getItem('cayena_solicitudes_global')||'[]');
-    }
-    try { empCfgD = await DB_Planilla.getCfg(); } catch(e) {
-      empCfgD = JSON.parse(localStorage.getItem('cayena_planilla_cfg')||'{}');
-    }
+const per=getMesLabel();
+el('tper').textContent=per;el('cpb').textContent=per;
+// importTodosLosDatos() se llama después de cargar supabase-config.js
 
-    const USERS_PL = [
-      {id:5},{id:3},{id:4},{id:2}
-    ];
-
-    // ── 2. Calcular por empleado (misma lógica que calcEmp en planilla.html) ─
-    let planillaBruta = 0, adelantos = 0, prestamos = 0,
-        consumoEmpleados = 0, cobrosHerram = 0;
-
-    USERS_PL.forEach(function(u){
-      const cfg = empCfgD[u.id] || {sueldo:0,bono:0,horaPago:0,horasAcordadas:0};
-      const sueldo = parseFloat(cfg.sueldo)||0;
-      const bono   = parseFloat(cfg.bono)||0;
-      const bruto  = sueldo + bono;
-      planillaBruta += bruto;
-
-      // Filtrar descuentos aprobados del período para este empleado
-      allSolD.forEach(function(s){
-        const uid = s.user_id !== undefined ? s.user_id : s.userId;
-        if(Number(uid) !== Number(u.id)) return;
-        if(s.estado !== 'approved') return;
-
-        if(s.tipo === 'prestamo' && s.cuotas && s.cuotas > 1){
-          const fechaInicio = s.fecha || null;
-          if(!fechaInicio) return;
-          const montoCuota = parseFloat(((s.monto||0) / s.cuotas).toFixed(2));
-          const inicio = new Date(fechaInicio + 'T12:00:00');
-          for(let c = 0; c < s.cuotas; c++){
-            const fc = new Date(inicio);
-            fc.setDate(fc.getDate() + (15 * (c + 1)));
-            const cuotaPer = fc.getFullYear() + '-' + String(fc.getMonth()+1).padStart(2,'0');
-            if(cuotaPer === periodo) prestamos += montoCuota;
-          }
-        } else {
-          const fechaSol = s.fecha || null;
-          if(!fechaSol) return;
-          const solPer = fechaSol.substring(0,7);
-          if(solPer !== periodo) return;
-
-          const monto = parseFloat(s.montoDescuento || s.monto) || 0;
-          if(s.tipo === 'adelanto')         adelantos        += monto;
-          else if(s.tipo === 'prestamo')    prestamos        += monto;
-          else if(s.tipo === 'comida')      consumoEmpleados += monto; // ya es 20%
-          else if(s.tipo === 'herramienta') cobrosHerram     += monto;
-        }
-      });
-    });
-
-    planillaBruta    = parseFloat(planillaBruta.toFixed(2));
-    adelantos        = parseFloat(adelantos.toFixed(2));
-    prestamos        = parseFloat(prestamos.toFixed(2));
-    consumoEmpleados = parseFloat(consumoEmpleados.toFixed(2));
-    cobrosHerram     = parseFloat(cobrosHerram.toFixed(2));
-    const planillaNeta = parseFloat((planillaBruta - adelantos - prestamos - consumoEmpleados + cobrosHerram).toFixed(2));
-
-    if(planillaBruta <= 0) return;
-
-    // Guardar para próximas cargas
-    localStorage.setItem('cayena_planilla_neta', JSON.stringify({
-      periodo, planillaBruta, adelantos, prestamos,
-      consumoEmpleados, cobrosHerramientas: cobrosHerram, planillaNeta
-    }));
-
-    // ── 3. Calcular subsidio empresa (80%) ────────────────────────────────
-    const consumoTotal    = consumoEmpleados > 0 ? parseFloat((consumoEmpleados / 0.20).toFixed(2)) : 0;
-    const subsidioEmpresa = parseFloat((consumoTotal * 0.80).toFixed(2));
-
-    // ── 4. Actualizar P&L visible ─────────────────────────────────────────
-    el('f-nom').value = planillaBruta.toFixed(2);
-    const gNom = el('g-nom');
-    if(gNom){ gNom.textContent = Lf(planillaBruta); gNom.className = 'da'; }
-    el('b-gop').textContent = 'Con datos';
-    el('b-gop').className   = 'sc-chip sc-ok';
-
-    if(adelantos > 0){
-      el('dr-adelantos').style.display = '';
-      el('g-adelantos').textContent = Lf(adelantos);
-    }
-    if(prestamos > 0){
-      el('dr-prestamos').style.display = '';
-      el('g-prestamos').textContent = Lf(prestamos);
-    }
-    if(subsidioEmpresa > 0){
-      el('dr-comida').style.display = '';
-      el('g-comida').textContent = Lf(subsidioEmpresa);
-    }
-    if(cobrosHerram > 0){
-      el('dr-herramientas').style.display = '';
-      el('g-herramientas').textContent = '+ ' + Lf(cobrosHerram);
-    }
-    if(adelantos > 0 || prestamos > 0 || subsidioEmpresa > 0 || cobrosHerram > 0){
-      el('dr-nom-neta').style.display = '';
-      el('g-nom-neta').textContent = Lf(planillaNeta);
-      el('g-nom-neta').style.color = planillaNeta >= 0 ? 'var(--text)' : 'var(--red)';
-    }
-
-    // ── 5. Recalcular cascada P&L ─────────────────────────────────────────
-    const ibv  = v('f-ibv'), oi = v('f-oi');
-    const ini  = v('f-ini'), comp = v('f-comp'), fin = v('f-fin');
-    const nom  = planillaBruta;
-    const alq  = v('f-alq')  || 6500;
-    const srv  = v('f-srv')  || 519.255;
-    const mnt  = v('f-mnt');
-    const pub  = v('f-pub')  || 3000;
-    const oop  = v('f-oop');
-    const ofi  = v('f-ofi');
-    const oadm = v('f-oadm') || 5440.463;
-    const gfin = v('f-gfin') || 13542.32;
-
-    const ti   = ibv + oi;
-    const mp   = ini + comp - fin;
-    const rb   = ti - mp;
-    const tg   = nom + alq + srv + mnt + pub + oop;
-    const ro   = rb - tg;
-    const ta   = ofi + oadm + gfin;
-    const ai   = ro - ta;
-    const isr  = ai > 0 ? ai * 0.15 : 0;
-    const neto = ai - isr;
-
-    el('p-nom').textContent  = ti > 0 && nom > 0 ? pct(nom,ti) : '—';
-    el('gt-gop').textContent = tg > 0 ? Lf(tg) : '—';
-    sr('r-op', ro);
-    ss('r-ai', ai);
-    el('g-isr').textContent = isr > 0 ? Lf(isr) : '—';
-    el('f-isr').textContent = isr > 0 ? Lf(isr) : 'L 0.00';
-    const fn = el('r-neto');
-    fn.textContent = Lf(Math.abs(neto));
-    fn.className   = 'fv ' + (neto > 0 ? 'p' : neto < 0 ? 'n' : 'mt');
-
-    // ── 6. Banner ─────────────────────────────────────────────────────────
-    const banner = document.getElementById('planilla-neta-banner');
-    if(banner){
-      banner.style.display = 'flex';
-      banner.innerHTML =
-        '<div style="flex:1">' +
-          '<div style="font-size:12px;font-weight:700;color:var(--blue-deep)">💰 Nómina · ' + periodo + '</div>' +
-          '<div style="font-size:11px;color:var(--body);margin-top:3px">' +
-            'Bruta: <strong>' + Lf(planillaBruta) + '</strong>' +
-            (adelantos > 0 ? ' · Adelantos: ' + Lf(adelantos) : '') +
-            (prestamos > 0 ? ' · Préstamos: ' + Lf(prestamos) : '') +
-            ' · Salida caja: <strong style="color:var(--blue)">' + Lf(planillaNeta) + '</strong>' +
-          '</div>' +
-        '</div>' +
-        '<button onclick="this.parentNode.style.display=\'none\'" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;padding:0 4px;min-height:auto;line-height:1">×</button>';
-    }
-
-    // ── 7. Hint en modal ──────────────────────────────────────────────────
-    const hint = document.getElementById('nom-planilla-hint');
-    const detail = document.getElementById('nom-planilla-detail');
-    if(hint) hint.textContent = '· Planilla ' + periodo + ' ✓';
-    if(detail){
-      detail.style.display = 'block';
-      detail.innerHTML =
-        '📊 Bruta: <strong>' + Lf(planillaBruta) + '</strong> · ' +
-        '💰 Neta caja: <strong style="color:var(--blue)">' + Lf(planillaNeta) + '</strong><br>' +
-        'Adelantos: ' + Lf(adelantos) + ' · Préstamos: ' + Lf(prestamos) +
-        ' · Subsidio 80%: ' + Lf(subsidioEmpresa) + ' · Cobros: ' + Lf(cobrosHerram);
-    }
-
-  } catch(e) { console.warn('[importFromPlanilla]', e); }
-}
 
 
 
