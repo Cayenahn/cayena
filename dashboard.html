@@ -1197,66 +1197,94 @@ importFromIngresos();
 importFromCompras();
 importFromInventario();
 importFromGastos();
-importFromPlanilla(); // debe ir ÚLTIMO — tiene prioridad sobre gastos para Nómina
+importFromPlanilla(); // async — consulta Supabase directo
 
-function importFromPlanilla(){
-  let raw = localStorage.getItem('cayena_planilla_neta');
-
-  // ── Fallback: calcular directo desde cayena_planilla_cfg si no hay neta guardada ──
-  if(!raw){
-    try {
-      const cfg  = JSON.parse(localStorage.getItem('cayena_planilla_cfg') || '{}');
-      const sols = JSON.parse(localStorage.getItem('cayena_solicitudes_global') || '[]');
-      const per  = getMesGlobal ? getMesGlobal() : '';
-      let bruto  = 0;
-      Object.values(cfg).forEach(function(c){
-        bruto += (parseFloat(c.sueldo)||0) + (parseFloat(c.bono)||0);
-      });
-      if(bruto > 0){
-        let adelantos=0, prestamos=0, consumoEmpleados=0, cobrosHerram=0;
-        sols.filter(s => s.estado==='approved' && (s.fecha||'').substring(0,7) === per.substring(0,7))
-            .forEach(s => {
-              const m = parseFloat(s.montoDescuento || s.monto) || 0;
-              if(s.tipo==='adelanto')    adelantos        += m;
-              else if(s.tipo==='prestamo')  prestamos        += m;
-              else if(s.tipo==='comida')    consumoEmpleados += m;
-              else if(s.tipo==='herramienta') cobrosHerram   += m;
-            });
-        raw = JSON.stringify({
-          periodo: per.substring(0,7),
-          planillaBruta: parseFloat(bruto.toFixed(2)),
-          adelantos: parseFloat(adelantos.toFixed(2)),
-          prestamos: parseFloat(prestamos.toFixed(2)),
-          consumoEmpleados: parseFloat(consumoEmpleados.toFixed(2)),
-          cobrosHerramientas: parseFloat(cobrosHerram.toFixed(2)),
-          planillaNeta: parseFloat((bruto - adelantos - prestamos - consumoEmpleados + cobrosHerram).toFixed(2))
-        });
-      }
-    } catch(e2) { /* fallback falló también, no hay datos */ }
-  }
-
-  if(!raw) return;
+async function importFromPlanilla(){
   try {
-    const pn = JSON.parse(raw);
-    if(!pn || !pn.planillaBruta || pn.planillaBruta <= 0) return;
+    // ── 1. Período actual desde mes-global.js ─────────────────────────────
+    const periodo = getMesGlobal().substring(0,7); // "YYYY-MM"
 
-    const nom             = pn.planillaBruta;
-    const adelantos       = pn.adelantos        || 0;
-    const prestamos       = pn.prestamos        || 0;
-    const subsidioComida  = pn.consumoEmpleados || 0;
-    const cobrosHerram    = pn.cobrosHerramientas || 0;
-    const consumoTotal    = subsidioComida > 0 ? parseFloat((subsidioComida / 0.20).toFixed(2)) : 0;
+    let allSolD = [], empCfgD = {};
+    try { allSolD = await DB_Sol.getAll(); } catch(e) {
+      allSolD = JSON.parse(localStorage.getItem('cayena_solicitudes_global')||'[]');
+    }
+    try { empCfgD = await DB_Planilla.getCfg(); } catch(e) {
+      empCfgD = JSON.parse(localStorage.getItem('cayena_planilla_cfg')||'{}');
+    }
+
+    const USERS_PL = [
+      {id:5},{id:3},{id:4},{id:2}
+    ];
+
+    // ── 2. Calcular por empleado (misma lógica que calcEmp en planilla.html) ─
+    let planillaBruta = 0, adelantos = 0, prestamos = 0,
+        consumoEmpleados = 0, cobrosHerram = 0;
+
+    USERS_PL.forEach(function(u){
+      const cfg = empCfgD[u.id] || {sueldo:0,bono:0,horaPago:0,horasAcordadas:0};
+      const sueldo = parseFloat(cfg.sueldo)||0;
+      const bono   = parseFloat(cfg.bono)||0;
+      const bruto  = sueldo + bono;
+      planillaBruta += bruto;
+
+      // Filtrar descuentos aprobados del período para este empleado
+      allSolD.forEach(function(s){
+        const uid = s.user_id !== undefined ? s.user_id : s.userId;
+        if(Number(uid) !== Number(u.id)) return;
+        if(s.estado !== 'approved') return;
+
+        if(s.tipo === 'prestamo' && s.cuotas && s.cuotas > 1){
+          const fechaInicio = s.fecha || null;
+          if(!fechaInicio) return;
+          const montoCuota = parseFloat(((s.monto||0) / s.cuotas).toFixed(2));
+          const inicio = new Date(fechaInicio + 'T12:00:00');
+          for(let c = 0; c < s.cuotas; c++){
+            const fc = new Date(inicio);
+            fc.setDate(fc.getDate() + (15 * (c + 1)));
+            const cuotaPer = fc.getFullYear() + '-' + String(fc.getMonth()+1).padStart(2,'0');
+            if(cuotaPer === periodo) prestamos += montoCuota;
+          }
+        } else {
+          const fechaSol = s.fecha || null;
+          if(!fechaSol) return;
+          const solPer = fechaSol.substring(0,7);
+          if(solPer !== periodo) return;
+
+          const monto = parseFloat(s.montoDescuento || s.monto) || 0;
+          if(s.tipo === 'adelanto')         adelantos        += monto;
+          else if(s.tipo === 'prestamo')    prestamos        += monto;
+          else if(s.tipo === 'comida')      consumoEmpleados += monto; // ya es 20%
+          else if(s.tipo === 'herramienta') cobrosHerram     += monto;
+        }
+      });
+    });
+
+    planillaBruta    = parseFloat(planillaBruta.toFixed(2));
+    adelantos        = parseFloat(adelantos.toFixed(2));
+    prestamos        = parseFloat(prestamos.toFixed(2));
+    consumoEmpleados = parseFloat(consumoEmpleados.toFixed(2));
+    cobrosHerram     = parseFloat(cobrosHerram.toFixed(2));
+    const planillaNeta = parseFloat((planillaBruta - adelantos - prestamos - consumoEmpleados + cobrosHerram).toFixed(2));
+
+    if(planillaBruta <= 0) return;
+
+    // Guardar para próximas cargas
+    localStorage.setItem('cayena_planilla_neta', JSON.stringify({
+      periodo, planillaBruta, adelantos, prestamos,
+      consumoEmpleados, cobrosHerramientas: cobrosHerram, planillaNeta
+    }));
+
+    // ── 3. Calcular subsidio empresa (80%) ────────────────────────────────
+    const consumoTotal    = consumoEmpleados > 0 ? parseFloat((consumoEmpleados / 0.20).toFixed(2)) : 0;
     const subsidioEmpresa = parseFloat((consumoTotal * 0.80).toFixed(2));
-    const planillaNeta    = pn.planillaNeta;
 
-    // ── Nómina bruta ──────────────────────────────────────────────────────
-    el('f-nom').value = nom.toFixed(2);
+    // ── 4. Actualizar P&L visible ─────────────────────────────────────────
+    el('f-nom').value = planillaBruta.toFixed(2);
     const gNom = el('g-nom');
-    if(gNom){ gNom.textContent = Lf(nom); gNom.className = 'da'; }
+    if(gNom){ gNom.textContent = Lf(planillaBruta); gNom.className = 'da'; }
     el('b-gop').textContent = 'Con datos';
     el('b-gop').className   = 'sc-chip sc-ok';
 
-    // ── Desglose planilla ─────────────────────────────────────────────────
     if(adelantos > 0){
       el('dr-adelantos').style.display = '';
       el('g-adelantos').textContent = Lf(adelantos);
@@ -1279,12 +1307,10 @@ function importFromPlanilla(){
       el('g-nom-neta').style.color = planillaNeta >= 0 ? 'var(--text)' : 'var(--red)';
     }
 
-    // ── Recalcular cascada P&L ─────────────────────────────────────────────
-    const ibv  = v('f-ibv');
-    const oi   = v('f-oi');
-    const ini  = v('f-ini');
-    const comp = v('f-comp');
-    const fin  = v('f-fin');
+    // ── 5. Recalcular cascada P&L ─────────────────────────────────────────
+    const ibv  = v('f-ibv'), oi = v('f-oi');
+    const ini  = v('f-ini'), comp = v('f-comp'), fin = v('f-fin');
+    const nom  = planillaBruta;
     const alq  = v('f-alq')  || 6500;
     const srv  = v('f-srv')  || 519.255;
     const mnt  = v('f-mnt');
@@ -1304,7 +1330,7 @@ function importFromPlanilla(){
     const isr  = ai > 0 ? ai * 0.15 : 0;
     const neto = ai - isr;
 
-    el('p-nom').textContent  = ti > 0 && nom > 0 ? pct(nom, ti) : '—';
+    el('p-nom').textContent  = ti > 0 && nom > 0 ? pct(nom,ti) : '—';
     el('gt-gop').textContent = tg > 0 ? Lf(tg) : '—';
     sr('r-op', ro);
     ss('r-ai', ai);
@@ -1314,34 +1340,34 @@ function importFromPlanilla(){
     fn.textContent = Lf(Math.abs(neto));
     fn.className   = 'fv ' + (neto > 0 ? 'p' : neto < 0 ? 'n' : 'mt');
 
-    // ── Banner ────────────────────────────────────────────────────────────
+    // ── 6. Banner ─────────────────────────────────────────────────────────
     const banner = document.getElementById('planilla-neta-banner');
     if(banner){
       banner.style.display = 'flex';
       banner.innerHTML =
         '<div style="flex:1">' +
-          '<div style="font-size:12px;font-weight:700;color:var(--blue-deep)">💰 Planilla cargada · ' + (pn.periodo||'—') + '</div>' +
+          '<div style="font-size:12px;font-weight:700;color:var(--blue-deep)">💰 Nómina · ' + periodo + '</div>' +
           '<div style="font-size:11px;color:var(--body);margin-top:3px">' +
-            'Bruta P&amp;L: <strong>' + Lf(nom) + '</strong>' +
-            (adelantos > 0 ? ' &nbsp;·&nbsp; Adelantos: ' + Lf(adelantos) : '') +
-            (prestamos > 0 ? ' &nbsp;·&nbsp; Préstamos: ' + Lf(prestamos) : '') +
-            ' &nbsp;|&nbsp; Salida caja: <strong style="color:var(--blue)">' + Lf(planillaNeta) + '</strong>' +
+            'Bruta: <strong>' + Lf(planillaBruta) + '</strong>' +
+            (adelantos > 0 ? ' · Adelantos: ' + Lf(adelantos) : '') +
+            (prestamos > 0 ? ' · Préstamos: ' + Lf(prestamos) : '') +
+            ' · Salida caja: <strong style="color:var(--blue)">' + Lf(planillaNeta) + '</strong>' +
           '</div>' +
         '</div>' +
         '<button onclick="this.parentNode.style.display=\'none\'" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;padding:0 4px;min-height:auto;line-height:1">×</button>';
     }
 
-    // ── Hint modal ────────────────────────────────────────────────────────
-    const hint   = document.getElementById('nom-planilla-hint');
+    // ── 7. Hint en modal ──────────────────────────────────────────────────
+    const hint = document.getElementById('nom-planilla-hint');
     const detail = document.getElementById('nom-planilla-detail');
-    if(hint) hint.textContent = '· Planilla ' + (pn.periodo||'') + ' ✓';
+    if(hint) hint.textContent = '· Planilla ' + periodo + ' ✓';
     if(detail){
       detail.style.display = 'block';
       detail.innerHTML =
-        '📊 Bruta: <strong>' + Lf(nom) + '</strong> &nbsp;·&nbsp; ' +
+        '📊 Bruta: <strong>' + Lf(planillaBruta) + '</strong> · ' +
         '💰 Neta caja: <strong style="color:var(--blue)">' + Lf(planillaNeta) + '</strong><br>' +
-        'Adelantos: ' + Lf(adelantos) + ' &nbsp;·&nbsp; Préstamos: ' + Lf(prestamos) +
-        ' &nbsp;·&nbsp; Subsidio 80%: ' + Lf(subsidioEmpresa) + ' &nbsp;·&nbsp; Cobros: ' + Lf(cobrosHerram);
+        'Adelantos: ' + Lf(adelantos) + ' · Préstamos: ' + Lf(prestamos) +
+        ' · Subsidio 80%: ' + Lf(subsidioEmpresa) + ' · Cobros: ' + Lf(cobrosHerram);
     }
 
   } catch(e) { console.warn('[importFromPlanilla]', e); }
