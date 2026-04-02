@@ -1126,7 +1126,7 @@ function calcular(){
 }
 const per=getMesLabel();
 el('tper').textContent=per;el('cpb').textContent=per;
-importTodosLosDatos(); // carga todo desde Supabase en tiempo real
+// importTodosLosDatos() se llama después de cargar supabase-config.js
 
 async function importTodosLosDatos(){
   const periodo  = getMesGlobal();          // "YYYY-MM"
@@ -1698,6 +1698,14 @@ function exportPDF() {
   if (typeof initSelectorMes === 'undefined') return;
   initSelectorMes('mes-selector-topbar', '2026-01');
 })();
+
+// ── Cargar todos los datos en tiempo real (DEBE ir después de supabase-config.js) ──
+importTodosLosDatos();
+
+// Re-cargar cuando el usuario cambia el mes global
+document.addEventListener('mesGlobalCambiado', function() {
+  importTodosLosDatos();
+});
 </script>
 <script>
 // ── Overflow menu toggle ──────────────────────────────────────────────────────
