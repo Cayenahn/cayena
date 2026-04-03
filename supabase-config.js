@@ -96,6 +96,25 @@ const Cache = {
  
 // ─── MÓDULO: SOLICITUDES (Cuenta Corriente ↔ Planilla) ───────────────────────
 const DB_Sol = {
+  async getByPeriodo(periodo){
+    // Solo solicitudes aprobadas relevantes al período — evita traer historial completo
+    const ck=`sol_periodo_${periodo}`;
+    if(Cache.get(ck)) return Cache.get(ck);
+    // Traer aprobadas: las del mes + préstamos con cuotas activas (últimos 12 meses)
+    const doceAtras = new Date();
+    doceAtras.setMonth(doceAtras.getMonth() - 12);
+    const desde = doceAtras.toISOString().split('T')[0];
+    const qs=`estado=eq.approved&fecha=gte.${desde}&select=*&order=created_at.desc`;
+    const rows = await SB.get('solicitudes', qs);
+    const data = rows.map(s=>({
+      id:s.id, tipo:s.tipo, monto:parseFloat(s.monto),
+      montoDescuento:s.monto_descuento?parseFloat(s.monto_descuento):null,
+      fecha:s.fecha, cuotas:s.cuotas, desc:s.descripcion,
+      estado:s.estado, createdAt:new Date(s.created_at).getTime(),
+      userId:s.user_id, userName:s.user_name
+    }));
+    Cache.set(ck,data); return data;
+  },
   async getAll(filtros={}){
     const ck='sol_all'+JSON.stringify(filtros);
     if(Cache.get(ck)) return Cache.get(ck);
@@ -250,6 +269,14 @@ const DB_Ingresos = {
  
 // ─── MÓDULO: COMPRAS ──────────────────────────────────────────────────────────
 const DB_Compras = {
+  async getByPeriodo(periodo){
+    // Solo compras del mes — mucho más rápido que getAll()
+    const ck=`compras_${periodo}`;
+    if(Cache.get(ck)) return Cache.get(ck);
+    const qs=`fecha=gte.${periodo}-01&fecha=lte.${periodo}-31&select=*&order=fecha.desc`;
+    const rows = await SB.get('compras', qs);
+    Cache.set(ck,rows); return rows;
+  },
   async getAll(){
     const ck='compras_all';
     if(Cache.get(ck)) return Cache.get(ck);
@@ -388,5 +415,40 @@ const DB_ISV = {
   }
 };
  
+// ─── MÓDULO: CIERRES MENSUALES ────────────────────────────────────────────────
+// Tabla: cierres_mensuales
+// Columnas: periodo TEXT PK, label TEXT, datos JSONB, cerrado_en TIMESTAMPTZ, cerrado_por TEXT
+const DB_Cierres = {
+  async getAll(){
+    const ck = 'cierres_all';
+    if(Cache.get(ck)) return Cache.get(ck);
+    const rows = await SB.get('cierres_mensuales', 'select=*&order=periodo.desc');
+    Cache.set(ck, rows); return rows;
+  },
+  async getOne(periodo){
+    const ck = `cierre_${periodo}`;
+    if(Cache.get(ck)) return Cache.get(ck);
+    const rows = await SB.get('cierres_mensuales', `periodo=eq.${encodeURIComponent(periodo)}&select=*`);
+    const d = rows[0] || null;
+    if(d) Cache.set(ck, d);
+    return d;
+  },
+  async guardar(periodo, label, datos, cerradoPor){
+    Cache.del('cierres_all');
+    Cache.del(`cierre_${periodo}`);
+    return SB.upsert('cierres_mensuales', {
+      periodo,
+      label,
+      datos: JSON.stringify(datos),
+      cerrado_en: new Date().toISOString(),
+      cerrado_por: cerradoPor || 'Gerencia'
+    }, 'periodo');
+  },
+  async existe(periodo){
+    const r = await this.getOne(periodo).catch(()=>null);
+    return r !== null;
+  }
+};
+
 // ─── VERIFICACIÓN ─────────────────────────────────────────────────────────────
 // Supabase configurado ✓

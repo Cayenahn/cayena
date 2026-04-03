@@ -811,72 +811,13 @@ body.mobile .logo-wrap{display:none}
     gap: 6px;
     flex-shrink: 0;
   }
-  .tr2 .btn:not(.btn-primary):not(.btn-overflow){
-    display: none !important;
-  }
-  .tr2 .btn-primary{
-    padding: 8px 14px !important;
-    font-size: 12px !important;
-    min-height: 36px !important;
-    white-space: nowrap;
-  }
 
   /* Botón overflow ⋯ */
-  .btn-overflow{
-    display: flex !important;
-    align-items: center;
-    justify-content: center;
-    width: 36px;
-    height: 36px;
-    min-height: 36px;
-    padding: 0 !important;
-    font-size: 18px !important;
-    border-radius: 10px !important;
-  }
 }
 
 /* ── Menú overflow ── */
-.overflow-menu{
-  display: none;
-  position: fixed;
-  top: 60px;
-  right: 12px;
-  background: var(--white);
-  border: 1px solid var(--border);
-  border-radius: var(--r-lg);
-  box-shadow: 0 8px 32px rgba(0,0,0,.12);
-  z-index: 500;
-  min-width: 200px;
-  overflow: hidden;
-  animation: omFadeIn .15s ease;
-}
-.overflow-menu.open{ display: block; }
 @keyframes omFadeIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
-.om-item{
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 13px 16px;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--body);
-  cursor: pointer;
-  border: none;
-  background: none;
-  width: 100%;
-  text-align: left;
-  transition: background .1s;
-  font-family: var(--font, inherit);
-}
-.om-item:hover{ background: var(--bg); }
 .om-item:not(:last-child){ border-bottom: 1px solid var(--border); }
-.om-icon{ font-size: 16px; width: 20px; flex-shrink: 0; }
-.om-backdrop{
-  display: none;
-  position: fixed;
-  inset: 0;
-  z-index: 499;
-}
 .om-backdrop.open{ display: block; }
 
 /* ── Barra de acción inferior (botón primario fijo) ── */
@@ -956,15 +897,6 @@ body.mobile .logo-wrap{display:none}
         <span class="tey">Cayena</span><div class="tsep"></div>
         <span class="ttl">Proveedores</span><div class="tsep"></div><div id="mes-selector-topbar"></div>
       </div>
-      <div class="tr2">
-        <button class="btn" onclick="exportPDF()">Exportar PDF</button>
-        <button class="btn btn-primary" onclick="location.href='compras.html'">← Compras</button>
-        <button class="btn btn-overflow" id="btn-overflow" title="Más opciones" aria-label="Más opciones">⋯</button>
-      </div>
-      <div class="overflow-menu" id="overflow-menu">
-  <button class="om-item" onclick="exportPDF();document.getElementById('overflow-menu').classList.remove('open');document.getElementById('om-backdrop') && document.getElementById('om-backdrop').classList.remove('open')"><span class="om-icon">📄</span>Exportar PDF</button>
-</div>
-<div class="om-backdrop" id="om-backdrop"></div>
     </div>
 
     <div class="content">
@@ -1467,50 +1399,7 @@ loadData();
 document.addEventListener('visibilitychange', () => {
   if(document.visibilityState === 'visible') loadData();
 });
-var CSS_BLOCK = '<style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;font-size:11px;color:#0F172A;background:#fff;padding:24px}.header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;padding-bottom:14px;border-bottom:2px solid #2563EB}.header h1{font-size:20px;font-weight:800;color:#1E3A8A}.header .meta{text-align:right;font-size:10px;color:#64748B;line-height:1.8}.kpi-row{display:grid;gap:10px;margin-bottom:18px}.kpi{background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:12px 14px}.kpi-lbl{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:#64748B;margin-bottom:4px}.kpi-val{font-size:18px;font-weight:800;color:#2563EB}table{width:100%;border-collapse:collapse;margin-bottom:16px}thead th{background:#1E3A8A;color:#fff;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:8px 10px;text-align:left}thead th:not(:first-child){text-align:right}tbody tr:nth-child(even){background:#F8FAFC}tbody td{padding:7px 10px;font-size:10px;color:#334155;border-bottom:1px solid #E2E8F0}tbody td:not(:first-child){text-align:right;font-variant-numeric:tabular-nums}tfoot td{background:#EFF6FF;font-weight:700;font-size:11px;padding:9px 10px;border-top:2px solid #2563EB;color:#1E3A8A}tfoot td:not(:first-child){text-align:right}.section{margin-bottom:20px}.section-title{font-size:12px;font-weight:700;color:#1E3A8A;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid #E2E8F0;text-transform:uppercase;letter-spacing:.5px}.footer{margin-top:20px;padding-top:10px;border-top:1px solid #E2E8F0;font-size:9px;color:#94A3B8;display:flex;justify-content:space-between}@media print{body{padding:0}@page{margin:15mm;size:A4}}</style>';
 
-function exportPDF() {
-  var records = JSON.parse(localStorage.getItem('cayena_compras')||'[]');
-  if(!records.length){alert('No hay datos para exportar.');return;}
-  var now = new Date();
-  var fecha = now.toLocaleDateString('es-HN',{day:'2-digit',month:'long',year:'numeric'});
-  var hora = now.toLocaleTimeString('es-HN',{hour:'2-digit',minute:'2-digit'});
-  var MO2=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-  var per = MO2[now.getMonth()] + ' ' + now.getFullYear();
-  var Lf = function(n){return 'L ' + parseFloat(n||0).toLocaleString('es-HN',{minimumFractionDigits:2,maximumFractionDigits:2});};
-  var map={};
-  records.forEach(function(r){
-    var k=r.proveedor||'Varios';
-    if(!map[k])map[k]={name:k,total:0,pagado:0,pendiente:0,facturas:0};
-    map[k].total+=r.total; map[k].facturas++;
-    if(r.pago&&r.pago!=='Pendiente')map[k].pagado+=r.total;
-    else map[k].pendiente+=r.total;
-  });
-  var provs=Object.values(map).sort(function(a,b){return b.pendiente-a.pendiente||b.total-a.total;});
-  var ttot=0,tpag=0,tpend=0;
-  provs.forEach(function(p){ttot+=p.total;tpag+=p.pagado;tpend+=p.pendiente;});
-  var rows=provs.map(function(p){
-    return '<tr><td><b>'+p.name+'</b></td><td>'+p.facturas+'</td><td>'+Lf(p.total)+'</td><td>'+Lf(p.pagado)+'</td>'
-      +'<td style="color:'+(p.pendiente>0?'#EF4444':'#16A34A')+';font-weight:700">'+(p.pendiente>0?Lf(p.pendiente):'Al dia')+'</td></tr>';
-  }).join('');
-  var html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Proveedores Cayena</title>' + CSS_BLOCK + '</head><body>'
-    + '<div class="header"><div><h1>Resumen de Proveedores</h1><div style="font-size:11px;color:#64748B;margin-top:4px">Cayena - Cuentas por pagar</div></div>'
-    + '<div class="meta">Exportado: ' + fecha + ' ' + hora + '<br>Per\u00EDodo: ' + per + '</div></div>'
-    + '<div class="kpi-row" style="grid-template-columns:repeat(3,1fr)">'
-    + '<div class="kpi"><div class="kpi-lbl">Total compras</div><div class="kpi-val">'+Lf(ttot)+'</div></div>'
-    + '<div class="kpi"><div class="kpi-lbl">Total pagado</div><div class="kpi-val" style="color:#16A34A">'+Lf(tpag)+'</div></div>'
-    + '<div class="kpi"><div class="kpi-lbl">Pendiente</div><div class="kpi-val" style="color:#EF4444">'+Lf(tpend)+'</div></div></div>'
-    + '<table><thead><tr><th>Proveedor</th><th>Facturas</th><th>Total comprado</th><th>Pagado</th><th>Pendiente</th></tr></thead>'
-    + '<tbody>' + rows + '</tbody>'
-    + '<tfoot><tr><td>TOTALES</td><td>'+provs.length+' proveedores</td><td>'+Lf(ttot)+'</td><td>'+Lf(tpag)+'</td><td>'+Lf(tpend)+'</td></tr></tfoot>'
-    + '</table>'
-    + '<div class="footer"><span>Cayena - Proveedores</span><span>' + fecha + '</span></div>'
-    + '</body></html>';
-  var w = window.open('','_blank','width=900,height=700');
-  w.document.write(html);
-  w.document.close();
-  setTimeout(function(){w.print();}, 600);
-}
 
 </script>
 <script src="supabase-config.js"></script>
@@ -1524,25 +1413,6 @@ function exportPDF() {
 })();
 </script>
 <script>
-// ── Overflow menu toggle ──────────────────────────────────────────────────────
-(function(){
-  var omBtn = document.getElementById('btn-overflow');
-  var omMenu = document.getElementById('overflow-menu');
-  var omBd = document.getElementById('om-backdrop');
-  if(!omBtn || !omMenu) return;
-  omBtn.addEventListener('click', function(e){
-    e.stopPropagation();
-    omMenu.classList.toggle('open');
-    omBd && omBd.classList.toggle('open');
-  });
-  omBd && omBd.addEventListener('click', function(){
-    omMenu.classList.remove('open');
-    omBd.classList.remove('open');
-  });
-  document.addEventListener('keydown', function(e){
-    if(e.key==='Escape'){ omMenu.classList.remove('open'); omBd && omBd.classList.remove('open'); }
-  });
-})();
 </script>
 <script>
 // ── Sidebar IIFE ──────────────────────────────────────────────────────────────

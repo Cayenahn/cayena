@@ -277,8 +277,6 @@ body.mobile .sb-toggle{display:none !important}
         <span class="ttl">Historial P&amp;L</span>
       </div>
       <div class="tr2">
-        <button class="btn btn-sm" onclick="exportPDFMes()">📄 Exportar PDF</button>
-        <button class="btn btn-sm btn-primary" onclick="location.href='dashboard.html'">← Dashboard</button>
       </div>
     </div>
 
@@ -317,9 +315,40 @@ function getRange() {
 }
 
 // ── COLLECT DATA FOR A MES ────────────────────────────────────────────────────
+// ── Cache de cierres cargados desde Supabase ──────────────────────────────────
+let cierresSupabase = {}; // { "2026-03": { ...snapshot } }
+let cierresCargados = false;
+
+async function cargarCierres(){
+  if(cierresCargados) return;
+  try {
+    const rows = await DB_Cierres.getAll();
+    rows.forEach(r => {
+      try {
+        const datos = typeof r.datos === 'string' ? JSON.parse(r.datos) : r.datos;
+        cierresSupabase[r.periodo] = {
+          ...datos,
+          _cerradoEn:  r.cerrado_en,
+          _cerradoPor: r.cerrado_por,
+          _fromSupabase: true
+        };
+      } catch(e){}
+    });
+    cierresCargados = true;
+  } catch(e){ console.warn('[historial] no se pudo cargar cierres:', e); }
+}
+
 function collectMes(mesStr) {
   if (allData[mesStr]) return allData[mesStr];
 
+  // ── 1. Prioridad: cierre guardado en Supabase ─────────────────────────────
+  if(cierresSupabase[mesStr]){
+    const d = cierresSupabase[mesStr];
+    allData[mesStr] = d;
+    return d;
+  }
+
+  // ── 2. Fallback: localStorage (mes actual sin cerrar todavía) ─────────────
   const [y, mStr] = mesStr.split('-').map(Number);
   const m = mStr - 1;
 
@@ -337,7 +366,6 @@ function collectMes(mesStr) {
   const pb     = parseFloat(ingM.reduce((s,r)=>s+(parseFloat(r.pb)||0),0).toFixed(2));
   const totalCmp = parseFloat(cmpM.reduce((s,r)=>s+(parseFloat(r.total)||0),0).toFixed(2));
 
-  // Inventario
   const padM = String(m+1).padStart(2,'0');
   const iniRaw = JSON.parse(localStorage.getItem(`cayena_inv_inicial_${y}-${padM}`) || '{}');
   const finRaw = JSON.parse(localStorage.getItem(`cayena_inv_final_${y}-${padM}`)   || '{}');
@@ -345,30 +373,21 @@ function collectMes(mesStr) {
   const ini = calcInv(iniRaw);
   const fin = calcInv(finRaw);
 
-  // Gastos: try cayena_gastos_fijos_YYYY-MM + vars
-  const fixedKey = `cayena_gastos_fijos_${mesStr}`;
-  const varKey   = `cayena_gastos_vars_${mesStr}`;
-  const fixedMap = JSON.parse(localStorage.getItem(fixedKey) || '{}');
-  const varList  = JSON.parse(localStorage.getItem(varKey)   || '[]');
-
-  // Also try cayena_gastos_totales if it matches this period
   const gtRaw = JSON.parse(localStorage.getItem('cayena_gastos_totales') || 'null');
   const gt = (gtRaw && gtRaw.periodo === mesStr) ? gtRaw : null;
-
   const bycat = gt?.bycat || {};
 
-  const nom  = bycat['Nómina']                      || Object.values(fixedMap).filter((_,i)=>Object.keys(fixedMap)[i]?.toLowerCase().includes('nom')).reduce((s,v)=>s+(v||0),0) || 0;
+  const nom  = bycat['Nómina']                      || 0;
   const alq  = bycat['Alquiler']                    || 0;
   const srv  = bycat['Servicios públicos']           || 0;
   const mnt  = bycat['Mantenimiento y reparaciones'] || 0;
   const pub  = bycat['Publicidad y marketing']       || 0;
-  const oop  = bycat['Otros gastos operativos']      || varList.reduce((s,r)=>s+(parseFloat(r.monto)||0),0) || 0;
+  const oop  = bycat['Otros gastos operativos']      || 0;
   const ofi  = bycat['Gastos de Oficina']            || 0;
   const oadm = bycat['Otros Gastos Administrativos'] || 0;
   const gfin = bycat['Gastos financieros']           || 0;
   const oi   = bycat['Otros Ingresos']               || 0;
 
-  // P&L calculation
   const ti   = parseFloat((ibv + oi).toFixed(2));
   const mp   = parseFloat((ini + totalCmp - fin).toFixed(2));
   const rb   = parseFloat((ti - mp).toFixed(2));
@@ -386,7 +405,8 @@ function collectMes(mesStr) {
     nom, alq, srv, mnt, pub, oop, tgop, ro,
     ofi, oadm, gfin, tga, ai, isr, neto,
     diasActivos: ingM.length,
-    hasData: ibv > 0 || totalCmp > 0 || tgop > 0
+    hasData: ibv > 0 || totalCmp > 0 || tgop > 0,
+    _fromSupabase: false
   };
 
   allData[mesStr] = d;
@@ -399,9 +419,9 @@ function renderTimeline(range) {
     ${range.map(m => {
       const d = collectMes(m);
       const isActive = m === currentMes;
-      const hasData = d.hasData;
-      return `<button class="tpill ${isActive?'active':''} ${hasData?'has-data':'no-data'}"
-        onclick="goToMes('${m}')">${mesEtiqueta(m)}</button>`;
+      const closed = !!cierresSupabase[m];
+      return `<button class="tpill ${isActive?'active':''} ${d.hasData?'has-data':'no-data'}"
+        onclick="goToMes('${m}')" title="${closed?'✅ Mes cerrado':'Sin cierre'}">${mesEtiqueta(m)}${closed?' ✅':''}</button>`;
     }).join('')}
   </div>`;
 }
@@ -595,7 +615,10 @@ function renderPL(d) {
 }
 
 // ── MAIN RENDER ───────────────────────────────────────────────────────────────
-function render() {
+async function render() {
+  // ── Cargar cierres de Supabase primero ───────────────────────────────────
+  await cargarCierres();
+
   const range = getRange();
   const cur = collectMes(currentMes);
 
@@ -608,23 +631,32 @@ function render() {
   }
 
   const hasCur = cur.hasData;
+  const isClosed = !!cierresSupabase[currentMes];
+
+  // Badge de cierre oficial
+  const closedBadge = isClosed
+    ? `<div style="display:inline-flex;align-items:center;gap:6px;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:999px;padding:4px 12px;font-size:11px;font-weight:600;color:var(--green-ui);margin-bottom:12px">
+        ✅ Mes cerrado oficialmente · por ${cierresSupabase[currentMes]._cerradoPor||'Gerencia'}
+      </div>`
+    : `<div style="display:inline-flex;align-items:center;gap:6px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:999px;padding:4px 12px;font-size:11px;font-weight:600;color:var(--amber);margin-bottom:12px">
+        ⏳ Mes activo — pendiente de cierre desde Dashboard
+      </div>`;
 
   el('main-content').innerHTML = `
     ${renderTimeline(range)}
+    ${closedBadge}
     ${renderComparison(cur, prev)}
     ${renderKPIs(cur)}
     ${renderSparkline(range)}
-
     ${hasCur ? renderPL(cur) : `
     <div class="empty-pl">
       <div class="ico">📋</div>
       <h3>Sin datos para ${cur.label}</h3>
-      <p>Este período no tiene ingresos, compras ni gastos registrados. Los datos se importan automáticamente desde los demás módulos.</p>
-      <button class="btn btn-primary" onclick="location.href='ingresos.html'">Registrar ingresos →</button>
+      <p>Este período no tiene datos. Cierra el mes desde Dashboard para guardarlo aquí.</p>
+      <button class="btn btn-primary" onclick="location.href='dashboard.html'">Ir a Dashboard →</button>
     </div>`}
   `;
 
-  // Scroll active pill into view
   setTimeout(() => {
     const activePill = document.querySelector('.tpill.active');
     if (activePill) activePill.scrollIntoView({block:'nearest',inline:'center',behavior:'smooth'});
@@ -638,25 +670,6 @@ function goToMes(mes) {
 }
 
 // ── PDF EXPORT ─────────────────────────────────────────────────────────────────
-function exportPDFMes() {
-  const d = collectMes(currentMes);
-  const CSS = '<style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;font-size:11px;color:#0F172A;background:#fff;padding:24px}.header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;padding-bottom:14px;border-bottom:2px solid #2563EB}.header h1{font-size:20px;font-weight:800;color:#1E3A8A}.meta{text-align:right;font-size:10px;color:#64748B;line-height:1.8}.section{margin-bottom:18px}.section-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#1E3A8A;background:#EFF6FF;padding:6px 10px;margin-bottom:0}.row{display:flex;justify-content:space-between;padding:6px 10px;border-bottom:1px solid #E2E8F0;font-size:10px}.row.sub{background:#F8FAFC;font-weight:700}.result{background:#1E3A8A;color:#fff;padding:14px 16px;border-radius:8px;display:flex;justify-content:space-between;align-items:center;margin-top:16px}.result-lbl{font-size:10px;opacity:.7}.result-val{font-size:20px;font-weight:800}.footer{margin-top:16px;padding-top:8px;border-top:1px solid #E2E8F0;font-size:9px;color:#94A3B8;display:flex;justify-content:space-between}@media print{body{padding:0}@page{margin:12mm;size:A4}}</style>';
-  const row = (n,v) => `<div class="row"><span>${n}</span><span>${v===0?'—':Lf(v)}</span></div>`;
-  const sub = (n,v) => `<div class="row sub"><span>${n}</span><span>${Lf(Math.abs(v))}</span></div>`;
-  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>P&L ${d.label}</title>${CSS}</head><body>
-    <div class="header"><div><h1>Estado de Resultados</h1><div style="font-size:11px;color:#64748B;margin-top:4px">Cayena · RTN: 0318-2001-022079 · Siguatepeque, Honduras</div></div>
-    <div class="meta"><div><strong>Período:</strong> ${d.label}</div><div><strong>Días activos:</strong> ${d.diasActivos}</div><div><strong>Generado:</strong> ${new Date().toLocaleDateString('es-HN')}</div></div></div>
-    <div class="section"><div class="section-title">Ingresos</div>${row('Ingreso Bruto en Ventas',d.ibv)}${row('Otros Ingresos',d.oi)}${sub('Total Ingresos',d.ti)}</div>
-    <div class="section"><div class="section-title">Costo de Producción</div>${row('Inventario Inicial',d.ini)}${row('(+) Compras',d.cmp)}${row('(−) Inventario Final',d.fin)}${sub('Materia Prima Utilizada',d.mp)}${sub('Resultado Bruto en Ventas',d.rb)}</div>
-    <div class="section"><div class="section-title">Gastos Operativos</div>${row('Nómina',d.nom)}${row('Alquiler',d.alq)}${row('Servicios públicos',d.srv)}${row('Mantenimiento',d.mnt)}${row('Publicidad',d.pub)}${row('Otros Operativos',d.oop)}${sub('Resultado Operativo',d.ro)}</div>
-    <div class="section"><div class="section-title">Gastos Administrativos</div>${row('Gastos de Oficina',d.ofi)}${row('Otros Administrativos',d.oadm)}${row('Gastos Financieros',d.gfin)}${sub('Resultado Antes de ISR',d.ai)}${row('ISR (15%)',d.isr)}</div>
-    <div class="result"><div><div class="result-lbl">RESULTADO NETO DEL EJERCICIO · ${d.label.toUpperCase()}</div></div><div class="result-val">${Lf(Math.abs(d.neto))}</div></div>
-    <div class="footer"><span>Cayena — Historial P&L</span><span>${new Date().toLocaleDateString('es-HN',{day:'2-digit',month:'long',year:'numeric'})}</span></div>
-    </body></html>`;
-  const w = window.open('','_blank','width=900,height=700');
-  w.document.write(html); w.document.close();
-  setTimeout(()=>w.print(), 500);
-}
 
 // ── SIDEBAR TOGGLE ─────────────────────────────────────────────────────────────
 (function(){

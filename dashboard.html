@@ -701,6 +701,12 @@ body.mobile .sb-toggle{display:none !important}
 body.mobile .logo-wrap{display:none}
 @media(min-width:901px){.sidebar{position:relative;transform:none;height:100vh}.sb-backdrop{display:none!important}}
 
+/* ── Cerrar Mes ── */
+#btn-cierre{display:flex;align-items:center;gap:7px}
+#btn-cierre.saving{opacity:.6;pointer-events:none}
+#btn-cierre.done{background:var(--green-ui);border-color:var(--green-ui);color:#fff}
+#btn-cierre.ya-cerrado{background:var(--bg);color:var(--muted);cursor:default}
+
 /* ── Sincronizar ── */
 #btn-sync{display:flex;align-items:center;gap:7px;min-width:130px;justify-content:center}
 #btn-sync.syncing svg{animation:spin-sync .8s linear infinite}
@@ -983,6 +989,10 @@ body.mobile .logo-wrap{display:none}
         <span class="ttl">Estado de Resultados</span><div class="tsep"></div><div id="mes-selector-topbar"></div>
       </div>
       <div class="tr2">
+        <button class="btn" id="btn-cierre" onclick="cerrarMes()" title="Guardar cierre mensual en Historial">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0"><path d="M2 7h10M7 2l5 5-5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Cerrar Mes
+        </button>
         <button class="btn btn-primary" id="btn-sync" onclick="sincronizar()">
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0"><path d="M12.5 2.5A6 6 0 1 1 8.5 1.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M8.5 1.2V4M8.5 1.2H11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
           Sincronizar
@@ -1041,6 +1051,124 @@ function sr(id,val){const e=el(id);if(!e)return;e.textContent=Lf(Math.abs(val));
 function ss(id,val){const e=el(id);if(!e)return;e.textContent=Lf(Math.abs(val));e.className='srv '+(val>0?'p':val<0?'n':'m');}
 
 // ── renderPL — mismo sistema que historial.html ───────────────────────────────
+async function cerrarMes(){
+  const periodo  = getMesGlobal();
+  const perLabel = getMesLabel();
+  const btn      = document.getElementById('btn-cierre');
+  const session  = JSON.parse(sessionStorage.getItem('cayena_session')||'{}');
+
+  // ── Verificar si ya está cerrado ────────────────────────────────────────
+  try {
+    const existe = await DB_Cierres.existe(periodo);
+    if(existe){
+      if(!confirm(`⚠️ El mes ${perLabel} ya tiene un cierre guardado.\n\n¿Deseas sobreescribirlo con los datos actuales?`)) return;
+    } else {
+      if(!confirm(`¿Cerrar el mes ${perLabel}?\n\nEsto guardará el P&L completo en Historial.\nPodrás sobreescribirlo si necesitas corregir algo.`)) return;
+    }
+  } catch(e){ /* si falla la verificación, continuar de todos modos */ }
+
+  // ── Estado: guardando ────────────────────────────────────────────────────
+  btn.classList.add('saving');
+  btn.innerHTML = '⏳ Guardando...';
+
+  try {
+    // Sincronizar primero para tener datos frescos
+    await importTodosLosDatos();
+
+    // Leer el P&L del contenedor renderizado
+    const plEl   = document.getElementById('pl-content');
+    const kpisEl = document.getElementById('dash-kpis');
+
+    // Construir el snapshot desde los datos del localStorage (ya actualizados)
+    const pn      = JSON.parse(localStorage.getItem('cayena_planilla_neta') || '{}');
+    const ingresos= JSON.parse(localStorage.getItem('cayena_ingresos') || '[]')
+                      .filter(r=>(r.periodo===periodo)||(r.fecha||'').startsWith(periodo));
+    const compras = JSON.parse(localStorage.getItem('cayena_compras') || '[]')
+                      .filter(r=>(r.fecha||'').startsWith(periodo));
+    const gastos  = JSON.parse(localStorage.getItem('cayena_gastos_totales') || 'null');
+    const precios = JSON.parse(localStorage.getItem('cayena_precios') || '{}');
+    const padM    = String(getMesMonth()+1).padStart(2,'0');
+    const Y       = getMesYear();
+    const iniRaw  = JSON.parse(localStorage.getItem(`cayena_inv_inicial_${Y}-${padM}`) || '{}');
+    const finRaw  = JSON.parse(localStorage.getItem(`cayena_inv_final_${Y}-${padM}`) || '{}');
+    const ci      = map => parseFloat(Object.entries(map).reduce((s,[n,q])=>s+(parseFloat(q)||0)*(precios[n]||0),0).toFixed(2));
+
+    const ibv  = parseFloat(ingresos.reduce((s,r)=>s+(parseFloat(r.total)||0),0).toFixed(2));
+    const comp = parseFloat(compras.reduce((s,r)=>s+(parseFloat(r.monto||r.total||0)),0).toFixed(2));
+    const ini  = ci(iniRaw);
+    const fin  = ci(finRaw);
+    const bycat= gastos?.bycat || {};
+
+    const oi   = parseFloat((bycat['Otros Ingresos']||0).toFixed(2));
+    const alq  = parseFloat((bycat['Alquiler']||0).toFixed(2));
+    const srv  = parseFloat((bycat['Servicios públicos']||0).toFixed(2));
+    const mnt  = parseFloat((bycat['Mantenimiento y reparaciones']||0).toFixed(2));
+    const pub  = parseFloat((bycat['Publicidad y marketing']||0).toFixed(2));
+    const oop  = parseFloat((bycat['Otros gastos operativos']||0).toFixed(2));
+    const ofi  = parseFloat((bycat['Gastos de Oficina']||0).toFixed(2));
+    const oadm = parseFloat((bycat['Otros Gastos Administrativos']||0).toFixed(2));
+    const gfin = parseFloat((bycat['Gastos financieros']||0).toFixed(2));
+    const nom  = pn.planillaBruta || 0;
+
+    const ti   = parseFloat((ibv+oi).toFixed(2));
+    const mp   = parseFloat((ini+comp-fin).toFixed(2));
+    const rb   = parseFloat((ti-mp).toFixed(2));
+    const tgop = parseFloat((nom+alq+srv+mnt+pub+oop).toFixed(2));
+    const ro   = parseFloat((rb-tgop).toFixed(2));
+    const tga  = parseFloat((ofi+oadm+gfin).toFixed(2));
+    const ai   = parseFloat((ro-tga).toFixed(2));
+    const isr  = ai>0 ? parseFloat((ai*0.15).toFixed(2)) : 0;
+    const neto = parseFloat((ai-isr).toFixed(2));
+
+    const snapshot = {
+      periodo, label: perLabel,
+      ibv, oi, ti, ini, cmp:comp, fin, mp, rb,
+      nom, alq, srv, mnt, pub, oop, tgop, ro,
+      ofi, oadm, gfin, tga, ai, isr, neto,
+      adelantos:    pn.adelantos    || 0,
+      prestamos:    pn.prestamos    || 0,
+      consumoEmp:   pn.consumoEmpleados || 0,
+      cobrosHerram: pn.cobrosHerramientas || 0,
+      planillaNeta: pn.planillaNeta || 0,
+      diasActivos:  ingresos.length,
+      hasData:      ti > 0 || comp > 0 || tgop > 0,
+      cerradoEn:    new Date().toISOString(),
+      cerradoPor:   session.name || 'Gerencia'
+    };
+
+    // ── Guardar en Supabase ────────────────────────────────────────────────
+    await DB_Cierres.guardar(periodo, perLabel, snapshot, session.name || 'Gerencia');
+
+    // ── Estado: éxito ──────────────────────────────────────────────────────
+    btn.classList.remove('saving');
+    btn.classList.add('done');
+    btn.innerHTML = '✅ Mes cerrado';
+
+    // Toast informativo
+    setTimeout(()=>{
+      btn.classList.remove('done');
+      btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0"><path d="M2 7h10M7 2l5 5-5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> Cerrar Mes';
+    }, 4000);
+
+    // Mostrar banner confirmación
+    const banner = document.getElementById('planilla-neta-banner');
+    if(banner){
+      banner.style.display = 'flex';
+      banner.innerHTML =
+        '<div style="flex:1"><div style="font-size:12px;font-weight:700;color:var(--green-ui)">✅ Cierre de ' + perLabel + ' guardado en Historial</div>' +
+        '<div style="font-size:11px;color:var(--body);margin-top:2px">Resultado neto: <strong>' + Lf(neto) + '</strong> · Guardado por ' + (session.name||'Gerencia') + '</div></div>' +
+        '<button onclick="this.parentNode.style.display=\'none\'" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;padding:0 4px;min-height:auto;line-height:1">×</button>';
+    }
+
+  } catch(e) {
+    btn.classList.remove('saving');
+    btn.innerHTML = '⚠ Error — reintentar';
+    setTimeout(()=>{ btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0"><path d="M2 7h10M7 2l5 5-5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> Cerrar Mes'; }, 3000);
+    console.error('[cerrarMes]', e);
+    alert('Error al guardar el cierre. Verifica tu conexión.\n\n' + e.message);
+  }
+}
+
 async function sincronizar(){
   const btn = document.getElementById('btn-sync');
   if(!btn || btn.classList.contains('syncing')) return;
@@ -1209,7 +1337,7 @@ async function importTodosLosDatos(){
       DB_Ingresos.getByPeriodo(periodo).catch(()=>
         JSON.parse(localStorage.getItem('cayena_ingresos')||'[]')
           .filter(r=>(r.periodo===periodo)||(r.fecha||'').startsWith(periodo))),
-      DB_Compras.getAll().catch(()=>
+      DB_Compras.getByPeriodo(periodo).catch(()=>
         JSON.parse(localStorage.getItem('cayena_compras')||'[]')),
       DB_Inv.getPrecios().catch(()=>
         JSON.parse(localStorage.getItem('cayena_precios')||'{}')),
@@ -1222,7 +1350,7 @@ async function importTodosLosDatos(){
         JSON.parse(localStorage.getItem(`cayena_gastos_fijos_${periodo}`)||'{}')),
       DB_Gastos.getVars(periodo).catch(()=>
         JSON.parse(localStorage.getItem(`cayena_gastos_vars_${periodo}`)||'[]')),
-      DB_Sol.getAll().catch(()=>
+      DB_Sol.getByPeriodo(periodo).catch(()=>
         JSON.parse(localStorage.getItem('cayena_solicitudes_global')||'[]')),
       DB_Planilla.getCfg().catch(()=>
         JSON.parse(localStorage.getItem('cayena_planilla_cfg')||'{}')),
